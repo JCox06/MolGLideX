@@ -49,6 +49,10 @@ class AppManager {
         return activeTab?.actionManager?.canRedo() ?: return false
     }
 
+    fun performQuickCapture() {
+
+    }
+
     companion object {
         private const val EDITOR_PREFIX: String = "internal_editor_"
     }

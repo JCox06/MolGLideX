@@ -68,3 +68,17 @@ class NewProjectAction (val mainFrame: MolGlideFrame,val appManager: AppManager)
 }
 
 
+class QuickCaptureAction (val appManager: AppManager) : AbstractAction("Quick Capture") {
+
+    init {
+        putValue(SHORT_DESCRIPTION, "Captures, saves, and opens the current view as an SVG image.")
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK))
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        //Save the SVG file
+        //todo later
+    }
+}
+
+

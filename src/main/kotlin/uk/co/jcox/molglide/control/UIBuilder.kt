@@ -1,6 +1,7 @@
 package uk.co.jcox.molglide.control
 
 import com.sun.org.apache.xpath.internal.operations.Bool
+import org.checkerframework.checker.guieffect.qual.UI
 import org.joml.Vector2d
 import org.joml.minus
 import org.joml.plus
@@ -62,7 +63,7 @@ class UIBuilder (private val data: EditorStateData) {
                 when (chemBond.bond.order) {
                     IBond.Order.SINGLE -> uiBonds.add(absoluteBond)
                     IBond.Order.DOUBLE -> uiBonds.addAll(calculatePositionForDoubleBond(absoluteBond, chemBond))
-                    IBond.Order.TRIPLE -> uiBonds.addAll(calculatePositionForTripleBond(absoluteBond))
+                    IBond.Order.TRIPLE -> uiBonds.addAll(calculatePositionForTripleBond(absoluteBond, chemBond))
                     else -> {}
                 }
             }
@@ -110,7 +111,7 @@ class UIBuilder (private val data: EditorStateData) {
      *
      * @return The list of new UI bonds which can be added to the final UI
      */
-    private fun calculatePositionForTripleBond(uiBond: UIBond): List<UIBond> {
+    private fun calculatePositionForTripleBond(uiBond: UIBond, chemBond: ChemMolecule.ChemBond): List<UIBond> {
         val bondList = mutableListOf<UIBond>()
         val perp = calculatePerpendicularVector(uiBond)
         val bondA = applyBondTranslation(uiBond, perp * INTER_BOND_DISTANCE)
@@ -146,12 +147,18 @@ class UIBuilder (private val data: EditorStateData) {
             //Have to take all the UiBonds now back by half of the applied vector
             val appliedVector = doubleBond.second
             val newVector = appliedVector * -0.5
-            translate(uiBond, newVector)
-            translate(doubleUIBond, newVector)
+            val bondA = applyBondTranslation(uiBond, newVector)
+            val bondB = applyBondTranslation(doubleUIBond, newVector)
+            bondList.add(bondA)
+            bondList.add(bondB)
+            return bondList
         }
 
-        //Add everything to the list
-        bondList.add(doubleUIBond)
+        //If we don't need to centre, then we need to shorten the double
+        //part of the bond instead
+        val finalDoubleBond = getBaselineShortening(doubleUIBond, chemBond)
+
+        bondList.add(finalDoubleBond)
         bondList.add(uiBond)
 
         return bondList
@@ -218,11 +225,35 @@ class UIBuilder (private val data: EditorStateData) {
      * For now, just check to see if one of the atoms is either C (carbonyl) or nitrogen (Immine)
      */
     private fun shouldCentreDoubleBond(chemBond: ChemMolecule.ChemBond) : Boolean {
+
+        if (chemBond.molecule.checkBondInRing(chemBond)) {
+            return false
+        }
         //Get both atoms
         val heteroatom = chemBond.bond.atoms().find { it.symbol == "O" || it.symbol == "N" }
 
         return heteroatom != null
     }
+
+
+    /**
+     * By default, all double part of bonds that are NOT terminal, will be shortened by
+     * the same amount.
+     *
+     * This might not be what professional editors use, but it works for now, and also looks nice
+     * which is the main thing
+     */
+    private fun getBaselineShortening(doubleUIBond: UIBond, chemBond: ChemMolecule.ChemBond) : UIBond {
+        if (chemBond.isTerminal()) {
+            return doubleUIBond
+        }
+        val startDouble = Vector2d(doubleUIBond.startX, doubleUIBond.startY)
+        val endDouble = Vector2d(doubleUIBond.endX, doubleUIBond.endY)
+        val newStart = getCappedEnd(startDouble, endDouble, 0.85)
+        val newEnd = getCappedEnd(endDouble, startDouble, 0.85)
+        return UIBond(newStart.x, newStart.y, newEnd.x, newEnd.y)
+    }
+
 
     /**
      * Given a UIBond this method will calculate the vector perpendicular to the bond line
@@ -246,16 +277,9 @@ class UIBuilder (private val data: EditorStateData) {
         return UIBond(startX, startY, endX, endY)
     }
 
-    private fun translate(uiBond: UIBond, vector: Vector2d) {
-        uiBond.startX += vector.x
-        uiBond.startY += vector.y
-        uiBond.endX += vector.x
-        uiBond.endY += vector.y
-    }
-
-    private fun getCappedEnd(start: Vector2d, end: Vector2d): Vector2d {
+    private fun getCappedEnd(start: Vector2d, end: Vector2d, amount: Double = 0.70): Vector2d {
         val diff = end - start
-        val newEnd = start + (diff * 0.70)
+        val newEnd = start + (diff * amount)
         return newEnd
     }
 

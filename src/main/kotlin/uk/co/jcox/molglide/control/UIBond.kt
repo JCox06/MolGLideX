@@ -1,8 +1,8 @@
 package uk.co.jcox.molglide.control
 
 data class UIBond (
-    var startX: Double,
-    var startY: Double,
-    var endX: Double,
-    var endY: Double,
+    val startX: Double,
+    val startY: Double,
+    val endX: Double,
+    val endY: Double,
 )

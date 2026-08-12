@@ -13,7 +13,7 @@ import javax.swing.JFrame
 import javax.swing.SwingUtilities
 
 fun main() {
-    FlatLightLaf.setup()
+    FlatDarkLaf.setup()
     JFrame.setDefaultLookAndFeelDecorated(true)
     JDialog.setDefaultLookAndFeelDecorated(false)
 

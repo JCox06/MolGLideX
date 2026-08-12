@@ -205,6 +205,16 @@ class ChemMolecule (
         override fun hashCode(): Int {
             return bond.hashCode()
         }
+
+        fun isTerminal(): Boolean {
+            val atomA = bond.getAtom(0)
+            val atomB = bond.getAtom(1)
+
+            if (atomA.bondCount > 1 || atomB.bondCount > 1) {
+                return false
+            }
+            return true
+        }
     }
 
 
