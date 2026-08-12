@@ -9,14 +9,20 @@ import jdk.internal.vm.ThreadContainers.root
 import uk.co.jcox.molglide.control.AppManager
 import java.awt.BorderLayout
 import java.awt.Dimension
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
+import java.awt.event.MouseListener
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
+import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JComponent
 import javax.swing.JFrame
+import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.JToolBar
+import javax.swing.SwingUtilities
 
 class MolGlideFrame : JFrame("MolGLideX (INDEV)") {
 
@@ -25,12 +31,16 @@ class MolGlideFrame : JFrame("MolGLideX (INDEV)") {
 
     private lateinit var dockRoot: RootDockingPanel
 
+    private val statusLabel = JLabel()
+
     init {
         this.setSize(1200, 800)
         this.setLocationRelativeTo(null)
 
 
         initDocking()
+        add(Toolbox(appManager), BorderLayout.PAGE_START)
+        add(buildStatusBar(), BorderLayout.PAGE_END)
         addQuitHandler()
         registerDefaultWindows()
 
@@ -47,7 +57,7 @@ class MolGlideFrame : JFrame("MolGLideX (INDEV)") {
         DockingUI.initialize()
         dockRoot = RootDockingPanel(this)
         add(dockRoot, BorderLayout.CENTER)
-        add(Toolbox(appManager), BorderLayout.PAGE_END)
+
     }
 
     private fun addQuitHandler() {
@@ -80,14 +90,40 @@ class MolGlideFrame : JFrame("MolGLideX (INDEV)") {
         if (enable) {
             Docking.dock(panel, this)
         }
+        component.addMouseMotionListener(object : MouseAdapter() {
+            override fun mouseMoved(e: MouseEvent?) {
+                handle()
+            }
+            override fun mouseDragged(e: MouseEvent?) {
+                handle()
+            }
+
+            fun handle() {
+                SwingUtilities.invokeLater {
+                    val act = appManager.activeTab
+                    if (act != null) {
+                        val weight = String.format("%.4f", act.getSelectedWeight())
+                        statusLabel.text = "${act.getSelectedFormula()} | ${weight}"
+                    }
+                }
+            }
+        })
     }
 
+    private fun buildStatusBar() : JPanel {
+        val statusBar = JPanel()
+        statusBar.setLayout(BorderLayout())
+        statusBar.add(statusLabel, BorderLayout.WEST)
+
+        val label = JLabel("MolGLideX (v0.0.1)")
+        statusBar.add(label, BorderLayout.EAST)
+
+        return statusBar
+    }
 
     fun getWindows() : List<DockingPanel> {
         return windows
     }
-
-
 
 }
 

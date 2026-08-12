@@ -42,9 +42,5 @@ class AtomInsertionAction (
         hideIfCarbon(insertTo)
     }
 
-    private fun hideIfCarbon(chemAtom: ChemMolecule.ChemAtom) {
-        if (chemAtom.isCarbon()) {
-            chemAtom.setVisible(false)
-        }
-    }
+
 }

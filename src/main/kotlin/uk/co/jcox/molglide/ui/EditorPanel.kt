@@ -1,19 +1,20 @@
 package uk.co.jcox.molglide.ui
 
 import com.github.jsonldjava.shaded.com.google.common.math.IntMath.pow
-import org.checkerframework.checker.units.qual.g
-import org.openscience.cdk.interfaces.IAtom
-import uk.co.jcox.molglide.control.AppManager
+import org.joml.Vector2d
+import org.joml.minus
+import org.joml.plus
+import org.joml.times
+import org.xmlcml.euclid.Vector2
+import uk.co.jcox.molglide.control.ChemMolecule
 import uk.co.jcox.molglide.control.EditorStateController
 import uk.co.jcox.molglide.control.UIAtom
-import uk.co.jcox.molglide.control.UIBond
 import java.awt.BasicStroke
 import java.awt.Font
 import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.Point
 import java.awt.RenderingHints
-import java.awt.event.FocusEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.event.MouseWheelEvent
@@ -23,10 +24,8 @@ import javax.swing.JPanel
 import javax.swing.SwingUtilities
 import javax.swing.Timer
 import javax.swing.UIManager
-import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.sqrt
-import kotlin.time.times
 
 class EditorPanel(val dataController: EditorStateController) : JPanel() {
 
@@ -73,53 +72,95 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
     }
 
     private fun paintAtoms(g2d: Graphics2D) {
-        val atomsToPaint = dataController.getVisibleAtoms()
+        val atomsToPaint = dataController.getUIAtoms()
         atomsToPaint.forEach { ui ->
             val x = ui.posX * cameraZoom
             val y = ui.posY * cameraZoom
-            val metric =  paintMasterAtom(g2d, ui, x, y)
-            paintTrailGroup(g2d, ui, x, y, metric)
+
+            val metrics = getMasterMetrics(g2d, ui, x, y)
+            paintAtomSelection(g2d, ui, metrics)
+            if (ui.visible) {
+                paintMasterAtom(g2d, ui, metrics)
+                if (ui.trailGroup != "") {
+                    paintTrailGroup(g2d, ui, x, y, metrics)
+                }
+            }
+
         }
     }
 
-    private fun paintMasterAtom(g2d: Graphics2D, uiAtom: UIAtom, x: Double, y: Double) : MasterAtomMetric {
 
+    private fun getMasterMetrics(g2d: Graphics2D, uiAtom: UIAtom, x: Double, y: Double): MasterAtomMetric {
         val textWidth = g2d.fontMetrics.stringWidth(uiAtom.element)
-        val textHeight = g2d.fontMetrics.height
+        val textHeight = g2d.fontMetrics.ascent - g2d.fontMetrics.descent
 
         val centreTextWidth = x - textWidth / 2
         val centreBoxWidth = x - textWidth
         val centreTextHeight = y + textHeight / 2
-        val centreBoxHeight = y - textHeight / 2
+        val centreBoxHeight = y - g2d.fontMetrics.height / 2
+        return MasterAtomMetric(centreTextWidth, centreTextHeight, centreBoxWidth, centreBoxHeight, textWidth, textHeight)
+    }
 
+    private fun paintAtomSelection(g2d: Graphics2D, uiAtom: UIAtom, m: MasterAtomMetric) {
         if (dataController.checkSelected(uiAtom)) {
             val oldColour = g2d.color
             val newColour = UIManager.getColor("Component.accentColor")
             g2d.color = newColour
-            g2d.fillRoundRect((centreBoxWidth).toInt(),
-                (centreBoxHeight).toInt(),
-                (textWidth * 2),
-                (textWidth * 2).toInt(), textWidth / 2, textHeight / 2)
+            g2d.fillRoundRect((m.centreBoxWidth).toInt(),
+                (m.centreBoxHeight).toInt(),
+                (m.textWidth * 2),
+                (m.textWidth * 2), m.textWidth, m.textWidth)
             g2d.color = oldColour
         }
-
-        g2d.drawString(uiAtom.element, centreTextWidth.toInt(), centreTextHeight.toInt())
-
-        val masterAtomMetric = MasterAtomMetric(-textWidth/2.0, textHeight/2.0, textWidth)
-        return masterAtomMetric
     }
 
-    private fun paintTrailGroup(g2d: Graphics2D, uiAtom: UIAtom, x: Double, y: Double, masterAtomMetric: MasterAtomMetric) {
-        val startX = x + masterAtomMetric.offsetX + masterAtomMetric.textWidth
-        val startY = y + masterAtomMetric.offsetY
+    private fun paintMasterAtom(g2d: Graphics2D, uiAtom: UIAtom,  m: MasterAtomMetric) {
+        g2d.drawString(uiAtom.element, m.centreTextWidth.toInt(), m.centreTextHeight.toInt())
+    }
+
+    private fun paintTrailGroup(g2d: Graphics2D, uiAtom: UIAtom, x: Double, y: Double, m: MasterAtomMetric) {
+
+        val s = getStartingPos(g2d,x, y, m, uiAtom)
+        val startX = s.x
+        val startY = s.y
 
         val attString = AttributedString(uiAtom.trailGroup)
         attString.addAttribute(TextAttribute.FAMILY, g2d.font.family)
         attString.addAttribute(TextAttribute.SIZE, g2d.font.size)
-        attString.addAttribute(TextAttribute.SUPERSCRIPT, TextAttribute.SUPERSCRIPT_SUB,  uiAtom.trailGroup.length -1, uiAtom.trailGroup.length)
+
+        val range = getSubscriptRange(uiAtom.trailGroup)
+        range.forEach {
+            attString.addAttribute(TextAttribute.SUPERSCRIPT, TextAttribute.SUPERSCRIPT_SUB,  it, it + 1)
+        }
         g2d.drawString(attString.iterator, startX.toFloat(), startY.toFloat())
     }
 
+    private fun getStartingPos(g2d: Graphics2D, x: Double, y: Double, m: MasterAtomMetric, uiAtom: UIAtom) : Vector2d {
+        val startX = x + m.textWidth / 2
+        val startY = y + m.textHeight / 2
+
+        if (uiAtom.trailGroupPos == ChemMolecule.TrailingGroupPosition.RIGHT) {
+            return Vector2d(startX, startY)
+        }
+        if (uiAtom.trailGroupPos == ChemMolecule.TrailingGroupPosition.LEFT) {
+            val trail = uiAtom.trailGroup
+            val textWidth = g2d.fontMetrics.stringWidth(trail)
+            return Vector2d(startX - textWidth - m.textWidth, startY)
+        }
+
+
+        return Vector2d(startX, startY)
+    }
+
+    private fun getSubscriptRange(trailGroup: String) : List<Int> {
+        val list = ArrayList<Int>()
+        trailGroup.forEachIndexed { index, ch ->
+            if (ch.isDigit()) {
+                list.add(index)
+            }
+        }
+        return list
+    }
 
     private fun paintBonds(g2d: Graphics2D) {
         g2d.stroke = BasicStroke(LINE_STROKE * cameraZoom, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
@@ -130,12 +171,25 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
             val endX = bondUI.endX * cameraZoom
             val endY = bondUI.endY * cameraZoom
 
-            paintSingleBond(g2d, startX, startY, endX, endY)
+            paintSingleBond(g2d, startX, startY, endX, endY, bondUI.startVisible, bondUI.endVisible)
         }
     }
 
-    private fun paintSingleBond(g2d: Graphics2D, startX: Double, startY: Double, endX: Double, endY: Double) {
-        g2d.drawLine(startX.toInt(), startY.toInt(), endX.toInt(), endY.toInt())
+    private fun paintSingleBond(g2d: Graphics2D, startX: Double, startY: Double, endX: Double, endY: Double, startVisible: Boolean, endVisible: Boolean) {
+
+        val start = if (endVisible) getCappedEnd(Vector2d(startX, startY), Vector2d(endX, endY)) else Vector2d(endX, endY)
+        val end = if (startVisible) getCappedEnd(Vector2d(endX, endY), Vector2d(startX, startY)) else Vector2d(startX, startY)
+
+        g2d.drawLine(start.x.toInt(), start.y.toInt(), end.x.toInt(), end.y.toInt())
+    }
+
+    /**
+     * Will cap the end of the bond
+     */
+    private fun getCappedEnd(start: Vector2d, end: Vector2d): Vector2d {
+        val diff = end - start
+        val newEnd = start + (diff * 0.70)
+        return newEnd
     }
 
     private fun screenToWorld(screen: Point) : Point {
@@ -231,7 +285,7 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         private const val MOUSE_SENSE = 2.0
         private const val MOUSE_SENSE_ZOOM = 0.5f
         private const val UNMODDED_TEXT_SIZE = 32.0f
-        private const val SIG_MOUSE_DELTA = 1.0f
+        private const val SIG_MOUSE_DELTA = 2.0f
         private const val LINE_STROKE = 3.0f
     }
 }

@@ -1,6 +1,8 @@
 package uk.co.jcox.molglide.control
 
-import org.apache.jena.sparql.pfunction.library.container
+
+import org.apache.commons.lang3.DoubleRange
+import org.joml.Vector2d
 import org.openscience.cdk.Atom
 import org.openscience.cdk.AtomContainer
 import org.openscience.cdk.atomtype.CDKAtomTypeMatcher
@@ -10,7 +12,9 @@ import org.openscience.cdk.interfaces.IAtomContainer
 import org.openscience.cdk.interfaces.IBond
 import org.openscience.cdk.smiles.smarts.parser.SMARTSParserConstants.a
 import org.openscience.cdk.tools.CDKHydrogenAdder
+import org.openscience.cdk.tools.manipulator.AtomContainerManipulator
 import org.openscience.cdk.tools.manipulator.AtomTypeManipulator
+import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator
 import java.util.UUID
 import javax.vecmath.Point2d
 
@@ -70,7 +74,7 @@ class ChemMolecule (
     fun getUIProperties() : List<UIAtom> {
         val properties = mutableListOf<UIAtom>()
         container.atoms().forEach { atom ->
-            val ui: UIAtom = UIAtom(atom.symbol, atom.point2d.x, atom.point2d.y, calculateTrailGroup(atom), atom.getProperty<Boolean>(VISIBLE), atom.id)
+            val ui: UIAtom = UIAtom(atom.symbol, atom.point2d.x, atom.point2d.y, calculateTrailGroup(atom), atom.getProperty(TRAILING_POS), atom.getProperty(VISIBLE), atom.id)
             properties.add(ui)
         }
         return properties
@@ -79,9 +83,9 @@ class ChemMolecule (
     fun getUIBondProperties() : List<UIBond> {
         val properties = mutableListOf<UIBond>()
         container.bonds().forEach { bond ->
-            val atomA = bond.getAtom(0).point2d
-            val atomB = bond.getAtom(1).point2d
-            val uiBond: UIBond = UIBond(atomA.x, atomA.y, atomB.x, atomB.y)
+            val atomA = bond.getAtom(0)
+            val atomB = bond.getAtom(1)
+            val uiBond: UIBond = UIBond(atomA.point2d.x, atomA.point2d.y, atomB.point2d.x, atomB.point2d.y, atomA.getProperty<Boolean>(VISIBLE), atomB.getProperty<Boolean>(VISIBLE))
             properties.add(uiBond)
         }
         return properties
@@ -137,8 +141,27 @@ class ChemMolecule (
         return bonds
     }
 
+    fun findBond(chemAtom1: ChemAtom, chemAtom2: ChemAtom): ChemBond? {
+        val ibond = container.getBond(chemAtom1.atom, chemAtom2.atom)
+        if (ibond != null) {
+            return ChemBond(ibond, this)
+        }
+        return null
+    }
+
+    fun getFormulaString(): String {
+        val formula = MolecularFormulaManipulator.getMolecularFormula(container)
+        return MolecularFormulaManipulator.getString(formula)
+    }
+
+    fun getMolecularWeight(): Double {
+        val mass = AtomContainerManipulator.getMass(container)
+        return mass
+    }
+
     private fun initDefaultAtomProperties(atom: IAtom) {
         atom.setProperty(VISIBLE, true)
+        atom.setProperty(TRAILING_POS, TrailingGroupPosition.RIGHT)
     }
 
     class ChemAtom (
@@ -154,14 +177,51 @@ class ChemMolecule (
         fun isCarbon(): Boolean {
             return atom.symbol == "C"
         }
+        fun setTrailPos(trail: TrailingGroupPosition) {
+            atom.setProperty(TRAILING_POS, trail)
+        }
+        fun getTrailPos() : TrailingGroupPosition {
+            return atom.getProperty<TrailingGroupPosition>(TRAILING_POS)
+        }
+        fun getPos() : org.joml.Vector2d {
+            val p2d = atom.point2d
+            return Vector2d(p2d.x, p2d.y)
+        }
+
+        override fun hashCode(): Int {
+            return atom.hashCode()
+        }
+
+        override fun equals(other: Any?): Boolean {
+            return atom == other
+        }
     }
 
     class ChemBond (
         val bond: IBond,
         val molecule: ChemMolecule,
-    )
+
+
+    ) {
+        override fun equals(other: Any?): Boolean {
+            return bond == other
+        }
+
+        override fun hashCode(): Int {
+            return bond.hashCode()
+        }
+    }
+
+
+    enum class TrailingGroupPosition (val vec: Vector2d) {
+        ABOVE(Vector2d(0.0, 1.0)),
+        BELOW(Vector2d(0.0, -1.0)),
+        LEFT(Vector2d(-1.0, 0.0)),
+        RIGHT(Vector2d(1.0, 0.0)),
+    }
 
     companion object {
         const val VISIBLE = "MOLGLIDE_VISIBLE"
+        const val TRAILING_POS = "MOLGLIDE_TRAILING_POS"
     }
 }

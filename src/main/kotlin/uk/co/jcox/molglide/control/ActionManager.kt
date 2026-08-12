@@ -19,6 +19,13 @@ class ActionManager (
         isDirty = true
     }
 
+    fun canUndo(): Boolean {
+        return pastActions.isNotEmpty()
+    }
+
+    fun canRedo(): Boolean {
+        return discardedActions.isNotEmpty()
+    }
 
     fun undoLastAction() {
         if (pastActions.isNotEmpty()) {

@@ -1,7 +1,5 @@
 package uk.co.jcox.molglide.control
 
-import org.checkerframework.checker.units.qual.m
-import org.openscience.cdk.smiles.smarts.parser.SMARTSParserConstants.x
 import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.control.tool.AtomBondTool
 import uk.co.jcox.molglide.control.tool.Tool
@@ -18,7 +16,7 @@ class EditorStateController (
     private val uiAtoms: MutableList<UIAtom> = mutableListOf()
     private val uiBonds: MutableList<UIBond> = mutableListOf()
 
-    fun getVisibleAtoms(): List<UIAtom> {
+    fun getUIAtoms(): List<UIAtom> {
         return uiAtoms
     }
 
@@ -76,5 +74,21 @@ class EditorStateController (
 
     fun nowActive() {
         appManager.activeTab = this
+    }
+
+    fun getSelectedFormula(): String {
+        val s = selectionManager.primary
+        if (s is SelectionManager.Type.Active) {
+            return s.chemAtom.molecule.getFormulaString()
+        }
+        return ""
+    }
+
+    fun getSelectedWeight(): Double {
+        val s = selectionManager.primary
+        if (s is SelectionManager.Type.Active) {
+            return s.chemAtom.molecule.getMolecularWeight()
+        }
+        return 0.0
     }
 }

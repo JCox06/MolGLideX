@@ -35,13 +35,18 @@ class AppManager {
 
     fun handleGlobalUndo() {
         activeTab?.actionManager?.undoLastAction()
-        if (activeTab == null) {
-
-        }
     }
 
     fun handleGlobalRedo() {
         activeTab?.actionManager?.restoreLastAction()
+    }
+
+    fun canUndo(): Boolean {
+        return activeTab?.actionManager?.canUndo() ?: return false
+    }
+
+    fun canRedo(): Boolean {
+        return activeTab?.actionManager?.canRedo() ?: return false
     }
 
     companion object {

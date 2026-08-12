@@ -5,6 +5,7 @@ data class UIAtom (
     val posX: Double,
     val posY: Double,
     val trailGroup: String,
+    val trailGroupPos: ChemMolecule.TrailingGroupPosition,
     val visible: Boolean,
     val id: String,
 )

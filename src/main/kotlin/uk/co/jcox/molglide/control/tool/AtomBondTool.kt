@@ -1,9 +1,11 @@
 package uk.co.jcox.molglide.control.tool
 
+import com.sun.accessibility.internal.resources.accessibility
 import com.sun.org.apache.xpath.internal.operations.Bool
 import org.apache.jena.vocabulary.AS.radius
 import org.joml.Vector2f
 import org.joml.minus
+import org.joml.plus
 import uk.co.jcox.molglide.control.ActionManager
 import uk.co.jcox.molglide.control.AppManager
 import uk.co.jcox.molglide.control.ChemMolecule
@@ -12,6 +14,7 @@ import uk.co.jcox.molglide.control.SelectionManager
 import uk.co.jcox.molglide.control.actions.AtomInsertionAction
 import uk.co.jcox.molglide.control.actions.CreateMoleculeAction
 import uk.co.jcox.molglide.control.actions.ReplaceAtomAction
+import uk.co.jcox.molglide.control.actions.RingCyclisationAction
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
@@ -43,7 +46,97 @@ class AtomBondTool(val appManager: AppManager, val actionManager: ActionManager,
         val calculatedNewPos = closestPointToCircleCircumference(Vector2f(anchorPos.x.toFloat(), anchorPos.y.toFloat()), Vector2f(clickX.toFloat(), clickY.toFloat()), CONNECTION_DISTANCE.toFloat())
         mode.draggingAtom.atom.point2d.x = calculatedNewPos.x.toDouble()
         mode.draggingAtom.atom.point2d.y = calculatedNewPos.y.toDouble()
+
+        //Check to see if any trailing groups should be automatically moved
+        autoMoveTrailingGroup(mode)
+        checkBondOrderChange(mode)
     }
+
+    private fun autoMoveTrailingGroup(mode: Mode.AtomInsertionDragging) {
+        val anchor = mode.insertedTo
+        val dragging = mode.draggingAtom
+
+        autoMoveGroup(anchor, dragging)
+        autoMoveGroup(dragging, anchor)
+    }
+
+    /**
+     * Automatically adjust one atom's trailing group position, depending on its position to
+     * another atom
+     * @param checkAgainst this atom will not be affected by this function
+     * @param applier this method will change this atom's trailing group mode
+     *
+     * This function works by testing the two main positions a trailing group can reside
+     * either left or right of the master atom.
+     * This method tests both positions to see which has the longest distance away
+     */
+    private fun autoMoveGroup(checkAgainst: ChemMolecule.ChemAtom, applier: ChemMolecule.ChemAtom) {
+        val leftTest = ChemMolecule.TrailingGroupPosition.LEFT.vec + applier.getPos()
+        val rightTest = ChemMolecule.TrailingGroupPosition.RIGHT.vec + applier.getPos()
+
+        val leftDistance = checkAgainst.getPos().distance(leftTest)
+        val rightDistance = checkAgainst.getPos().distance(rightTest)
+
+        if (leftDistance == rightDistance) {
+            return
+        }
+
+        if (rightDistance > leftDistance) {
+            applier.setTrailPos(ChemMolecule.TrailingGroupPosition.RIGHT)
+        } else {
+            applier.setTrailPos(ChemMolecule.TrailingGroupPosition.LEFT)
+
+        }
+    }
+
+
+    /**
+     * When in dragging mode the user is free to move the newly inserted atom wherever they want
+     * Should this atom align with an already existing bond, then we should attempt to increase the bond order of that bond
+     *
+     * If the user pulls away again, then we should undo that increasing of the bond order
+     * However, additionally, this tool (class) needs to be restored to how it was to allow
+     * the user to move the freely created atom
+     *
+     * Using the same method it is possible to detect cyclisation actions
+     *
+     * Internal Undo/Redo is controlled by the ActionManager
+     */
+    private fun checkBondOrderChange(draggingMode: Mode.AtomInsertionDragging) {
+        val draggingPos = draggingMode.draggingAtom.getPos()
+        val molecule = draggingMode.insertedTo.molecule
+
+        //Find an atom that is overlapping
+        val overlap = molecule.atoms().toList().find {
+            draggingPos.equals(it.getPos(), 0.25) && it.atom != draggingMode.draggingAtom.atom && it.atom != draggingMode.insertedTo.atom
+        }
+
+        if (overlap == null) {
+            return
+        }
+        if (draggingMode.allowBondChanges) {
+            actionManager.undoLastAction()
+            draggingMode.allowBondChanges = false
+            //Then we have found an overlapping atom
+            //And the tool allows bond changes
+            //So undo the insert, and instead update the bond order of the common bond between the two atoms
+            val commonBond = molecule.findBond(overlap, draggingMode.insertedTo)
+            //If the bond exists, then update order
+            if (commonBond != null) {
+
+                return
+            }
+            //Otherwise, there was no common bond between the atoms, and we need to instead perform
+            //a cyclisation action
+            handleRingCyclisationAction(draggingMode.insertedTo, overlap)
+        }
+    }
+
+    private fun handleRingCyclisationAction(anchorAtom: ChemMolecule.ChemAtom, overlap: ChemMolecule.ChemAtom) {
+            val action = RingCyclisationAction(anchorAtom, overlap)
+            actionManager.executeAction(action)
+    }
+
 
 
     private fun closestPointToCircleCircumference(circleCentre: org.joml.Vector2f, randomPoint: org.joml.Vector2f, radius: Float) : org.joml.Vector2f {

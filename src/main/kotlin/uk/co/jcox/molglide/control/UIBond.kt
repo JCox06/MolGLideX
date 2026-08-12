@@ -5,4 +5,6 @@ data class UIBond (
     val startY: Double,
     val endX: Double,
     val endY: Double,
+    val startVisible: Boolean,
+    val endVisible: Boolean,
 )
