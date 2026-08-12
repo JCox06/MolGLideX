@@ -1,6 +1,7 @@
 package uk.co.jcox.molglide.control
 
 
+import com.sun.org.apache.xpath.internal.operations.Bool
 import org.apache.commons.lang3.DoubleRange
 import org.joml.Vector2d
 import org.joml.minus
@@ -8,11 +9,13 @@ import org.joml.plus
 import org.joml.times
 import org.openscience.cdk.Atom
 import org.openscience.cdk.AtomContainer
+import org.openscience.cdk.RingSet
 import org.openscience.cdk.atomtype.CDKAtomTypeMatcher
 import org.openscience.cdk.exception.CDKException
 import org.openscience.cdk.interfaces.IAtom
 import org.openscience.cdk.interfaces.IAtomContainer
 import org.openscience.cdk.interfaces.IBond
+import org.openscience.cdk.ringsearch.RingSearch
 import org.openscience.cdk.smiles.smarts.parser.SMARTSParserConstants.a
 import org.openscience.cdk.tools.CDKHydrogenAdder
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator
@@ -74,55 +77,11 @@ class ChemMolecule (
         calculateAtomProperties()
     }
 
-    fun getUIProperties() : List<UIAtom> {
-        val properties = mutableListOf<UIAtom>()
-        container.atoms().forEach { atom ->
-            val ui: UIAtom = UIAtom(atom.symbol, atom.point2d.x, atom.point2d.y, calculateTrailGroup(atom), atom.getProperty(TRAILING_POS), atom.getProperty(VISIBLE), atom.id)
-            properties.add(ui)
-        }
-        return properties
-    }
 
-    fun getUIBondProperties() : List<UIBond> {
-        val properties = mutableListOf<UIBond>()
-        container.bonds().forEach { bond ->
-            val atomA = ChemAtom(bond.getAtom(0), this)
-            val atomB = ChemAtom(bond.getAtom(1), this)
-
-            val aPos = atomA.getPos()
-            val bPos = atomB.getPos()
-            val aVis = atomA.isVisible()
-            val bVis = atomB.isVisible()
-
-            val start = if (bVis) getCappedEnd(aPos, bPos) else bPos
-            val end = if (aVis) getCappedEnd(bPos, aPos) else aPos
-
-
-            val uiBond: UIBond = UIBond(start.x, start.y, end.x, end.y)
-            properties.add(uiBond)
-        }
-        return properties
-    }
 
     fun updateBondOrder(chemBond: ChemBond, newOrder: IBond.Order) {
         chemBond.bond.order = newOrder
         calculateAtomProperties()
-    }
-
-    private fun getCappedEnd(start: Vector2d, end: Vector2d): Vector2d {
-        val diff = end - start
-        val newEnd = start + (diff * 0.70)
-        return newEnd
-    }
-
-    private fun calculateTrailGroup(atom: IAtom) : String {
-        if (atom.implicitHydrogenCount == 1) {
-            return "H"
-        }
-        if (atom.implicitHydrogenCount > 1) {
-            return "H${atom.implicitHydrogenCount}"
-        }
-        return ""
     }
 
     private fun calculateAtomProperties() {
@@ -148,6 +107,18 @@ class ChemMolecule (
 
     }
 
+    fun checkBondInRing(chemBond: ChemBond) : Boolean{
+        val ringSearch: RingSearch = RingSearch(container)
+        return ringSearch.cyclic(chemBond.bond)
+    }
+
+    fun getAllFragments(): List<IAtomContainer> {
+        val ringSearch: RingSearch = RingSearch(container)
+        val fragments = mutableListOf<IAtomContainer>()
+        fragments.addAll(ringSearch.fusedRingFragments())
+        fragments.addAll(ringSearch.isolatedRingFragments())
+        return fragments
+    }
 
     fun atoms() : List<ChemAtom> {
         val atoms = mutableListOf<ChemAtom>()

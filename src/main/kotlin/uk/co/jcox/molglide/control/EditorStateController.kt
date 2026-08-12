@@ -13,26 +13,18 @@ class EditorStateController (
     private val selectionManager: SelectionManager = SelectionManager()
     private var currentTool: Tool = AtomBondTool(appManager, actionManager, selectionManager, stateData)
 
-    private val uiAtoms: MutableList<UIAtom> = mutableListOf()
-    private val uiBonds: MutableList<UIBond> = mutableListOf()
+    val uiBuilder = UIBuilder(stateData)
 
-    fun getUIAtoms(): List<UIAtom> {
-        return uiAtoms
-    }
-
-    fun getBondsToDraw() : List<UIBond> {
-        return uiBonds
-    }
 
     fun handleMouseClick(mouseX: Int, mouseY: Int) {
         prepareTool()
         currentTool.onClick(mouseX, mouseY)
-        rebuildUI()
+        uiBuilder.rebuild()
     }
 
     fun handleMouseRelease(mouseX: Int, mouseY: Int) {
         currentTool.onRelease(mouseX, mouseY)
-        rebuildUI()
+        uiBuilder.rebuild()
     }
 
     fun handleSuddenMouseMove() {
@@ -54,18 +46,10 @@ class EditorStateController (
         currentTool.runUpdates()
         selectionManager.update(stateData, worldX, worldY)
         if (actionManager.isDirty) {
-            rebuildUI()
+            uiBuilder.rebuild()
         }
     }
 
-    private fun rebuildUI() {
-        uiAtoms.clear()
-        uiBonds.clear()
-        stateData.getMolecules().forEach { molecule ->
-            uiAtoms.addAll(molecule.getUIProperties())
-            uiBonds.addAll(molecule.getUIBondProperties())
-        }
-    }
 
     fun checkSelected(atom: UIAtom) : Boolean {
         val selection = selectionManager.primary

@@ -72,7 +72,7 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
     }
 
     private fun paintAtoms(g2d: Graphics2D) {
-        val atomsToPaint = dataController.getUIAtoms()
+        val atomsToPaint = dataController.uiBuilder.getUIAtoms()
         atomsToPaint.forEach { ui ->
             val x = ui.posX * cameraZoom
             val y = ui.posY * cameraZoom
@@ -164,7 +164,7 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
 
     private fun paintBonds(g2d: Graphics2D) {
         g2d.stroke = BasicStroke(LINE_STROKE * cameraZoom, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
-        val bondsToPaint = dataController.getBondsToDraw()
+        val bondsToPaint = dataController.uiBuilder.getUIBonds()
         bondsToPaint.forEach { bondUI ->
             val startX = bondUI.startX * cameraZoom
             val startY = bondUI.startY * cameraZoom
