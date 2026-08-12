@@ -13,6 +13,7 @@ import uk.co.jcox.molglide.control.EditorStateData
 import uk.co.jcox.molglide.control.SelectionManager
 import uk.co.jcox.molglide.control.actions.AtomInsertionAction
 import uk.co.jcox.molglide.control.actions.CreateMoleculeAction
+import uk.co.jcox.molglide.control.actions.IncrementBondOrderAction
 import uk.co.jcox.molglide.control.actions.ReplaceAtomAction
 import uk.co.jcox.molglide.control.actions.RingCyclisationAction
 import kotlin.math.abs
@@ -111,10 +112,8 @@ class AtomBondTool(val appManager: AppManager, val actionManager: ActionManager,
             draggingPos.equals(it.getPos(), 0.25) && it.atom != draggingMode.draggingAtom.atom && it.atom != draggingMode.insertedTo.atom
         }
 
-        if (overlap == null) {
-            return
-        }
-        if (draggingMode.allowBondChanges) {
+
+        if (overlap != null && draggingMode.allowBondChanges) {
             actionManager.undoLastAction()
             draggingMode.allowBondChanges = false
             //Then we have found an overlapping atom
@@ -123,12 +122,22 @@ class AtomBondTool(val appManager: AppManager, val actionManager: ActionManager,
             val commonBond = molecule.findBond(overlap, draggingMode.insertedTo)
             //If the bond exists, then update order
             if (commonBond != null) {
-
+                val action = IncrementBondOrderAction(commonBond)
+                actionManager.executeAction(action)
                 return
             }
             //Otherwise, there was no common bond between the atoms, and we need to instead perform
             //a cyclisation action
             handleRingCyclisationAction(draggingMode.insertedTo, overlap)
+            return
+        }
+
+        //If no overlap was found, and we cannot make bond changes
+        //It means the user has pulled away from an atom, after previously being aligned with one
+        //Therefore undo everything, and restore normal dragging mode
+        if (overlap == null && !draggingMode.allowBondChanges) {
+            actionManager.undoLastAction()
+            setupDraggingAtom(Mode.PostReplacement(draggingMode.insertedTo))
         }
     }
 
@@ -159,10 +168,14 @@ class AtomBondTool(val appManager: AppManager, val actionManager: ActionManager,
         if (currentMode is Mode.PostReplacement) {
             //Convert to insertion
             actionManager.undoLastAction()
-            val atomInsertionAction = AtomInsertionAction(appManager.editMode.symbol, currentMode.insertTo, mouseX, mouseY)
-            actionManager.executeAction(atomInsertionAction)
-            atomInsertionAction.newAtom?.let { toolMode = Mode.AtomInsertionDragging(it, currentMode.insertTo, true) }
+            setupDraggingAtom(currentMode)
         }
+    }
+
+    private fun setupDraggingAtom(currentMode: Mode.PostReplacement) {
+        val atomInsertionAction = AtomInsertionAction(appManager.editMode.symbol, currentMode.insertTo, mouseX, mouseY)
+        actionManager.executeAction(atomInsertionAction)
+        atomInsertionAction.newAtom?.let { toolMode = Mode.AtomInsertionDragging(it, currentMode.insertTo, true) }
     }
 
     override fun onClick(clickX: Int, clickY: Int) {

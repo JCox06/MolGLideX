@@ -171,27 +171,9 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
             val endX = bondUI.endX * cameraZoom
             val endY = bondUI.endY * cameraZoom
 
-            paintSingleBond(g2d, startX, startY, endX, endY, bondUI.startVisible, bondUI.endVisible)
+            g2d.drawLine(startX.toInt(), startY.toInt(), endX.toInt(), endY.toInt())
         }
     }
-
-    private fun paintSingleBond(g2d: Graphics2D, startX: Double, startY: Double, endX: Double, endY: Double, startVisible: Boolean, endVisible: Boolean) {
-
-        val start = if (endVisible) getCappedEnd(Vector2d(startX, startY), Vector2d(endX, endY)) else Vector2d(endX, endY)
-        val end = if (startVisible) getCappedEnd(Vector2d(endX, endY), Vector2d(startX, startY)) else Vector2d(startX, startY)
-
-        g2d.drawLine(start.x.toInt(), start.y.toInt(), end.x.toInt(), end.y.toInt())
-    }
-
-    /**
-     * Will cap the end of the bond
-     */
-    private fun getCappedEnd(start: Vector2d, end: Vector2d): Vector2d {
-        val diff = end - start
-        val newEnd = start + (diff * 0.70)
-        return newEnd
-    }
-
     private fun screenToWorld(screen: Point) : Point {
         var x: Double = screen.x.toDouble()
         var y: Double = screen.y.toDouble()
