@@ -1,5 +1,7 @@
 package uk.co.jcox.molglide.control
 
+import org.joml.Vector2d
+import org.xmlcml.euclid.Vector2
 import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.control.tool.AtomBondTool
 import uk.co.jcox.molglide.control.tool.Tool
@@ -53,8 +55,8 @@ class EditorStateController (
 
 
     fun checkSelected(atom: UIAtom) : Boolean {
-        val selection = selectionManager.primary
-        return selection is SelectionManager.Type.ActiveAtom && selection.chemAtom.atom.id == atom.id
+        val selection = selectionManager.primarySelection
+        return selection is SelectionManager.Type.ActiveAtom && selection.chemAtom.atom.id == atom.chemID
     }
 
     fun nowActive(panel: EditorPanel) {
@@ -63,7 +65,7 @@ class EditorStateController (
     }
 
     fun getSelectedFormula(): String {
-        val s = selectionManager.primary
+        val s = selectionManager.primarySelection
         if (s is SelectionManager.Type.ActiveAtom) {
             return s.chemAtom.molecule.getFormulaString()
         }
@@ -71,18 +73,34 @@ class EditorStateController (
     }
 
     fun isAtomSelected() : Boolean {
-        val selection = selectionManager.primary
+        val selection = selectionManager.primarySelection
         if (selection is SelectionManager.Type.ActiveAtom) {
             return true
         }
         return false
     }
 
+    fun isBondSelected(): Boolean {
+        val selection = selectionManager.primarySelection
+        if (selection is SelectionManager.Type.ActiveBond) {
+            return true
+        }
+        return false
+    }
+
     fun getSelectedWeight(): Double {
-        val s = selectionManager.primary
+        val s = selectionManager.primarySelection
         if (s is SelectionManager.Type.ActiveAtom) {
             return s.chemAtom.molecule.getMolecularWeight()
         }
         return 0.0
+    }
+
+    fun getSelectedBondPos(): Vector2d? {
+        val selection = selectionManager.primarySelection
+        if (selection is SelectionManager.Type.ActiveBond) {
+            return selection.chemBond.midPoint()
+        }
+        return null
     }
 }

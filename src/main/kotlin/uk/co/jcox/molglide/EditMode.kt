@@ -13,7 +13,10 @@ enum class EditMode (val symbol: String, val type: ToolType) {
     INSERT_MAGNESIUM("Mg", ToolType.ATOM_INSERT),
     INSERT_LITHIUM("Li", ToolType.ATOM_INSERT),
     INSERT_SULPHUR("S", ToolType.ATOM_INSERT),
+    INSERT_SILICON("Si", ToolType.ATOM_INSERT),
+    INSERT_OSMIUM("Os", ToolType.ATOM_INSERT),
     INSERT_WILD_CARD("R", ToolType.ATOM_INSERT),
+
 ;
 
     enum class ToolType {

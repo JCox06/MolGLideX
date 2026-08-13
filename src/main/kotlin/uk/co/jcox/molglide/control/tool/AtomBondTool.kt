@@ -204,7 +204,7 @@ class AtomBondTool(val appManager: AppManager, val actionManager: ActionManager,
     }
 
     private fun getToolMode(clickX: Int, clickY: Int) : Mode {
-        val selection = selectionManager.primary
+        val selection = selectionManager.primarySelection
 
         //If the selection is active (as in the user is selecting an atom)
         //Any subsequent click should replace the atom selected with the active atom from the toolbox

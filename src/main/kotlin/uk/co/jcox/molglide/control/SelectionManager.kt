@@ -6,15 +6,31 @@ import javax.vecmath.Point2d
 class SelectionManager (
 ) {
 
-    var primary: Type = Type.None
+    var primarySelection: Type = Type.None
 
     fun update(levelData: EditorStateData, worldX: Int, worldY: Int) {
         val closestAtom = getClosestAtom(levelData, worldX, worldY)
-        if (closestAtom != null && closestAtom.second < MIN_DIST) {
-            primary = Type.ActiveAtom(closestAtom.first)
+        val closestBond = getClosestBond(levelData, worldX, worldY)
+
+        if (closestAtom == null && closestBond != null && closestBond.second < MIN_DIST) {
+            primarySelection = Type.ActiveBond(closestBond.first)
             return
         }
-        primary = Type.None
+        if (closestBond == null && closestAtom != null && closestAtom.second < MIN_DIST) {
+            primarySelection = Type.ActiveAtom(closestAtom.first)
+            return
+        }
+        if (closestAtom != null && closestBond != null) {
+            if (closestAtom.second < closestBond.second && closestAtom.second < MIN_DIST) {
+                primarySelection = Type.ActiveAtom(closestAtom.first)
+                return
+            }
+            if (closestBond.second < MIN_DIST) {
+                primarySelection = Type.ActiveBond(closestBond.first)
+                return
+            }
+        }
+        primarySelection = Type.None
     }
 
     private fun getClosestAtom(levelData: EditorStateData, worldX: Int, worldY: Int) : Pair<ChemMolecule.ChemAtom, Double>?{

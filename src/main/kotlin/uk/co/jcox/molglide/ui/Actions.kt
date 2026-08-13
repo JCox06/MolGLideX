@@ -1,7 +1,7 @@
 package uk.co.jcox.molglide.ui
 
-import org.apache.jena.base.Sys
 import org.joda.time.DateTime
+import uk.co.jcox.molglide.MolGLideUtils
 import uk.co.jcox.molglide.control.AppManager
 import uk.co.jcox.molglide.control.EditorStateController
 import uk.co.jcox.molglide.control.SVGExporter
@@ -84,7 +84,7 @@ class QuickCaptureAction (val appManager: AppManager) : AbstractAction("Quick Ca
         if (currentPane != null) {
             val exporter = SVGExporter()
             val userHome = File(System.getProperty("user.home"))
-            val file = File(AppManager.getQuickCaptureDirectory(), DateTime.now().toString())
+            val file = File(MolGLideUtils.getQuickCaptureDirectory(), DateTime.now().toString())
             exporter.quickExport(currentPane, file)
             Desktop.getDesktop().browse(file.toURI())
         }
@@ -113,7 +113,7 @@ class DeleteAtomAction (val controller: EditorStateController) : AbstractAction(
     }
 }
 
-class ToggleAtomVisibility (val controller: EditorStateController) : AbstractAction("Atom Visible") {
+class ToggleAtomVisibilityMenuAction (val controller: EditorStateController) : AbstractAction("Atom Visible") {
     init {
         putValue(SHORT_DESCRIPTION, "Select whether this atom should be visible")
         putValue(SELECTED_KEY, true)
@@ -124,4 +124,101 @@ class ToggleAtomVisibility (val controller: EditorStateController) : AbstractAct
     }
 }
 
+class FlipBondMenuAction (val controller: EditorStateController) : AbstractAction("Flip Bond") {
+    init {
+        putValue(SHORT_DESCRIPTION, "Toggles the side of the double bond")
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        println("Changed side of the double bond")
+    }
+}
+
+class SetPlainBondMenuAction (val controller: EditorStateController) : AbstractAction("Plain") {
+    init {
+        putValue(SHORT_DESCRIPTION, "Select single bond")
+        putValue(SELECTED_KEY, true)
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        println("Changed the atom bond")
+    }
+}
+
+class SetWedgedBondMenuAction (val controller: EditorStateController) : AbstractAction("Wedged") {
+    init {
+        putValue(SHORT_DESCRIPTION, "Select wedged bond")
+        putValue(SELECTED_KEY, true)
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        println("Changed the atom bond")
+    }
+}
+
+class SetDashedBondMenuAction (val controller: EditorStateController) : AbstractAction("Wedged") {
+    init {
+        putValue(SHORT_DESCRIPTION, "Select dashed bond")
+        putValue(SELECTED_KEY, true)
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        println("Changed the atom bond")
+    }
+}
+
+class SetDoubleBondMenuAction (val controller: EditorStateController) : AbstractAction("Plain") {
+    init {
+        putValue(SHORT_DESCRIPTION, "Select double bond")
+        putValue(SELECTED_KEY, true)
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        println("Changed the atom bond")
+    }
+}
+
+class SetAromaticDoubleBondMenuAction (val controller: EditorStateController) : AbstractAction("Aromatic") {
+    init {
+        putValue(SHORT_DESCRIPTION, "Select aromatic bond")
+        putValue(SELECTED_KEY, true)
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        println("Changed the atom bond")
+    }
+}
+
+class SetCentreDoubleBondMenuAction (val controller: EditorStateController) : AbstractAction("Centre Bond") {
+    init {
+        putValue(SHORT_DESCRIPTION, "Select aromatic bond")
+        putValue(SELECTED_KEY, true)
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        println("Changed the atom bond")
+    }
+}
+
+class SetTripleBondMenuAction (val controller: EditorStateController) : AbstractAction("Triple Bond") {
+    init {
+        putValue(SHORT_DESCRIPTION, "Select Triple bond")
+        putValue(SELECTED_KEY, true)
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        println("Changed the atom bond")
+    }
+}
+
+class DeleteBondMenuAction (val controller: EditorStateController) : AbstractAction("Delete Bond") {
+    init {
+        putValue(SHORT_DESCRIPTION, "Select Triple bond")
+        putValue(SELECTED_KEY, true)
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        println("Changed the atom bond")
+    }
+}
 

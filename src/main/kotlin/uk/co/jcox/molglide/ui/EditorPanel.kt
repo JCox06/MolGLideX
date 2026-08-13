@@ -2,37 +2,27 @@ package uk.co.jcox.molglide.ui
 
 import com.github.jsonldjava.shaded.com.google.common.math.IntMath.pow
 import org.joml.Vector2d
-import org.joml.minus
-import org.joml.plus
-import org.joml.times
-import org.xmlcml.euclid.Vector2
+import uk.co.jcox.molglide.MolGLideUtils
 import uk.co.jcox.molglide.control.ChemMolecule
 import uk.co.jcox.molglide.control.EditorStateController
 import uk.co.jcox.molglide.control.UIAtom
 import java.awt.BasicStroke
-import java.awt.Checkbox
 import java.awt.Font
 import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.Point
-import java.awt.PopupMenu
 import java.awt.RenderingHints
-import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.event.MouseWheelEvent
 import java.awt.font.TextAttribute
 import java.text.AttributedString
 import javax.swing.JCheckBoxMenuItem
-import javax.swing.JComponent
 import javax.swing.JMenu
 import javax.swing.JPanel
 import javax.swing.JPopupMenu
-import javax.swing.KeyStroke
-import javax.swing.Popup
 import javax.swing.SwingUtilities
 import javax.swing.Timer
-import javax.swing.UIManager
 import javax.swing.event.PopupMenuEvent
 import javax.swing.event.PopupMenuListener
 import kotlin.math.max
@@ -48,9 +38,6 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
 
     private var pauseEvents = false
 
-    private val atomContextMenu: JPopupMenu
-
-
     init {
         val timer = Timer(16) {
             repaint()
@@ -63,8 +50,37 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         addMouseListener(mouseListener)
         addMouseMotionListener(mouseListener)
         addMouseWheelListener(mouseListener)
+    }
 
-        atomContextMenu = buildAtomContextMenu()
+
+    private fun buildBondContextMenu() : JPopupMenu {
+        val menu = JPopupMenu()
+
+        val flipBondAction = FlipBondMenuAction(dataController)
+        menu.add(flipBondAction)
+
+        val menuSingle = JMenu("Single")
+        menuSingle.add(SetPlainBondMenuAction(dataController))
+        menuSingle.add(SetWedgedBondMenuAction(dataController))
+        menuSingle.add(SetDashedBondMenuAction(dataController))
+        menu.add(menuSingle)
+
+        val menuDouble = JMenu("Double")
+        menuDouble.add(SetDoubleBondMenuAction(dataController))
+        menuDouble.add(SetAromaticDoubleBondMenuAction(dataController))
+        menuDouble.add(SetCentreDoubleBondMenuAction(dataController))
+        menu.add(menuDouble)
+
+        menu.add(SetTripleBondMenuAction(dataController))
+        menu.add(DeleteBondMenuAction(dataController))
+
+        menu.addSeparator()
+
+        menu.add(buildCommonCDKMenu())
+
+        applyMenuEvent(menu)
+
+        return menu
     }
 
     private fun buildAtomContextMenu() : JPopupMenu {
@@ -72,11 +88,11 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
 
         val editLabelAction = EditLabelAction(dataController)
         val deleteAtomAction = DeleteAtomAction(dataController)
-        val toggleAtomVisibilityAction = ToggleAtomVisibility(dataController)
+        val toggleAtomVisibilityMenuActionAction = ToggleAtomVisibilityMenuAction(dataController)
 
         menu.add(editLabelAction)
         menu.add(deleteAtomAction)
-        menu.add(JCheckBoxMenuItem(toggleAtomVisibilityAction))
+        menu.add(JCheckBoxMenuItem(toggleAtomVisibilityMenuActionAction))
         menu.addSeparator()
         menu.add(buildCommonCDKMenu())
 
@@ -113,6 +129,7 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         super.paintComponent(g)
         val g2d = preparePainter(g)
         paintAtoms(g2d)
+        paintBondSelection(g2d)
         paintBonds(g2d)
     }
 
@@ -163,7 +180,7 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
     private fun paintAtomSelection(g2d: Graphics2D, uiAtom: UIAtom, m: MasterAtomMetric) {
         if (dataController.checkSelected(uiAtom)) {
             val oldColour = g2d.color
-            val newColour = UIManager.getColor("Component.accentColor")
+            val newColour = MolGLideUtils.getAccentColour()
             g2d.color = newColour
             g2d.fillRoundRect((m.centreBoxWidth).toInt(),
                 (m.centreBoxHeight).toInt(),
@@ -233,6 +250,28 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
             g2d.drawLine(startX.toInt(), startY.toInt(), endX.toInt(), endY.toInt())
         }
     }
+
+    private fun paintBondSelection(g2d: Graphics2D) {
+        val bondPos = dataController.getSelectedBondPos() ?: return
+        val width = BOND_MARKER * cameraZoom
+        val height = BOND_MARKER * cameraZoom
+        val start = getBoxStart(bondPos, width, height)
+
+        val oldColour = g2d.color
+        g2d.color = MolGLideUtils.getAccentColour()
+
+        g2d.fillRect(
+            start.x.toInt(), start.y.toInt(), width.toInt(), height.toInt()
+                    )
+        g2d.color = oldColour
+    }
+
+    private fun getBoxStart(bondPos: Vector2d, width: Float, height: Float): Vector2d {
+        val startX = bondPos.x * cameraZoom
+        val startY = bondPos.y * cameraZoom
+        return Vector2d(startX - width / 2, startY - height / 2)
+    }
+
     private fun screenToWorld(screen: Point) : Point {
         var x: Double = screen.x.toDouble()
         var y: Double = screen.y.toDouble()
@@ -334,9 +373,14 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
 
                 //Check to see what is selected
                 if (dataController.isAtomSelected()) {
+                    val atomContextMenu = buildAtomContextMenu()
                     atomContextMenu.show(e.component, e.x, e.y)
                 }
 
+                if (dataController.isBondSelected()) {
+                    val bondContextMenu = buildBondContextMenu()
+                    bondContextMenu.show(e.component, e.x, e.y)
+                }
             }
         }
     }
@@ -346,5 +390,6 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         private const val UNMODDED_TEXT_SIZE = 32.0f
         private const val SIG_MOUSE_DELTA = 2.0f
         private const val LINE_STROKE = 3.0f
+        private const val BOND_MARKER = UNMODDED_TEXT_SIZE * 0.5f
     }
 }

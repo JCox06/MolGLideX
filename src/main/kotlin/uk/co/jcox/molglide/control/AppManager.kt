@@ -61,19 +61,5 @@ class AppManager {
     companion object {
         private const val EDITOR_PREFIX: String = "internal_editor_"
 
-
-        fun getMolGLideHome() : File {
-            val userHome = File(System.getProperty("user.home"))
-            val molglide = File(userHome, ".molglide")
-            molglide.mkdir()
-            return molglide
-        }
-
-        fun getQuickCaptureDirectory() : File {
-            val molglide = getMolGLideHome()
-            val captures = File(molglide, "captures")
-            captures.mkdir()
-            return captures
-        }
     }
 }

@@ -92,6 +92,7 @@ class UIBuilder (private val data: EditorStateData) {
         val bVis = atomB.isVisible()
         val start = if (bVis) getCappedEnd(aPos, bPos) else bPos
         val end = if (aVis) getCappedEnd(bPos, aPos) else aPos
+        val id = chemBond.bond.id
         val uiBond: UIBond = UIBond(start.x, start.y, end.x, end.y)
         return uiBond
     }

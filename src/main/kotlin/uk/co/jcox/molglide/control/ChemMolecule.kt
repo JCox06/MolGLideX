@@ -45,6 +45,7 @@ class ChemMolecule (
             throw UnsupportedOperationException("Cannot form a basic connection between atoms of different containers")
         }
         val cdkBond = container.newBond(chemAtom1.atom, chemAtom2.atom, IBond.Order.SINGLE)
+        cdkBond.id = UUID.randomUUID().toString()
         calculateAtomProperties()
         return ChemBond(cdkBond, this)
     }

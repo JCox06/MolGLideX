@@ -17,7 +17,7 @@ fun main() {
     FlatIntelliJLaf.setup()
 
     JFrame.setDefaultLookAndFeelDecorated(true)
-    JDialog.setDefaultLookAndFeelDecorated(true)
+    JDialog.setDefaultLookAndFeelDecorated(false)
     UIManager.put("PopupMenu.consumeEventOnClose", true)
 
     SwingUtilities.invokeLater {
