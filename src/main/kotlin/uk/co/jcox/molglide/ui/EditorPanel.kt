@@ -10,20 +10,31 @@ import uk.co.jcox.molglide.control.ChemMolecule
 import uk.co.jcox.molglide.control.EditorStateController
 import uk.co.jcox.molglide.control.UIAtom
 import java.awt.BasicStroke
+import java.awt.Checkbox
 import java.awt.Font
 import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.Point
+import java.awt.PopupMenu
 import java.awt.RenderingHints
+import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.event.MouseWheelEvent
 import java.awt.font.TextAttribute
 import java.text.AttributedString
+import javax.swing.JCheckBoxMenuItem
+import javax.swing.JComponent
+import javax.swing.JMenu
 import javax.swing.JPanel
+import javax.swing.JPopupMenu
+import javax.swing.KeyStroke
+import javax.swing.Popup
 import javax.swing.SwingUtilities
 import javax.swing.Timer
 import javax.swing.UIManager
+import javax.swing.event.PopupMenuEvent
+import javax.swing.event.PopupMenuListener
 import kotlin.math.max
 import kotlin.math.sqrt
 
@@ -34,6 +45,11 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
     private var cameraZoom: Float = 1.0f
         set(value) {field = max(1.0f, value)}
     private var lastMousePos: Point = Point()
+
+    private var pauseEvents = false
+
+    private val atomContextMenu: JPopupMenu
+
 
     init {
         val timer = Timer(16) {
@@ -48,6 +64,49 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         addMouseMotionListener(mouseListener)
         addMouseWheelListener(mouseListener)
 
+        atomContextMenu = buildAtomContextMenu()
+    }
+
+    private fun buildAtomContextMenu() : JPopupMenu {
+        val menu = JPopupMenu()
+
+        val editLabelAction = EditLabelAction(dataController)
+        val deleteAtomAction = DeleteAtomAction(dataController)
+        val toggleAtomVisibilityAction = ToggleAtomVisibility(dataController)
+
+        menu.add(editLabelAction)
+        menu.add(deleteAtomAction)
+        menu.add(JCheckBoxMenuItem(toggleAtomVisibilityAction))
+        menu.addSeparator()
+        menu.add(buildCommonCDKMenu())
+
+        applyMenuEvent(menu)
+        return menu
+    }
+
+    private fun buildCommonCDKMenu() : JMenu {
+        val menuCDK = JMenu("Power CDK")
+        menuCDK.add("CDK SVG Exporter")
+        menuCDK.add("Copy Generic SMILES")
+        menuCDK.add("Copy Canonical SMILES")
+        return menuCDK
+    }
+
+    private fun applyMenuEvent(menu: JPopupMenu) {
+        menu.addPopupMenuListener(object: PopupMenuListener{
+            override fun popupMenuWillBecomeVisible(e: PopupMenuEvent?) {
+                pauseEvents = true
+            }
+
+            override fun popupMenuWillBecomeInvisible(e: PopupMenuEvent?) {
+                pauseEvents = false
+            }
+
+            override fun popupMenuCanceled(e: PopupMenuEvent?) {
+                pauseEvents = false
+            }
+
+        })
     }
 
     override fun paintComponent(g: Graphics?) {
@@ -194,21 +253,25 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         }
 
         override fun mousePressed(e: MouseEvent?) {
-            if (e == null) {
+            if (e == null || pauseEvents) {
                 return
             }
             val point = screenToWorld(e.point)
             if (SwingUtilities.isLeftMouseButton(e)) {
                 dataController.handleMouseClick(point.x, point.y)
             }
+
+            maybeShowPopup(e)
         }
 
         override fun mouseReleased(e: MouseEvent?) {
-            if (e == null) {
+            if (e == null || pauseEvents) {
                 return
             }
             val point = screenToWorld(e.point)
             dataController.handleMouseRelease(point.x, point.y)
+
+            maybeShowPopup(e)
         }
 
         override fun mouseEntered(e: MouseEvent?) {
@@ -220,7 +283,7 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         }
 
         override fun mouseWheelMoved(e: MouseWheelEvent?) {
-            if (e == null) {
+            if (e == null || pauseEvents) {
                 return
             }
             if(e.isControlDown) {
@@ -229,7 +292,7 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         }
 
         override fun mouseDragged(e: MouseEvent?) {
-            if (e == null) {
+            if (e == null || pauseEvents) {
                 return
             }
 
@@ -245,12 +308,15 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         }
 
         override fun mouseMoved(e: MouseEvent?) {
+            if (pauseEvents || e == null) {
+                return
+            }
             updateMouse(e)
-            dataController.nowActive()
+            dataController.nowActive(this@EditorPanel)
         }
 
         private fun updateMouse(e: MouseEvent?) {
-            if (e == null) {
+            if (e == null || pauseEvents) {
                 return
             }
             val currentPos = e.point
@@ -260,6 +326,17 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
             lastMousePos.y = currentPos.y
             if (sqrt((pow(offsetX, 2) + pow(offsetY, 2)).toDouble()) >= SIG_MOUSE_DELTA) {
                 dataController.handleSuddenMouseMove()
+            }
+        }
+
+        private fun maybeShowPopup(e: MouseEvent) {
+            if (e.isPopupTrigger && SwingUtilities.isRightMouseButton(e)) {
+
+                //Check to see what is selected
+                if (dataController.isAtomSelected()) {
+                    atomContextMenu.show(e.component, e.x, e.y)
+                }
+
             }
         }
     }

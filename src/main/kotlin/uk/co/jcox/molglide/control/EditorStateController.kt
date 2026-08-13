@@ -3,6 +3,7 @@ package uk.co.jcox.molglide.control
 import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.control.tool.AtomBondTool
 import uk.co.jcox.molglide.control.tool.Tool
+import uk.co.jcox.molglide.ui.EditorPanel
 
 class EditorStateController (
     private val appManager: AppManager,
@@ -53,24 +54,33 @@ class EditorStateController (
 
     fun checkSelected(atom: UIAtom) : Boolean {
         val selection = selectionManager.primary
-        return selection is SelectionManager.Type.Active && selection.chemAtom.atom.id == atom.id
+        return selection is SelectionManager.Type.ActiveAtom && selection.chemAtom.atom.id == atom.id
     }
 
-    fun nowActive() {
+    fun nowActive(panel: EditorPanel) {
         appManager.activeTab = this
+        appManager.activePanel = panel
     }
 
     fun getSelectedFormula(): String {
         val s = selectionManager.primary
-        if (s is SelectionManager.Type.Active) {
+        if (s is SelectionManager.Type.ActiveAtom) {
             return s.chemAtom.molecule.getFormulaString()
         }
         return ""
     }
 
+    fun isAtomSelected() : Boolean {
+        val selection = selectionManager.primary
+        if (selection is SelectionManager.Type.ActiveAtom) {
+            return true
+        }
+        return false
+    }
+
     fun getSelectedWeight(): Double {
         val s = selectionManager.primary
-        if (s is SelectionManager.Type.Active) {
+        if (s is SelectionManager.Type.ActiveAtom) {
             return s.chemAtom.molecule.getMolecularWeight()
         }
         return 0.0

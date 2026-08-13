@@ -1,5 +1,6 @@
 package uk.co.jcox.molglide.control
 
+import org.joml.Vector2d
 import javax.vecmath.Point2d
 
 class SelectionManager (
@@ -10,7 +11,7 @@ class SelectionManager (
     fun update(levelData: EditorStateData, worldX: Int, worldY: Int) {
         val closestAtom = getClosestAtom(levelData, worldX, worldY)
         if (closestAtom != null && closestAtom.second < MIN_DIST) {
-            primary = Type.Active(closestAtom.first)
+            primary = Type.ActiveAtom(closestAtom.first)
             return
         }
         primary = Type.None
@@ -25,11 +26,20 @@ class SelectionManager (
         return result
     }
 
+    private fun getClosestBond(levelData: EditorStateData, worldX: Int, worldY: Int): Pair<ChemMolecule.ChemBond, Double>? {
+        val bonds = levelData.getBonds()
+        val x = worldX.toDouble()
+        val y = worldY.toDouble()
+        val lengthFromMouse = bonds.map { it to it.midPoint().distance(Vector2d(x, y)) }
+        val result = lengthFromMouse.minByOrNull {it.second}
+        return result
+    }
 
 
     sealed class Type {
         object None: Type()
-        data class Active(val chemAtom: ChemMolecule.ChemAtom): Type()
+        data class ActiveAtom(val chemAtom: ChemMolecule.ChemAtom): Type()
+        data class ActiveBond(val chemBond: ChemMolecule.ChemBond): Type()
     }
 
     companion object {

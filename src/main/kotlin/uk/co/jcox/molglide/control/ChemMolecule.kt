@@ -215,6 +215,12 @@ class ChemMolecule (
             }
             return true
         }
+
+        fun midPoint(): Vector2d {
+            val atomA = bond.getAtom(0).point2d
+            val atomB = bond.getAtom(1).point2d
+            return Vector2d((atomA.x + atomB.x) / 2, (atomA.y + atomB.y) /2)
+        }
     }
 
 

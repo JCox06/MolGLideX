@@ -1,6 +1,10 @@
 package uk.co.jcox.molglide.control
 
+import org.checkerframework.checker.units.qual.mol
 import uk.co.jcox.molglide.EditMode
+import uk.co.jcox.molglide.ui.EditorPanel
+import java.io.File
+import javax.swing.JPanel
 
 class AppManager {
 
@@ -11,6 +15,7 @@ class AppManager {
     var editMode: EditMode = EditMode.INSERT_CARBON
 
     var activeTab: EditorStateController? = null
+    var activePanel: EditorPanel? = null
 
     fun isRegistered(id: String): Boolean {
         return editorStateData.containsKey(id)
@@ -55,5 +60,20 @@ class AppManager {
 
     companion object {
         private const val EDITOR_PREFIX: String = "internal_editor_"
+
+
+        fun getMolGLideHome() : File {
+            val userHome = File(System.getProperty("user.home"))
+            val molglide = File(userHome, ".molglide")
+            molglide.mkdir()
+            return molglide
+        }
+
+        fun getQuickCaptureDirectory() : File {
+            val molglide = getMolGLideHome()
+            val captures = File(molglide, "captures")
+            captures.mkdir()
+            return captures
+        }
     }
 }

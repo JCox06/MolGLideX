@@ -1,8 +1,5 @@
 package uk.co.jcox.molglide.control.tool
 
-import com.sun.accessibility.internal.resources.accessibility
-import com.sun.org.apache.xpath.internal.operations.Bool
-import org.apache.jena.vocabulary.AS.radius
 import org.joml.Vector2f
 import org.joml.minus
 import org.joml.plus
@@ -211,7 +208,7 @@ class AtomBondTool(val appManager: AppManager, val actionManager: ActionManager,
 
         //If the selection is active (as in the user is selecting an atom)
         //Any subsequent click should replace the atom selected with the active atom from the toolbox
-        if (selection is SelectionManager.Type.Active) {
+        if (selection is SelectionManager.Type.ActiveAtom) {
             return Mode.AtomReplacement(selection.chemAtom)
         }
 

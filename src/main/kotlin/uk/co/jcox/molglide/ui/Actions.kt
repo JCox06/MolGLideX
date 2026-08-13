@@ -1,12 +1,16 @@
 package uk.co.jcox.molglide.ui
 
+import org.apache.jena.base.Sys
+import org.joda.time.DateTime
 import uk.co.jcox.molglide.control.AppManager
 import uk.co.jcox.molglide.control.EditorStateController
+import uk.co.jcox.molglide.control.SVGExporter
 import java.awt.Desktop
 import java.awt.event.ActionEvent
 import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
 import java.awt.event.WindowEvent
+import java.io.File
 import javax.swing.AbstractAction
 import javax.swing.KeyStroke
 
@@ -76,8 +80,47 @@ class QuickCaptureAction (val appManager: AppManager) : AbstractAction("Quick Ca
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        //Save the SVG file
-        //todo later
+        val currentPane = appManager.activePanel
+        if (currentPane != null) {
+            val exporter = SVGExporter()
+            val userHome = File(System.getProperty("user.home"))
+            val file = File(AppManager.getQuickCaptureDirectory(), DateTime.now().toString())
+            exporter.quickExport(currentPane, file)
+            Desktop.getDesktop().browse(file.toURI())
+        }
+    }
+}
+
+class EditLabelAction (val controller: EditorStateController) : AbstractAction("Edit Label") {
+    init {
+        putValue(SHORT_DESCRIPTION, "Edits the atom label")
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0))
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        println("Edited the label")
+    }
+}
+
+class DeleteAtomAction (val controller: EditorStateController) : AbstractAction("Delete Atom") {
+    init {
+        putValue(SHORT_DESCRIPTION, "Deletes the atom")
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0))
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        println("Deleted the atom")
+    }
+}
+
+class ToggleAtomVisibility (val controller: EditorStateController) : AbstractAction("Atom Visible") {
+    init {
+        putValue(SHORT_DESCRIPTION, "Select whether this atom should be visible")
+        putValue(SELECTED_KEY, true)
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        println("Changed the atom visiblity")
     }
 }
 

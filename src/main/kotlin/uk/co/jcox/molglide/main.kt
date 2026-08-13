@@ -11,11 +11,14 @@ import uk.co.jcox.molglide.ui.MolGlideFrame
 import javax.swing.JDialog
 import javax.swing.JFrame
 import javax.swing.SwingUtilities
+import javax.swing.UIManager
 
 fun main() {
-    FlatDarkLaf.setup()
+    FlatIntelliJLaf.setup()
+
     JFrame.setDefaultLookAndFeelDecorated(true)
-    JDialog.setDefaultLookAndFeelDecorated(false)
+    JDialog.setDefaultLookAndFeelDecorated(true)
+    UIManager.put("PopupMenu.consumeEventOnClose", true)
 
     SwingUtilities.invokeLater {
         val mainFrame = MolGlideFrame()
