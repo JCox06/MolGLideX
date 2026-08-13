@@ -102,8 +102,8 @@ class MolGlideFrame : JFrame("MolGLideX (INDEV)") {
                 SwingUtilities.invokeLater {
                     val act = appManager.activeTab
                     if (act != null) {
-                        val weight = String.format("%.4f", act.getSelectedWeight())
-                        statusLabel.text = "${act.getSelectedFormula()} | ${weight}"
+                        val weight = String.format("%.4f", act.uiBuilder.getSelectedWeight())
+                        statusLabel.text = "${act.uiBuilder.getSelectedFormula()} | ${weight}"
                     }
                 }
             }

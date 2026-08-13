@@ -1,5 +1,6 @@
 package uk.co.jcox.molglide.control
 
+import org.checkerframework.checker.units.qual.s
 import org.joml.Vector2d
 import org.xmlcml.euclid.Vector2
 import uk.co.jcox.molglide.EditMode
@@ -16,7 +17,7 @@ class EditorStateController (
     private val selectionManager: SelectionManager = SelectionManager()
     private var currentTool: Tool = AtomBondTool(appManager, actionManager, selectionManager, stateData)
 
-    val uiBuilder = UIBuilder(stateData)
+    val uiBuilder = UIBuilder(stateData, selectionManager)
 
 
     fun handleMouseClick(mouseX: Int, mouseY: Int) {
@@ -64,43 +65,4 @@ class EditorStateController (
         appManager.activePanel = panel
     }
 
-    fun getSelectedFormula(): String {
-        val s = selectionManager.primarySelection
-        if (s is SelectionManager.Type.ActiveAtom) {
-            return s.chemAtom.molecule.getFormulaString()
-        }
-        return ""
-    }
-
-    fun isAtomSelected() : Boolean {
-        val selection = selectionManager.primarySelection
-        if (selection is SelectionManager.Type.ActiveAtom) {
-            return true
-        }
-        return false
-    }
-
-    fun isBondSelected(): Boolean {
-        val selection = selectionManager.primarySelection
-        if (selection is SelectionManager.Type.ActiveBond) {
-            return true
-        }
-        return false
-    }
-
-    fun getSelectedWeight(): Double {
-        val s = selectionManager.primarySelection
-        if (s is SelectionManager.Type.ActiveAtom) {
-            return s.chemAtom.molecule.getMolecularWeight()
-        }
-        return 0.0
-    }
-
-    fun getSelectedBondPos(): Vector2d? {
-        val selection = selectionManager.primarySelection
-        if (selection is SelectionManager.Type.ActiveBond) {
-            return selection.chemBond.midPoint()
-        }
-        return null
-    }
 }

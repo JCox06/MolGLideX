@@ -6,6 +6,7 @@ import uk.co.jcox.molglide.MolGLideUtils
 import uk.co.jcox.molglide.control.ChemMolecule
 import uk.co.jcox.molglide.control.EditorStateController
 import uk.co.jcox.molglide.control.UIAtom
+import uk.co.jcox.molglide.control.UIBondContext
 import java.awt.BasicStroke
 import java.awt.Font
 import java.awt.Graphics
@@ -53,25 +54,28 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
     }
 
 
-    private fun buildBondContextMenu() : JPopupMenu {
+    private fun buildBondContextMenu(bondContext: UIBondContext) : JPopupMenu {
         val menu = JPopupMenu()
 
         val flipBondAction = FlipBondMenuAction(dataController)
         menu.add(flipBondAction)
 
         val menuSingle = JMenu("Single")
-        menuSingle.add(SetPlainBondMenuAction(dataController))
-        menuSingle.add(SetWedgedBondMenuAction(dataController))
-        menuSingle.add(SetDashedBondMenuAction(dataController))
+        menuSingle.add(JCheckBoxMenuItem(SetPlainBondMenuAction(dataController, bondContext.order == 1)))
+        menuSingle.add(JCheckBoxMenuItem(SetWedgedBondMenuAction(dataController, false)))
+        menuSingle.add(JCheckBoxMenuItem(SetDashedBondMenuAction(dataController, false)))
+        menuSingle.add(FlipStereoChemMenuAction(dataController))
         menu.add(menuSingle)
 
         val menuDouble = JMenu("Double")
-        menuDouble.add(SetDoubleBondMenuAction(dataController))
-        menuDouble.add(SetAromaticDoubleBondMenuAction(dataController))
-        menuDouble.add(SetCentreDoubleBondMenuAction(dataController))
+        val isDouble = bondContext.order == 2
+        val isCentre = bondContext.isCentre ?: false //Come back to this
+        menuDouble.add(JCheckBoxMenuItem(SetDoubleBondMenuAction(dataController, isDouble)))
+        menuDouble.add(JCheckBoxMenuItem(SetAromaticDoubleBondMenuAction(dataController, bondContext.isAromatic, isDouble)))
+        menuDouble.add(JCheckBoxMenuItem(SetCentreDoubleBondMenuAction(dataController, isCentre, isDouble)))
         menu.add(menuDouble)
 
-        menu.add(SetTripleBondMenuAction(dataController))
+        menu.add(JCheckBoxMenuItem(SetTripleBondMenuAction(dataController, bondContext.order == 3)))
         menu.add(DeleteBondMenuAction(dataController))
 
         menu.addSeparator()
@@ -86,12 +90,12 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
     private fun buildAtomContextMenu() : JPopupMenu {
         val menu = JPopupMenu()
 
-        val editLabelAction = EditLabelAction(dataController)
-        val deleteAtomAction = DeleteAtomAction(dataController)
-        val toggleAtomVisibilityMenuActionAction = ToggleAtomVisibilityMenuAction(dataController)
+        val editLabelAction = EditLabelMenuAction(dataController)
+        val deleteAtomMenuAction = DeleteAtomMenuAction(dataController)
+        val toggleAtomVisibilityMenuActionAction = ToggleAtomVisibilityMenuAction(dataController, true)
 
         menu.add(editLabelAction)
-        menu.add(deleteAtomAction)
+        menu.add(deleteAtomMenuAction)
         menu.add(JCheckBoxMenuItem(toggleAtomVisibilityMenuActionAction))
         menu.addSeparator()
         menu.add(buildCommonCDKMenu())
@@ -252,7 +256,8 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
     }
 
     private fun paintBondSelection(g2d: Graphics2D) {
-        val bondPos = dataController.getSelectedBondPos() ?: return
+        val bondContext = dataController.uiBuilder.getSelectedBond() ?: return
+        val bondPos = bondContext.midPoint
         val width = BOND_MARKER * cameraZoom
         val height = BOND_MARKER * cameraZoom
         val start = getBoxStart(bondPos, width, height)
@@ -372,13 +377,14 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
             if (e.isPopupTrigger && SwingUtilities.isRightMouseButton(e)) {
 
                 //Check to see what is selected
-                if (dataController.isAtomSelected()) {
+                if (dataController.uiBuilder.isAtomSelected()) {
                     val atomContextMenu = buildAtomContextMenu()
                     atomContextMenu.show(e.component, e.x, e.y)
                 }
 
-                if (dataController.isBondSelected()) {
-                    val bondContextMenu = buildBondContextMenu()
+                val bondContext = dataController.uiBuilder.getSelectedBond()
+                if (bondContext != null) {
+                    val bondContextMenu = buildBondContextMenu(bondContext)
                     bondContextMenu.show(e.component, e.x, e.y)
                 }
             }

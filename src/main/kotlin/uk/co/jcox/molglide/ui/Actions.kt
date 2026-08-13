@@ -91,18 +91,18 @@ class QuickCaptureAction (val appManager: AppManager) : AbstractAction("Quick Ca
     }
 }
 
-class EditLabelAction (val controller: EditorStateController) : AbstractAction("Edit Label") {
+class EditLabelMenuAction (val controller: EditorStateController) : AbstractAction("Edit Label") {
     init {
         putValue(SHORT_DESCRIPTION, "Edits the atom label")
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0))
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        println("Edited the label")
+        TODO()
     }
 }
 
-class DeleteAtomAction (val controller: EditorStateController) : AbstractAction("Delete Atom") {
+class DeleteAtomMenuAction (val controller: EditorStateController) : AbstractAction("Delete Atom") {
     init {
         putValue(SHORT_DESCRIPTION, "Deletes the atom")
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0))
@@ -113,31 +113,31 @@ class DeleteAtomAction (val controller: EditorStateController) : AbstractAction(
     }
 }
 
-class ToggleAtomVisibilityMenuAction (val controller: EditorStateController) : AbstractAction("Atom Visible") {
+class ToggleAtomVisibilityMenuAction (val controller: EditorStateController, isVisible: Boolean) : AbstractAction("Atom Visible") {
     init {
         putValue(SHORT_DESCRIPTION, "Select whether this atom should be visible")
-        putValue(SELECTED_KEY, true)
+        putValue(SELECTED_KEY, isVisible)
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        println("Changed the atom visiblity")
+
     }
 }
 
-class FlipBondMenuAction (val controller: EditorStateController) : AbstractAction("Flip Bond") {
+class FlipBondMenuAction (val controller: EditorStateController) : AbstractAction("Flip Double Bond") {
     init {
         putValue(SHORT_DESCRIPTION, "Toggles the side of the double bond")
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        println("Changed side of the double bond")
+
     }
 }
 
-class SetPlainBondMenuAction (val controller: EditorStateController) : AbstractAction("Plain") {
+class SetPlainBondMenuAction (val controller: EditorStateController, isPlain: Boolean) : AbstractAction("Plain") {
     init {
         putValue(SHORT_DESCRIPTION, "Select single bond")
-        putValue(SELECTED_KEY, true)
+        putValue(SELECTED_KEY, isPlain)
     }
 
     override fun actionPerformed(e: ActionEvent?) {
@@ -145,10 +145,10 @@ class SetPlainBondMenuAction (val controller: EditorStateController) : AbstractA
     }
 }
 
-class SetWedgedBondMenuAction (val controller: EditorStateController) : AbstractAction("Wedged") {
+class SetWedgedBondMenuAction (val controller: EditorStateController, isWedged: Boolean) : AbstractAction("Wedged") {
     init {
         putValue(SHORT_DESCRIPTION, "Select wedged bond")
-        putValue(SELECTED_KEY, true)
+        putValue(SELECTED_KEY, isWedged)
     }
 
     override fun actionPerformed(e: ActionEvent?) {
@@ -156,10 +156,10 @@ class SetWedgedBondMenuAction (val controller: EditorStateController) : Abstract
     }
 }
 
-class SetDashedBondMenuAction (val controller: EditorStateController) : AbstractAction("Wedged") {
+class SetDashedBondMenuAction (val controller: EditorStateController, isDashed: Boolean) : AbstractAction("Wedged") {
     init {
         putValue(SHORT_DESCRIPTION, "Select dashed bond")
-        putValue(SELECTED_KEY, true)
+        putValue(SELECTED_KEY, isDashed)
     }
 
     override fun actionPerformed(e: ActionEvent?) {
@@ -167,10 +167,21 @@ class SetDashedBondMenuAction (val controller: EditorStateController) : Abstract
     }
 }
 
-class SetDoubleBondMenuAction (val controller: EditorStateController) : AbstractAction("Plain") {
+class FlipStereoChemMenuAction (val controller: EditorStateController) : AbstractAction("Flip Stereo Chem") {
+    init {
+        putValue(SHORT_DESCRIPTION, "Flip the direction of stereo chem")
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        TODO()
+    }
+}
+
+
+class SetDoubleBondMenuAction (val controller: EditorStateController, isDouble: Boolean) : AbstractAction("Plain") {
     init {
         putValue(SHORT_DESCRIPTION, "Select double bond")
-        putValue(SELECTED_KEY, true)
+        putValue(SELECTED_KEY, isDouble)
     }
 
     override fun actionPerformed(e: ActionEvent?) {
@@ -178,10 +189,11 @@ class SetDoubleBondMenuAction (val controller: EditorStateController) : Abstract
     }
 }
 
-class SetAromaticDoubleBondMenuAction (val controller: EditorStateController) : AbstractAction("Aromatic") {
+class SetAromaticDoubleBondMenuAction (val controller: EditorStateController, isAromatic: Boolean, isDouble: Boolean) : AbstractAction("Aromatic") {
     init {
         putValue(SHORT_DESCRIPTION, "Select aromatic bond")
-        putValue(SELECTED_KEY, true)
+        putValue(SELECTED_KEY, isAromatic)
+        isEnabled = isDouble
     }
 
     override fun actionPerformed(e: ActionEvent?) {
@@ -189,10 +201,11 @@ class SetAromaticDoubleBondMenuAction (val controller: EditorStateController) : 
     }
 }
 
-class SetCentreDoubleBondMenuAction (val controller: EditorStateController) : AbstractAction("Centre Bond") {
+class SetCentreDoubleBondMenuAction (val controller: EditorStateController, isCentre: Boolean, isDouble: Boolean) : AbstractAction("Centre Bond") {
     init {
         putValue(SHORT_DESCRIPTION, "Select aromatic bond")
-        putValue(SELECTED_KEY, true)
+        putValue(SELECTED_KEY, isCentre)
+        isEnabled = isDouble
     }
 
     override fun actionPerformed(e: ActionEvent?) {
@@ -200,10 +213,10 @@ class SetCentreDoubleBondMenuAction (val controller: EditorStateController) : Ab
     }
 }
 
-class SetTripleBondMenuAction (val controller: EditorStateController) : AbstractAction("Triple Bond") {
+class SetTripleBondMenuAction (val controller: EditorStateController, isTriple: Boolean) : AbstractAction("Triple Bond") {
     init {
         putValue(SHORT_DESCRIPTION, "Select Triple bond")
-        putValue(SELECTED_KEY, true)
+        putValue(SELECTED_KEY, isTriple)
     }
 
     override fun actionPerformed(e: ActionEvent?) {

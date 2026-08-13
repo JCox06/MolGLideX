@@ -1,7 +1,5 @@
 package uk.co.jcox.molglide.control
 
-import com.sun.org.apache.xpath.internal.operations.Bool
-import org.checkerframework.checker.guieffect.qual.UI
 import org.joml.Vector2d
 import org.joml.minus
 import org.joml.plus
@@ -9,11 +7,9 @@ import org.joml.times
 import org.openscience.cdk.interfaces.IAtom
 import org.openscience.cdk.interfaces.IAtomContainer
 import org.openscience.cdk.interfaces.IBond
-import org.openscience.cdk.ringsearch.RingSearch
-import org.xmlcml.euclid.Vector2
 import uk.co.jcox.molglide.control.ChemMolecule.ChemAtom
 
-class UIBuilder (private val data: EditorStateData) {
+class UIBuilder (private val data: EditorStateData, private val selectionManager: SelectionManager) {
     private val uiAtoms: MutableList<UIAtom> = mutableListOf()
     private val uiBonds: MutableList<UIBond> = mutableListOf()
 
@@ -288,6 +284,40 @@ class UIBuilder (private val data: EditorStateData) {
     private fun clearUI() {
         uiAtoms.clear()
         uiBonds.clear()
+    }
+
+
+    fun getSelectedFormula(): String {
+        val s = selectionManager.primarySelection
+        if (s is SelectionManager.Type.ActiveAtom) {
+            return s.chemAtom.molecule.getFormulaString()
+        }
+        return ""
+    }
+
+    fun isAtomSelected() : Boolean {
+        val selection = selectionManager.primarySelection
+        if (selection is SelectionManager.Type.ActiveAtom) {
+            return true
+        }
+        return false
+    }
+
+    fun getSelectedBond(): UIBondContext? {
+        val selection = selectionManager.primarySelection
+        if (selection is SelectionManager.Type.ActiveBond) {
+            val chemBond = selection.chemBond
+            return UIBondContext(chemBond.bond.order.numeric(), chemBond.midPoint(), chemBond.bond.isAromatic, null)
+        }
+        return null
+    }
+
+    fun getSelectedWeight(): Double {
+        val s = selectionManager.primarySelection
+        if (s is SelectionManager.Type.ActiveAtom) {
+            return s.chemAtom.molecule.getMolecularWeight()
+        }
+        return 0.0
     }
 
 
