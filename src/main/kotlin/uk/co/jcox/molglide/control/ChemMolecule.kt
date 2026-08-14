@@ -22,6 +22,7 @@ import org.openscience.cdk.tools.CDKHydrogenAdder
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator
 import org.openscience.cdk.tools.manipulator.AtomTypeManipulator
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator
+import uk.co.jcox.molglide.StereoChem
 import java.util.UUID
 import javax.vecmath.Point2d
 
@@ -246,6 +247,14 @@ class ChemMolecule (
             val atomA = bond.getAtom(0).point2d
             val atomB = bond.getAtom(1).point2d
             return Vector2d((atomA.x + atomB.x) / 2, (atomA.y + atomB.y) /2)
+        }
+
+        fun stereo(): StereoChem {
+            return when (bond.display) {
+                IBond.Display.WedgedHashEnd -> StereoChem.DASHED
+                IBond.Display.WedgeEnd -> StereoChem.WEDGED
+                else -> StereoChem.NORMAL
+            }
         }
     }
 

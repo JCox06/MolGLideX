@@ -1,5 +1,6 @@
 package uk.co.jcox.molglide.control
 
+import jdk.internal.org.jline.utils.Display
 import org.joml.Vector2d
 import org.joml.minus
 import org.joml.plus
@@ -8,13 +9,15 @@ import org.openscience.cdk.interfaces.IAtom
 import org.openscience.cdk.interfaces.IAtomContainer
 import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.control.ChemMolecule.ChemAtom
+import uk.co.jcox.molglide.control.tool.AtomBondTool
+import kotlin.math.abs
 
 class UIBuilder (private val data: EditorStateData, private val selectionManager: SelectionManager) {
     private val uiAtoms: MutableList<UIAtom> = mutableListOf()
-    private val uiBonds: MutableList<UIBond> = mutableListOf()
+    private val uiLines: MutableList<UILine> = mutableListOf()
 
     fun getUIAtoms(): List<UIAtom> = uiAtoms
-    fun getUIBonds(): List<UIBond> = uiBonds
+    fun getUIBonds(): List<UILine> = uiLines
 
     fun rebuild() {
         clearUI()
@@ -57,12 +60,49 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
                 val absoluteBond = getAbsoluteBond(chemBond)
 
                 when (chemBond.bond.order) {
-                    IBond.Order.SINGLE -> uiBonds.add(absoluteBond)
-                    IBond.Order.DOUBLE -> uiBonds.addAll(calculatePositionForDoubleBond(absoluteBond, chemBond))
-                    IBond.Order.TRIPLE -> uiBonds.addAll(calculatePositionForTripleBond(absoluteBond, chemBond))
+                    IBond.Order.SINGLE -> handleSingleStereo(absoluteBond, chemBond)
+                    IBond.Order.DOUBLE -> uiLines.addAll(calculatePositionForDoubleBond(absoluteBond, chemBond))
+                    IBond.Order.TRIPLE -> uiLines.addAll(calculatePositionForTripleBond(absoluteBond, chemBond))
                     else -> {}
                 }
             }
+        }
+    }
+
+
+    private fun handleSingleStereo(absoluteBond: UILine, chemBond: ChemMolecule.ChemBond) {
+        //If the stereochem is just normal, then just add the absolute bond
+        if (chemBond.bond.display == IBond.Display.Solid) {
+            uiLines.add(absoluteBond)
+            return
+        }
+        if (chemBond.bond.display == IBond.Display.WedgedHashEnd) {
+            addDashedWedgeLines(absoluteBond, chemBond)
+            return
+        }
+    }
+
+
+    private fun addDashedWedgeLines(absoluteBond: UILine, chemBond: ChemMolecule.ChemBond) {
+        val vec = calculateVector(absoluteBond)
+        val perp = calculatePerpendicularVector(absoluteBond)
+        val currentPos = Vector2d(absoluteBond.startX, absoluteBond.startY)
+        val lastPos = Vector2d(absoluteBond.endX, absoluteBond.endY)
+
+        val dist = currentPos.distance(lastPos)
+        val toRepeat = (dist / INTER_DASH_DISTANCE).toInt()
+
+        repeat(toRepeat) {
+            //As the loop progresses, the size of the dashes increases
+            val sideLength = (it / toRepeat.toDouble()) * DASH_DISTANCE
+
+            val newStartX = (currentPos.x + perp.x * sideLength /2)
+            val newStartY = (currentPos.y + perp.y * sideLength /2)
+            val newEndX = (currentPos.x - perp.x * sideLength /2)
+            val newEndY = (currentPos.y - perp.y * sideLength /2)
+            uiLines.add(UILine(newStartX, newStartY, newEndX, newEndY))
+            currentPos.x += vec.x * INTER_DASH_DISTANCE
+            currentPos.y += vec.y * INTER_DASH_DISTANCE
         }
     }
 
@@ -79,7 +119,7 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
      * @param chemBond the bond to calculate basic UI properties for
      * @return UI information to show where a bond really starts and really ends
      */
-    private fun getAbsoluteBond(chemBond: ChemMolecule.ChemBond) : UIBond {
+    private fun getAbsoluteBond(chemBond: ChemMolecule.ChemBond) : UILine {
         val atomA = ChemAtom(chemBond.bond.getAtom(0), chemBond.molecule)
         val atomB = ChemAtom(chemBond.bond.getAtom(1), chemBond.molecule)
         val aPos = atomA.getPos()
@@ -89,8 +129,8 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
         val start = if (bVis) getCappedEnd(aPos, bPos) else bPos
         val end = if (aVis) getCappedEnd(bPos, aPos) else aPos
         val id = chemBond.bond.id
-        val uiBond: UIBond = UIBond(start.x, start.y, end.x, end.y)
-        return uiBond
+        val uiLine: UILine = UILine(start.x, start.y, end.x, end.y)
+        return uiLine
     }
 
 
@@ -103,18 +143,18 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
      *
      * No additional information (such as centring) is required!
      *
-     * @param uiBond The basic core bond properties (This should not be added to final UI) since these functions returns
+     * @param uiLine The basic core bond properties (This should not be added to final UI) since these functions returns
      * a whole list which should be added to the final UI
      *
      * @return The list of new UI bonds which can be added to the final UI
      */
-    private fun calculatePositionForTripleBond(uiBond: UIBond, chemBond: ChemMolecule.ChemBond): List<UIBond> {
-        val bondList = mutableListOf<UIBond>()
-        val perp = calculatePerpendicularVector(uiBond)
-        val bondA = applyBondTranslation(uiBond, perp * INTER_BOND_DISTANCE)
-        val bondB = applyBondTranslation(uiBond, perp * -INTER_BOND_DISTANCE)
+    private fun calculatePositionForTripleBond(uiLine: UILine, chemBond: ChemMolecule.ChemBond): List<UILine> {
+        val bondList = mutableListOf<UILine>()
+        val perp = calculatePerpendicularVector(uiLine)
+        val bondA = applyBondTranslation(uiLine, perp * INTER_BOND_DISTANCE)
+        val bondB = applyBondTranslation(uiLine, perp * -INTER_BOND_DISTANCE)
 
-        bondList.add(uiBond)
+        bondList.add(uiLine)
         bondList.add(bondA)
         bondList.add(bondB)
         return bondList
@@ -128,14 +168,14 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
      *  -If the double bond should be centred
      *  -If the edges of the double bond should be cut off more than the edges of single bond creating it
      *
-     *  @param uiBond The main bond metrics after clipping where the element label is
+     *  @param uiLine The main bond metrics after clipping where the element label is
      *  @return A list of bonds to add to the UIBonds list
      */
-    private fun calculatePositionForDoubleBond(uiBond: UIBond, chemBond: ChemMolecule.ChemBond) : List<UIBond> {
-        val bondList = mutableListOf<UIBond>()
+    private fun calculatePositionForDoubleBond(uiLine: UILine, chemBond: ChemMolecule.ChemBond) : List<UILine> {
+        val bondList = mutableListOf<UILine>()
 
         //Create the double bond, and correctly choose the side
-        val doubleBond = calculateDoubleBondSide(uiBond, chemBond)
+        val doubleBond = calculateDoubleBondSide(uiLine, chemBond)
         val doubleUIBond = doubleBond.first
         //Check to see if the double bond should be centred
         val shouldCentre = shouldCentreDoubleBond(chemBond)
@@ -144,7 +184,7 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
             //Have to take all the UiBonds now back by half of the applied vector
             val appliedVector = doubleBond.second
             val newVector = appliedVector * -0.5
-            val bondA = applyBondTranslation(uiBond, newVector)
+            val bondA = applyBondTranslation(uiLine, newVector)
             val bondB = applyBondTranslation(doubleUIBond, newVector)
             bondList.add(bondA)
             bondList.add(bondB)
@@ -156,24 +196,24 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
         val finalDoubleBond = getBaselineShortening(doubleUIBond, chemBond)
 
         bondList.add(finalDoubleBond)
-        bondList.add(uiBond)
+        bondList.add(uiLine)
 
         return bondList
     }
 
 
-    private fun calculateDoubleBondSide(uiBond: UIBond, chemBond: ChemMolecule.ChemBond): Pair<UIBond, Vector2d> {
-        val perp = calculatePerpendicularVector(uiBond)
+    private fun calculateDoubleBondSide(uiLine: UILine, chemBond: ChemMolecule.ChemBond): Pair<UILine, Vector2d> {
+        val perp = calculatePerpendicularVector(uiLine)
         val aVec = perp * INTER_BOND_DISTANCE
         val bVec = perp * -INTER_BOND_DISTANCE
-        val testSideA = applyBondTranslation(uiBond, aVec)
-        val testSideB = applyBondTranslation(uiBond, bVec)
+        val testSideA = applyBondTranslation(uiLine, aVec)
+        val testSideB = applyBondTranslation(uiLine, bVec)
 
         //First check if the bond is part of a ring
         if (chemBond.molecule.checkBondInRing(chemBond)) {
             //The bond is now part of the ring
             //Get the fragment it belongs to, and get the centre of that
-            val fragment = findFragment(chemBond, chemBond.molecule.getAllFragments()) ?: return Pair(uiBond, Vector2d(0.0, 0.0))
+            val fragment = findFragment(chemBond, chemBond.molecule.getAllFragments()) ?: return Pair(uiLine, Vector2d(0.0, 0.0))
             val centre = calculateAverageCentre(fragment)
 
             val distA = calculateDistance(testSideA, centre)
@@ -209,8 +249,8 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
     }
 
 
-    private fun calculateDistance(uiBond: UIBond, point: Vector2d): Double {
-        val midpoint = Vector2d((uiBond.startX + uiBond.endX) / 2, (uiBond.startY + uiBond.endY) / 2)
+    private fun calculateDistance(uiLine: UILine, point: Vector2d): Double {
+        val midpoint = Vector2d((uiLine.startX + uiLine.endX) / 2, (uiLine.startY + uiLine.endY) / 2)
         return midpoint.distance(point)
     }
 
@@ -240,38 +280,45 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
      * This might not be what professional editors use, but it works for now, and also looks nice
      * which is the main thing
      */
-    private fun getBaselineShortening(doubleUIBond: UIBond, chemBond: ChemMolecule.ChemBond) : UIBond {
+    private fun getBaselineShortening(doubleUILine: UILine, chemBond: ChemMolecule.ChemBond) : UILine {
         if (chemBond.isTerminal()) {
-            return doubleUIBond
+            return doubleUILine
         }
-        val startDouble = Vector2d(doubleUIBond.startX, doubleUIBond.startY)
-        val endDouble = Vector2d(doubleUIBond.endX, doubleUIBond.endY)
+        val startDouble = Vector2d(doubleUILine.startX, doubleUILine.startY)
+        val endDouble = Vector2d(doubleUILine.endX, doubleUILine.endY)
         val newStart = getCappedEnd(startDouble, endDouble, 0.85)
         val newEnd = getCappedEnd(endDouble, startDouble, 0.85)
-        return UIBond(newStart.x, newStart.y, newEnd.x, newEnd.y)
+        return UILine(newStart.x, newStart.y, newEnd.x, newEnd.y)
     }
 
 
     /**
      * Given a UIBond this method will calculate the vector perpendicular to the bond line
-     * @param uiBond the bond to supply
+     * @param uiLine the bond to supply
      * @return the normalised vector
      */
-    private fun calculatePerpendicularVector(uiBond: UIBond): Vector2d {
-        val start = Vector2d(uiBond.startX, uiBond.startY)
-        val end = Vector2d(uiBond.endX, uiBond.endY)
+    private fun calculatePerpendicularVector(uiLine: UILine): Vector2d {
 
-        val diff = end - start
+
+        val diff = calculateVector(uiLine)
         val perp = Vector2d(-diff.y, diff.x)
         return perp.normalize()
     }
 
-    private fun applyBondTranslation(uiBond: UIBond, vector: Vector2d) : UIBond {
-        val startX = uiBond.startX + vector.x
-        val startY = uiBond.startY + vector.y
-        val endX = uiBond.endX + vector.x
-        val endY = uiBond.endY + vector.y
-        return UIBond(startX, startY, endX, endY)
+    private fun calculateVector(uiLine: UILine): Vector2d {
+        val start = Vector2d(uiLine.startX, uiLine.startY)
+        val end = Vector2d(uiLine.endX, uiLine.endY)
+
+        val diff = end - start
+        return diff.normalize()
+    }
+
+    private fun applyBondTranslation(uiLine: UILine, vector: Vector2d) : UILine {
+        val startX = uiLine.startX + vector.x
+        val startY = uiLine.startY + vector.y
+        val endX = uiLine.endX + vector.x
+        val endY = uiLine.endY + vector.y
+        return UILine(startX, startY, endX, endY)
     }
 
     private fun getCappedEnd(start: Vector2d, end: Vector2d, amount: Double = 0.70): Vector2d {
@@ -283,7 +330,7 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
 
     private fun clearUI() {
         uiAtoms.clear()
-        uiBonds.clear()
+        uiLines.clear()
     }
 
 
@@ -307,7 +354,7 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
         val selection = selectionManager.primarySelection
         if (selection is SelectionManager.Type.ActiveBond) {
             val chemBond = selection.chemBond
-            return UIBondContext(chemBond.bond.order.numeric(), chemBond.midPoint(), chemBond.bond.isAromatic)
+            return UIBondContext(chemBond.bond.order.numeric(), chemBond.midPoint(), chemBond.bond.isAromatic, chemBond.stereo())
         }
         return null
     }
@@ -322,6 +369,7 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
     }
 
     fun getSelectedWeight(): Double {
+
         val s = selectionManager.primarySelection
         if (s is SelectionManager.Type.ActiveAtom) {
             return s.chemAtom.molecule.getMolecularWeight()
@@ -332,5 +380,7 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
 
     companion object {
         private const val INTER_BOND_DISTANCE = 6.0
+        private const val INTER_DASH_DISTANCE = AtomBondTool.CONNECTION_DISTANCE / 10.0
+        private const val DASH_DISTANCE = AtomBondTool.CONNECTION_DISTANCE / 2.0
     }
 }

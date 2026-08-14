@@ -1,6 +1,6 @@
 package uk.co.jcox.molglide.control
 
-data class UIBond (
+data class UILine (
     val startX: Double,
     val startY: Double,
     val endX: Double,

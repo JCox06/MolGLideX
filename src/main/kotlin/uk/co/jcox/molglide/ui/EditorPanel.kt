@@ -3,6 +3,7 @@ package uk.co.jcox.molglide.ui
 import com.github.jsonldjava.shaded.com.google.common.math.IntMath.pow
 import org.joml.Vector2d
 import uk.co.jcox.molglide.MolGLideUtils
+import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.control.ChemMolecule
 import uk.co.jcox.molglide.control.EditorStateController
 import uk.co.jcox.molglide.control.UIAtom
@@ -30,6 +31,19 @@ import javax.swing.event.PopupMenuListener
 import kotlin.math.max
 import kotlin.math.sqrt
 
+/*
+The editor panel is the class that actually draws the chemistry stuff
+
+The Editor Panel is actually simple, it requests each time it wants to paint, a set of lines to draw
+(These make up the bonds - For instance, 1 line for a single bond, 2 lines for a double, a lot of lines for a dashed stereochem bond)
+
+The Editor panel also gets a list of UIAtoms that it should paint each time
+
+For wedged bonds, since these are not lines, or atoms, a completely new primitive is called for this - A triangle!
+
+If the editor panel needs to find more information about a specific atom or bond, it can retrieve a UIBondContext
+or UIAtomContext, or directly query if an entity is selected from the controller
+ */
 class EditorPanel(val dataController: EditorStateController) : JPanel() {
 
     private var cameraX: Double = 0.0
@@ -63,8 +77,8 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
 
         val menuSingle = JMenu("Single")
         menuSingle.add(JCheckBoxMenuItem(SetPlainBondMenuAction(dataController, bondContext.order == 1)))
-        menuSingle.add(JCheckBoxMenuItem(SetWedgedBondMenuAction(dataController, false)))
-        menuSingle.add(JCheckBoxMenuItem(SetDashedBondMenuAction(dataController, false)))
+        menuSingle.add(JCheckBoxMenuItem(SetWedgedBondMenuAction(dataController, bondContext.stereo == StereoChem.WEDGED)))
+        menuSingle.add(JCheckBoxMenuItem(SetDashedBondMenuAction(dataController, bondContext.stereo == StereoChem.DASHED)))
         menuSingle.add(FlipStereoChemMenuAction(dataController))
         menu.add(menuSingle)
 

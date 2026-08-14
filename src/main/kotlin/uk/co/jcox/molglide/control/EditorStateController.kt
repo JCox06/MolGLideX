@@ -5,6 +5,7 @@ import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.control.actions.AtomDeletionAction
 import uk.co.jcox.molglide.control.actions.BondDeletionAction
+import uk.co.jcox.molglide.control.actions.ChangeStereoChemAction
 import uk.co.jcox.molglide.control.actions.ToggleAtomVisibilityAction
 import uk.co.jcox.molglide.control.tool.AtomBondTool
 import uk.co.jcox.molglide.control.tool.Tool
@@ -85,7 +86,9 @@ class EditorStateController (
     }
 
     fun updateSingleSelectedBond(bondOptions: StereoChem) {
-
+        val bond = selectionManager.getBond() ?: return
+        val action = ChangeStereoChemAction(bond, bondOptions)
+        actionManager.executeAction(action)
     }
 
     fun updateDoubleSelectedBond() {
