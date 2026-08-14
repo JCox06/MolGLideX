@@ -47,6 +47,16 @@ class TemplateRingTool(val appManager: AppManager, actionManager: ActionManager,
         }
     }
 
+
+
+    //This is so annoying
+    //todo Fix this
+    //I can't figure out why rotating rings after placing a new one is not working correctly
+    //It seems the rotations are about by a few degrees, which is strange considering nearest60 produces
+    //perfect integer values of rotation.
+    //
+    //And the centre of rotation is the centre of the ring, (something which I have confirmed through averaging
+    //the positions of the bonds) which rules out CDK changing it for whatever reason
     private fun rotateRingAngle(clickX: Int, clickY: Int, currentMode: Mode.Rotate) {
 
         val ringCentre = Vector2d(currentMode.ringCentreX, currentMode.ringCentreY)
@@ -61,8 +71,6 @@ class TemplateRingTool(val appManager: AppManager, actionManager: ActionManager,
 
         val nearest60: Int = ((angleDeg / angleIncr.toDouble()).roundToInt() * angleIncr)
 
-        println(nearest60)
-
         if (currentMode.firstRun) {
             currentMode.lastAngle = nearest60
             currentMode.firstRun = false
@@ -76,11 +84,10 @@ class TemplateRingTool(val appManager: AppManager, actionManager: ActionManager,
                 chemAtom.atom.point2d = Point2d(pos.x, pos.y)
             }
         }
-
-
         currentMode.lastAngle = nearest60
 
     }
+
 
     override fun onSuddenMove() {
 

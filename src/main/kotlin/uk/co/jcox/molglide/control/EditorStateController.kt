@@ -9,6 +9,7 @@ import uk.co.jcox.molglide.control.actions.AtomDeletionAction
 import uk.co.jcox.molglide.control.actions.BondDeletionAction
 import uk.co.jcox.molglide.control.actions.ChangeStereoChemAction
 import uk.co.jcox.molglide.control.actions.CompoundAction
+import uk.co.jcox.molglide.control.actions.FlipBondAction
 import uk.co.jcox.molglide.control.actions.ToggleAtomVisibilityAction
 import uk.co.jcox.molglide.control.actions.UpdateBondAromaticityAction
 import uk.co.jcox.molglide.control.actions.UpdateBondOrderAction
@@ -90,7 +91,9 @@ class EditorStateController (
     }
 
     fun flipSelectedBond() {
-        TODO()
+        val bond = selectionManager.getBond() ?: return
+        val action = FlipBondAction(bond)
+        actionManager.executeAction(action)
     }
 
     fun updateSingleSelectedBond(bondOptions: StereoChem) {

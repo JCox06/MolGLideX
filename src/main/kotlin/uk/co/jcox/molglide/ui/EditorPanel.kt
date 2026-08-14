@@ -74,9 +74,6 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
     private fun buildBondContextMenu(bondContext: UIBondContext) : JPopupMenu {
         val menu = JPopupMenu()
 
-        val flipBondAction = FlipBondMenuAction(dataController)
-        menu.add(flipBondAction)
-
         val menuSingle = JMenu("Single")
         menuSingle.add(JCheckBoxMenuItem(SetPlainBondMenuAction(dataController, bondContext.order == 1 && bondContext.stereo == StereoChem.NORMAL)))
         menuSingle.add(JCheckBoxMenuItem(SetWedgedBondMenuAction(dataController, bondContext.stereo == StereoChem.WEDGED)))
@@ -88,6 +85,8 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         val isDouble = bondContext.order == 2
         menuDouble.add(JCheckBoxMenuItem(SetDoubleBondMenuAction(dataController, isDouble)))
         menuDouble.add(JCheckBoxMenuItem(SetAromaticDoubleBondMenuAction(dataController, bondContext.isAromatic)))
+        val flipBondAction = FlipBondMenuAction(dataController)
+        menuDouble.add(flipBondAction)
         menu.add(menuDouble)
 
         menu.add(JCheckBoxMenuItem(SetTripleBondMenuAction(dataController, bondContext.order == 3)))

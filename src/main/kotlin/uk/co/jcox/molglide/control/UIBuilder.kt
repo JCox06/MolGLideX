@@ -262,7 +262,16 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
             val distA = calculateDistance(testSideA, centre)
             val distB = calculateDistance(testSideB, centre)
 
-            if (distA > distB) {
+            if (distA > distB && !chemBond.shouldFlip()) {
+                return Pair(testSideB, bVec)
+            }
+            if (distA > distB && chemBond.shouldFlip()) {
+                return Pair(testSideA, aVec)
+            }
+            if (distB > distA && !chemBond.shouldFlip()) {
+                return Pair(testSideA, aVec)
+            }
+            if (distB > distA && chemBond.shouldFlip()) {
                 return Pair(testSideB, bVec)
             }
             return Pair(testSideA, aVec)

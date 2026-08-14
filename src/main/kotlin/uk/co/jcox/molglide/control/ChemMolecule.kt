@@ -65,6 +65,7 @@ class ChemMolecule (
         val cdkBond = container.newBond(chemAtom1.atom, chemAtom2.atom, IBond.Order.SINGLE)
         cdkBond.display = IBond.Display.Solid
         cdkBond.id = UUID.randomUUID().toString()
+        initDefaultBondProperties(cdkBond)
         calculateAtomProperties()
         return ChemBond(cdkBond, this)
     }
@@ -202,6 +203,9 @@ class ChemMolecule (
         atom.setProperty(TRAILING_POS, TrailingGroupPosition.RIGHT)
     }
 
+    private fun initDefaultBondProperties(cdkBond: IBond) {
+        cdkBond.setProperty(FLIP_BOND, false)
+    }
 
     class ChemAtom (
         val atom: IAtom,
@@ -269,6 +273,13 @@ class ChemMolecule (
         fun stereo(): StereoChem {
             return StereoChem.getType(bond.display)
         }
+
+        fun shouldFlip(): Boolean {
+            return bond.getProperty<Boolean>(FLIP_BOND)
+        }
+        fun setFlip(flip: Boolean) {
+            bond.setProperty(FLIP_BOND, flip)
+        }
     }
 
 
@@ -282,5 +293,6 @@ class ChemMolecule (
     companion object {
         const val VISIBLE = "MOLGLIDE_VISIBLE"
         const val TRAILING_POS = "MOLGLIDE_TRAILING_POS"
+        const val FLIP_BOND = "MOLGLIDE_FLIP_BOND"
     }
 }
