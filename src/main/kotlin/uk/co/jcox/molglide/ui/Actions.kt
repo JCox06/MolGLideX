@@ -2,6 +2,7 @@ package uk.co.jcox.molglide.ui
 
 import org.joda.time.DateTime
 import uk.co.jcox.molglide.MolGLideUtils
+import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.control.AppManager
 import uk.co.jcox.molglide.control.EditorStateController
 import uk.co.jcox.molglide.control.SVGExporter
@@ -109,7 +110,7 @@ class DeleteAtomMenuAction (val controller: EditorStateController) : AbstractAct
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        println("Deleted the atom")
+        controller.deleteSelectedAtom()
     }
 }
 
@@ -120,7 +121,7 @@ class ToggleAtomVisibilityMenuAction (val controller: EditorStateController, isV
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-
+        controller.toggleSelectedAtomVisiblity()
     }
 }
 
@@ -130,7 +131,7 @@ class FlipBondMenuAction (val controller: EditorStateController) : AbstractActio
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-
+        controller.flipSelectedBond()
     }
 }
 
@@ -141,7 +142,7 @@ class SetPlainBondMenuAction (val controller: EditorStateController, isPlain: Bo
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        println("Changed the atom bond")
+        controller.updateSingleSelectedBond(StereoChem.NORMAL)
     }
 }
 
@@ -152,18 +153,18 @@ class SetWedgedBondMenuAction (val controller: EditorStateController, isWedged: 
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        println("Changed the atom bond")
+        controller.updateSingleSelectedBond(StereoChem.WEDGED)
     }
 }
 
-class SetDashedBondMenuAction (val controller: EditorStateController, isDashed: Boolean) : AbstractAction("Wedged") {
+class SetDashedBondMenuAction (val controller: EditorStateController, isDashed: Boolean) : AbstractAction("Hashed") {
     init {
         putValue(SHORT_DESCRIPTION, "Select dashed bond")
         putValue(SELECTED_KEY, isDashed)
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        println("Changed the atom bond")
+        controller.updateSingleSelectedBond(StereoChem.DASHED)
     }
 }
 
@@ -173,7 +174,7 @@ class FlipStereoChemMenuAction (val controller: EditorStateController) : Abstrac
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        TODO()
+        controller.invertStereoChemSelectedBond()
     }
 }
 
@@ -185,7 +186,7 @@ class SetDoubleBondMenuAction (val controller: EditorStateController, isDouble: 
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        println("Changed the atom bond")
+        controller.updateDoubleSelectedBond()
     }
 }
 
@@ -197,19 +198,7 @@ class SetAromaticDoubleBondMenuAction (val controller: EditorStateController, is
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        println("Changed the atom bond")
-    }
-}
-
-class SetCentreDoubleBondMenuAction (val controller: EditorStateController, isCentre: Boolean, isDouble: Boolean) : AbstractAction("Centre Bond") {
-    init {
-        putValue(SHORT_DESCRIPTION, "Select aromatic bond")
-        putValue(SELECTED_KEY, isCentre)
-        isEnabled = isDouble
-    }
-
-    override fun actionPerformed(e: ActionEvent?) {
-        println("Changed the atom bond")
+        controller.updateAromaticSelectedBond()
     }
 }
 
@@ -220,7 +209,7 @@ class SetTripleBondMenuAction (val controller: EditorStateController, isTriple: 
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        println("Changed the atom bond")
+        controller.setTripleSelectedBond()
     }
 }
 
@@ -231,7 +220,7 @@ class DeleteBondMenuAction (val controller: EditorStateController) : AbstractAct
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        println("Changed the atom bond")
+        controller.deleteSelectedBond()
     }
 }
 

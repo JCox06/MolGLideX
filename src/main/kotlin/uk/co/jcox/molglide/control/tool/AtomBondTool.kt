@@ -212,6 +212,11 @@ class AtomBondTool(val appManager: AppManager, val actionManager: ActionManager,
             return Mode.AtomReplacement(selection.chemAtom)
         }
 
+        //If a bond is selected, then do nothing
+        if (selection is SelectionManager.Type.ActiveBond) {
+            return Mode.None
+        }
+
         //If nothing is selected, assume we are creating a new atom
         return Mode.MolCreation(clickX, clickY)
     }

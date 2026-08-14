@@ -52,6 +52,23 @@ class SelectionManager (
     }
 
 
+    fun getBond(): ChemMolecule.ChemBond? {
+        val selection = primarySelection
+        if (selection is SelectionManager.Type.ActiveBond) {
+            return selection.chemBond
+        }
+        return null
+    }
+
+    fun getAtom(): ChemMolecule.ChemAtom? {
+        val selection = primarySelection
+        if (selection is SelectionManager.Type.ActiveAtom) {
+            return selection.chemAtom
+        }
+        return null
+    }
+
+
     sealed class Type {
         object None: Type()
         data class ActiveAtom(val chemAtom: ChemMolecule.ChemAtom): Type()

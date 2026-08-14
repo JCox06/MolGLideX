@@ -27,6 +27,10 @@ class EditorStateData (
         molecules.add(mol)
     }
 
+    fun addMolecules(extra: Collection<ChemMolecule>) {
+        molecules.addAll(extra)
+    }
+
     fun removeMolecule(molecule: ChemMolecule) {
         molecules.remove(molecule)
     }

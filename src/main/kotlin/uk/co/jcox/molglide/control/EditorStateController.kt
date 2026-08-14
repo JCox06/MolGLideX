@@ -1,11 +1,14 @@
 package uk.co.jcox.molglide.control
 
-import org.checkerframework.checker.units.qual.s
-import org.joml.Vector2d
-import org.xmlcml.euclid.Vector2
+import com.sun.org.apache.xpath.internal.operations.Bool
 import uk.co.jcox.molglide.EditMode
+import uk.co.jcox.molglide.StereoChem
+import uk.co.jcox.molglide.control.actions.AtomDeletionAction
+import uk.co.jcox.molglide.control.actions.BondDeletionAction
+import uk.co.jcox.molglide.control.actions.ToggleAtomVisibilityAction
 import uk.co.jcox.molglide.control.tool.AtomBondTool
 import uk.co.jcox.molglide.control.tool.Tool
+import uk.co.jcox.molglide.ui.DeleteBondMenuAction
 import uk.co.jcox.molglide.ui.EditorPanel
 
 class EditorStateController (
@@ -54,7 +57,6 @@ class EditorStateController (
         }
     }
 
-
     fun checkSelected(atom: UIAtom) : Boolean {
         val selection = selectionManager.primarySelection
         return selection is SelectionManager.Type.ActiveAtom && selection.chemAtom.atom.id == atom.chemID
@@ -65,4 +67,49 @@ class EditorStateController (
         appManager.activePanel = panel
     }
 
+    fun deleteSelectedAtom() {
+        val atom = selectionManager.getAtom() ?: return
+        val action = AtomDeletionAction(atom)
+        actionManager.executeAction(action)
+    }
+
+    fun toggleSelectedAtomVisiblity() {
+        val atom = selectionManager.getAtom() ?: return
+        val action = ToggleAtomVisibilityAction(atom)
+        actionManager.executeAction(action)
+
+    }
+
+    fun flipSelectedBond() {
+        TODO()
+    }
+
+    fun updateSingleSelectedBond(bondOptions: StereoChem) {
+
+    }
+
+    fun updateDoubleSelectedBond() {
+        val bond = selectionManager.getBond() ?: return
+        TODO()
+    }
+
+    fun updateAromaticSelectedBond() {
+        TODO()
+    }
+
+    fun invertStereoChemSelectedBond() {
+        TODO()
+    }
+
+    fun setTripleSelectedBond() {
+        TODO()
+    }
+
+    fun deleteSelectedBond() {
+        val selection = selectionManager.primarySelection
+        if (selection is SelectionManager.Type.ActiveBond) {
+            val action = BondDeletionAction(selection.chemBond)
+            actionManager.executeAction(action)
+        }
+    }
 }

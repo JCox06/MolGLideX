@@ -307,7 +307,16 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
         val selection = selectionManager.primarySelection
         if (selection is SelectionManager.Type.ActiveBond) {
             val chemBond = selection.chemBond
-            return UIBondContext(chemBond.bond.order.numeric(), chemBond.midPoint(), chemBond.bond.isAromatic, null)
+            return UIBondContext(chemBond.bond.order.numeric(), chemBond.midPoint(), chemBond.bond.isAromatic)
+        }
+        return null
+    }
+
+    fun getSelectedAtom(): UIAtomContext? {
+        val selection = selectionManager.primarySelection
+        if (selection is SelectionManager.Type.ActiveAtom) {
+            val chemAtom = selection.chemAtom
+            return UIAtomContext(chemAtom.isVisible())
         }
         return null
     }

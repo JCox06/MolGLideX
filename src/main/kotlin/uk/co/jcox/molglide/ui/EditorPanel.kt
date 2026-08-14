@@ -6,6 +6,7 @@ import uk.co.jcox.molglide.MolGLideUtils
 import uk.co.jcox.molglide.control.ChemMolecule
 import uk.co.jcox.molglide.control.EditorStateController
 import uk.co.jcox.molglide.control.UIAtom
+import uk.co.jcox.molglide.control.UIAtomContext
 import uk.co.jcox.molglide.control.UIBondContext
 import java.awt.BasicStroke
 import java.awt.Font
@@ -69,10 +70,8 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
 
         val menuDouble = JMenu("Double")
         val isDouble = bondContext.order == 2
-        val isCentre = bondContext.isCentre ?: false //Come back to this
         menuDouble.add(JCheckBoxMenuItem(SetDoubleBondMenuAction(dataController, isDouble)))
         menuDouble.add(JCheckBoxMenuItem(SetAromaticDoubleBondMenuAction(dataController, bondContext.isAromatic, isDouble)))
-        menuDouble.add(JCheckBoxMenuItem(SetCentreDoubleBondMenuAction(dataController, isCentre, isDouble)))
         menu.add(menuDouble)
 
         menu.add(JCheckBoxMenuItem(SetTripleBondMenuAction(dataController, bondContext.order == 3)))
@@ -87,12 +86,12 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         return menu
     }
 
-    private fun buildAtomContextMenu() : JPopupMenu {
+    private fun buildAtomContextMenu(atomContext: UIAtomContext) : JPopupMenu {
         val menu = JPopupMenu()
 
         val editLabelAction = EditLabelMenuAction(dataController)
         val deleteAtomMenuAction = DeleteAtomMenuAction(dataController)
-        val toggleAtomVisibilityMenuActionAction = ToggleAtomVisibilityMenuAction(dataController, true)
+        val toggleAtomVisibilityMenuActionAction = ToggleAtomVisibilityMenuAction(dataController, atomContext.isVisible)
 
         menu.add(editLabelAction)
         menu.add(deleteAtomMenuAction)
@@ -377,8 +376,9 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
             if (e.isPopupTrigger && SwingUtilities.isRightMouseButton(e)) {
 
                 //Check to see what is selected
-                if (dataController.uiBuilder.isAtomSelected()) {
-                    val atomContextMenu = buildAtomContextMenu()
+                val atomContext = dataController.uiBuilder.getSelectedAtom()
+                if (atomContext != null) {
+                    val atomContextMenu = buildAtomContextMenu(atomContext)
                     atomContextMenu.show(e.component, e.x, e.y)
                 }
 

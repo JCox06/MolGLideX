@@ -19,4 +19,18 @@ interface IDataAction {
             chemAtom.setVisible(true)
         }
     }
+
+    fun furtherFragment(data: EditorStateData, mol: ChemMolecule): List<ChemMolecule>  {
+        val isFragmented = mol.isFragmented()
+        if (isFragmented) {
+            //First remove the original molecule
+            data.removeMolecule(mol)
+
+            //Then add all the fragments of that molecule
+            val frags = mol.splitIntoFragments()
+            data.addMolecules(frags)
+            return frags
+        }
+        return emptyList()
+    }
 }

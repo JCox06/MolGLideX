@@ -12,6 +12,7 @@ import org.openscience.cdk.AtomContainer
 import org.openscience.cdk.RingSet
 import org.openscience.cdk.atomtype.CDKAtomTypeMatcher
 import org.openscience.cdk.exception.CDKException
+import org.openscience.cdk.graph.ConnectivityChecker
 import org.openscience.cdk.interfaces.IAtom
 import org.openscience.cdk.interfaces.IAtomContainer
 import org.openscience.cdk.interfaces.IBond
@@ -45,6 +46,7 @@ class ChemMolecule (
             throw UnsupportedOperationException("Cannot form a basic connection between atoms of different containers")
         }
         val cdkBond = container.newBond(chemAtom1.atom, chemAtom2.atom, IBond.Order.SINGLE)
+        cdkBond.display = IBond.Display.Solid
         cdkBond.id = UUID.randomUUID().toString()
         calculateAtomProperties()
         return ChemBond(cdkBond, this)
@@ -56,7 +58,11 @@ class ChemMolecule (
     }
 
     fun removeConnection(chemBond: ChemBond) {
-        container.removeBond(chemBond.bond)
+        removeConnection(chemBond.bond)
+    }
+
+    fun removeConnection(bond: IBond) {
+        container.removeBond(bond)
         calculateAtomProperties()
     }
 
@@ -155,10 +161,29 @@ class ChemMolecule (
         return mass
     }
 
+    fun isFragmented(): Boolean {
+        return !ConnectivityChecker.isConnected(container)
+    }
+
+    fun splitIntoFragments() : List<ChemMolecule> {
+        if (!isFragmented()) {
+            return emptyList()
+        }
+        val containers = mutableListOf<ChemMolecule>()
+
+        val cdkFragments = ConnectivityChecker.partitionIntoMolecules(container)
+        cdkFragments.forEach { fragment ->
+            val newMolecule = ChemMolecule(fragment)
+            containers.add(newMolecule)
+        }
+        return containers
+    }
+
     private fun initDefaultAtomProperties(atom: IAtom) {
         atom.setProperty(VISIBLE, true)
         atom.setProperty(TRAILING_POS, TrailingGroupPosition.RIGHT)
     }
+
 
     class ChemAtom (
         val atom: IAtom,
