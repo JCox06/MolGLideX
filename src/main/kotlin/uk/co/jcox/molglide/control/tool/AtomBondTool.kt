@@ -17,15 +17,12 @@ import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
-class AtomBondTool(val appManager: AppManager, val actionManager: ActionManager,
-                   val selectionManager: SelectionManager, val editorData: EditorStateData
+class AtomBondTool(val appManager: AppManager,actionManager: ActionManager,
+                   selectionManager: SelectionManager, editorData: EditorStateData
 ) : Tool(actionManager, selectionManager, editorData) {
 
     var toolMode: Mode = Mode.None
 
-    override fun runUpdates() {
-
-    }
 
     override fun onDragMouse(clickX: Int, clickY: Int) {
         val currentMode = toolMode

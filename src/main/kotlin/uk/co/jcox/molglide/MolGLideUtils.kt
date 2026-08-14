@@ -23,6 +23,4 @@ object MolGLideUtils {
     fun getAccentColour() : Color {
         return UIManager.getColor("Component.accentColor") ?: Color.PINK
     }
-
-
 }

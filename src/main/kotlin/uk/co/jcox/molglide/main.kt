@@ -14,10 +14,10 @@ import javax.swing.SwingUtilities
 import javax.swing.UIManager
 
 fun main() {
-    FlatIntelliJLaf.setup()
+    FlatLightLaf.setup()
 
     JFrame.setDefaultLookAndFeelDecorated(true)
-//    JDialog.setDefaultLookAndFeelDecorated(true)
+    JDialog.setDefaultLookAndFeelDecorated(false)
     UIManager.put("PopupMenu.consumeEventOnClose", true)
 
     SwingUtilities.invokeLater {

@@ -1,13 +1,19 @@
 package uk.co.jcox.molglide.control
 
 import com.sun.org.apache.xpath.internal.operations.Bool
+import org.apache.jena.vocabulary.TestManifest.action
+import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.control.actions.AtomDeletionAction
 import uk.co.jcox.molglide.control.actions.BondDeletionAction
 import uk.co.jcox.molglide.control.actions.ChangeStereoChemAction
+import uk.co.jcox.molglide.control.actions.CompoundAction
 import uk.co.jcox.molglide.control.actions.ToggleAtomVisibilityAction
+import uk.co.jcox.molglide.control.actions.UpdateBondAromaticityAction
+import uk.co.jcox.molglide.control.actions.UpdateBondOrderAction
 import uk.co.jcox.molglide.control.tool.AtomBondTool
+import uk.co.jcox.molglide.control.tool.TemplateRingTool
 import uk.co.jcox.molglide.control.tool.Tool
 import uk.co.jcox.molglide.ui.DeleteBondMenuAction
 import uk.co.jcox.molglide.ui.EditorPanel
@@ -47,11 +53,13 @@ class EditorStateController (
         if (appManager.editMode.type == EditMode.ToolType.ATOM_INSERT) {
             currentTool = AtomBondTool(appManager, actionManager, selectionManager, stateData)
         }
+        if (appManager.editMode.type == EditMode.ToolType.RING_INSERT) {
+            currentTool = TemplateRingTool(appManager, actionManager, selectionManager, stateData)
+        }
     }
 
     fun update(worldX: Int, worldY: Int) {
         currentTool.updateMouseWorld(worldX, worldY)
-        currentTool.runUpdates()
         selectionManager.update(stateData, worldX, worldY)
         if (actionManager.isDirty) {
             uiBuilder.rebuild()
@@ -87,17 +95,35 @@ class EditorStateController (
 
     fun updateSingleSelectedBond(bondOptions: StereoChem) {
         val bond = selectionManager.getBond() ?: return
-        val action = ChangeStereoChemAction(bond, bondOptions)
-        actionManager.executeAction(action)
+
+        //Again as explained below, I am only allowing single bonds to have stereochem
+        val changeOrder = UpdateBondOrderAction(bond, IBond.Order.SINGLE)
+        val changeStereo = ChangeStereoChemAction(bond, bondOptions)
+        val compoundAction = CompoundAction(changeOrder, changeStereo)
+        actionManager.executeAction(compoundAction)
     }
 
     fun updateDoubleSelectedBond() {
         val bond = selectionManager.getBond() ?: return
-        TODO()
+        //Although double bonds do have stereochemistry
+        //it is not really depicted in chemical sketchers
+        //So I think for a simple molecular editor, its okay for the moment to assume
+        //double bonds should NOT have stereochemistry information associated with them
+        val removeStereoAction = ChangeStereoChemAction(bond, StereoChem.NORMAL)
+        val updateBondOrderAction = UpdateBondOrderAction(bond, IBond.Order.DOUBLE)
+        val compoundAction = CompoundAction(removeStereoAction, updateBondOrderAction)
+        actionManager.executeAction(compoundAction)
     }
 
+
+    //Like the methods above, it might look first strange to see that this is not a compound action
+    //that affects the double bond option too.
+    //However in the case of benzene, the CDK recommends to have all the bonds (including formally single bonds)
+    //to be set as aromatic
     fun updateAromaticSelectedBond() {
-        TODO()
+        val bond = selectionManager.getBond() ?: return
+        val action = UpdateBondAromaticityAction(bond)
+        actionManager.executeAction(action)
     }
 
     fun invertStereoChemSelectedBond() {
@@ -105,7 +131,9 @@ class EditorStateController (
     }
 
     fun setTripleSelectedBond() {
-        TODO()
+        val bond = selectionManager.getBond() ?: return
+        val action = UpdateBondOrderAction(bond, IBond.Order.TRIPLE)
+        actionManager.executeAction(action)
     }
 
     fun deleteSelectedBond() {

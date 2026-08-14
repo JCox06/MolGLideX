@@ -28,8 +28,10 @@ import javax.swing.SwingUtilities
 import javax.swing.Timer
 import javax.swing.event.PopupMenuEvent
 import javax.swing.event.PopupMenuListener
+import kotlin.collections.toIntArray
 import kotlin.math.max
 import kotlin.math.sqrt
+import kotlin.time.times
 
 /*
 The editor panel is the class that actually draws the chemistry stuff
@@ -76,7 +78,7 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         menu.add(flipBondAction)
 
         val menuSingle = JMenu("Single")
-        menuSingle.add(JCheckBoxMenuItem(SetPlainBondMenuAction(dataController, bondContext.order == 1)))
+        menuSingle.add(JCheckBoxMenuItem(SetPlainBondMenuAction(dataController, bondContext.order == 1 && bondContext.stereo == StereoChem.NORMAL)))
         menuSingle.add(JCheckBoxMenuItem(SetWedgedBondMenuAction(dataController, bondContext.stereo == StereoChem.WEDGED)))
         menuSingle.add(JCheckBoxMenuItem(SetDashedBondMenuAction(dataController, bondContext.stereo == StereoChem.DASHED)))
         menuSingle.add(FlipStereoChemMenuAction(dataController))
@@ -85,7 +87,7 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         val menuDouble = JMenu("Double")
         val isDouble = bondContext.order == 2
         menuDouble.add(JCheckBoxMenuItem(SetDoubleBondMenuAction(dataController, isDouble)))
-        menuDouble.add(JCheckBoxMenuItem(SetAromaticDoubleBondMenuAction(dataController, bondContext.isAromatic, isDouble)))
+        menuDouble.add(JCheckBoxMenuItem(SetAromaticDoubleBondMenuAction(dataController, bondContext.isAromatic)))
         menu.add(menuDouble)
 
         menu.add(JCheckBoxMenuItem(SetTripleBondMenuAction(dataController, bondContext.order == 3)))
@@ -103,7 +105,7 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
     private fun buildAtomContextMenu(atomContext: UIAtomContext) : JPopupMenu {
         val menu = JPopupMenu()
 
-        val editLabelAction = EditLabelMenuAction(dataController)
+        val editLabelAction = EditLabelMenuAction(this,dataController)
         val deleteAtomMenuAction = DeleteAtomMenuAction(dataController)
         val toggleAtomVisibilityMenuActionAction = ToggleAtomVisibilityMenuAction(dataController, atomContext.isVisible)
 
@@ -147,7 +149,8 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         val g2d = preparePainter(g)
         paintAtoms(g2d)
         paintBondSelection(g2d)
-        paintBonds(g2d)
+        paintLines(g2d)
+        paintTriangles(g2d)
     }
 
 
@@ -255,7 +258,7 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         return list
     }
 
-    private fun paintBonds(g2d: Graphics2D) {
+    private fun paintLines(g2d: Graphics2D) {
         g2d.stroke = BasicStroke(LINE_STROKE * cameraZoom, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
         val bondsToPaint = dataController.uiBuilder.getUIBonds()
         bondsToPaint.forEach { bondUI ->
@@ -265,6 +268,19 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
             val endY = bondUI.endY * cameraZoom
 
             g2d.drawLine(startX.toInt(), startY.toInt(), endX.toInt(), endY.toInt())
+        }
+    }
+
+
+    private fun paintTriangles(g2d: Graphics2D) {
+        val triangles = dataController.uiBuilder.getUITriangles()
+        triangles.forEach { t ->
+            val x = listOf<Int>((t.v1.x * cameraZoom).toInt(), (t.v2.x * cameraZoom).toInt(),
+                (t.v3.x * cameraZoom).toInt()
+            ).toIntArray()
+            val y = listOf<Int>((t.v1.y * cameraZoom).toInt(), (t.v2.y * cameraZoom).toInt(), (t.v3.y * cameraZoom).toInt()).toIntArray()
+
+            g2d.fillPolygon(x, y, 3)
         }
     }
 

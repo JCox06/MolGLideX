@@ -1,6 +1,7 @@
 package uk.co.jcox.molglide.ui
 
 import org.joda.time.DateTime
+import uk.co.jcox.molglide.LabelToSmiles
 import uk.co.jcox.molglide.MolGLideUtils
 import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.control.AppManager
@@ -13,6 +14,8 @@ import java.awt.event.KeyEvent
 import java.awt.event.WindowEvent
 import java.io.File
 import javax.swing.AbstractAction
+import javax.swing.JOptionPane
+import javax.swing.JPanel
 import javax.swing.KeyStroke
 
 class UndoAction (val appManager: AppManager) : AbstractAction("Undo") {
@@ -92,14 +95,37 @@ class QuickCaptureAction (val appManager: AppManager) : AbstractAction("Quick Ca
     }
 }
 
-class EditLabelMenuAction (val controller: EditorStateController) : AbstractAction("Edit Label") {
+class EditLabelMenuAction (val panel: JPanel, val controller: EditorStateController) : AbstractAction("Edit Label") {
     init {
         putValue(SHORT_DESCRIPTION, "Edits the atom label")
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0))
     }
 
+
+
+    //todo I'm going to have a think about how to do this
+    //I want it to work exactly like ChemDraws Inline edit label feature
+    //Where all the atoms you write (for instance -OCH2CH(OMe)CH3) are all inteligent, and can be selected exactly like any other
+    //atom
+
+    //The only thing I am happy doing differently is having the dialogue for the text, I personally think writing text (with the cursor)
+    //directly in the editor is too hard to get it to work nicely!
     override fun actionPerformed(e: ActionEvent?) {
-        TODO()
+        val label = JOptionPane.showInputDialog(panel, "Type a chemical element, molecule, or any text", "Edit Label", JOptionPane.QUESTION_MESSAGE)
+
+        if (label != null) {
+            label.trim()
+            val common = LabelToSmiles.lookUp(label)
+            if (common == null) {
+                val result = JOptionPane.showConfirmDialog(panel, "Your label could not be interpreted. Continuing will disable some chemical intelligence for this molecule Do you want to continue", "Lookup Failed", JOptionPane.YES_NO_OPTION)
+                if (result == 0) {
+                   //todo IGNORING THIS FOR NOW
+                    TODO()
+                }
+                return
+            }
+
+        }
     }
 }
 
@@ -190,11 +216,10 @@ class SetDoubleBondMenuAction (val controller: EditorStateController, isDouble: 
     }
 }
 
-class SetAromaticDoubleBondMenuAction (val controller: EditorStateController, isAromatic: Boolean, isDouble: Boolean) : AbstractAction("Aromatic") {
+class SetAromaticDoubleBondMenuAction (val controller: EditorStateController, isAromatic: Boolean) : AbstractAction("Aromatic") {
     init {
         putValue(SHORT_DESCRIPTION, "Select aromatic bond")
         putValue(SELECTED_KEY, isAromatic)
-        isEnabled = isDouble
     }
 
     override fun actionPerformed(e: ActionEvent?) {

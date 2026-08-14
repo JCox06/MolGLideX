@@ -11,11 +11,7 @@ class ChangeStereoChemAction (private val chemBond: ChemMolecule.ChemBond, val n
     private val toRestore = chemBond.bond.display
 
     override fun execute(data: EditorStateData) {
-        chemBond.bond.display = when (newStereo) {
-            StereoChem.WEDGED -> IBond.Display.WedgeEnd
-            StereoChem.DASHED -> IBond.Display.WedgedHashEnd
-            StereoChem.NORMAL -> IBond.Display.Solid
-        }
+        chemBond.bond.display = newStereo.cdk
     }
 
     override fun undo(data: EditorStateData) {

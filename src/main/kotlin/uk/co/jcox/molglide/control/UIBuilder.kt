@@ -8,16 +8,26 @@ import org.joml.times
 import org.openscience.cdk.interfaces.IAtom
 import org.openscience.cdk.interfaces.IAtomContainer
 import org.openscience.cdk.interfaces.IBond
+import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.control.ChemMolecule.ChemAtom
 import uk.co.jcox.molglide.control.tool.AtomBondTool
 import kotlin.math.abs
+import kotlin.math.round
+import kotlin.math.roundToInt
 
 class UIBuilder (private val data: EditorStateData, private val selectionManager: SelectionManager) {
+
+    //UIAtom can take care of the atoms
+    //UILines can take care of single, double, triple, single (dashed) bonds
     private val uiAtoms: MutableList<UIAtom> = mutableListOf()
     private val uiLines: MutableList<UILine> = mutableListOf()
 
+    //For wedged bonds, UITriangles must be used, since these are triangular in shapep
+    private val uiTriangles: MutableList<UITriangle> = mutableListOf()
+
     fun getUIAtoms(): List<UIAtom> = uiAtoms
     fun getUIBonds(): List<UILine> = uiLines
+    fun getUITriangles(): List<UITriangle> = uiTriangles
 
     fun rebuild() {
         clearUI()
@@ -72,16 +82,42 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
 
     private fun handleSingleStereo(absoluteBond: UILine, chemBond: ChemMolecule.ChemBond) {
         //If the stereochem is just normal, then just add the absolute bond
-        if (chemBond.bond.display == IBond.Display.Solid) {
+        val s = chemBond.stereo()
+        if (s == StereoChem.NORMAL) {
             uiLines.add(absoluteBond)
             return
         }
-        if (chemBond.bond.display == IBond.Display.WedgedHashEnd) {
+        if (s == StereoChem.DASHED) {
             addDashedWedgeLines(absoluteBond, chemBond)
+            return
+        }
+
+        if (s == StereoChem.WEDGED) {
+            addWedgedBonds(absoluteBond, chemBond)
             return
         }
     }
 
+    private fun addWedgedBonds(absoluteBond: UILine, chemBond: ChemMolecule.ChemBond) {
+        val perp = calculatePerpendicularVector(absoluteBond)
+
+        val startX = absoluteBond.startX
+        val startY = absoluteBond.startY
+        val v1 = Vector2d(startX, startY)
+
+        val midPointEndX = absoluteBond.endX
+        val midPointEndY = absoluteBond.endY
+
+        val v2x = (midPointEndX + perp.x * DASH_DISTANCE / 2)
+        val v2y = (midPointEndY + perp.y * DASH_DISTANCE / 2)
+        val v2 = Vector2d(v2x, v2y)
+
+        val v3x = (midPointEndX - perp.x * DASH_DISTANCE / 2)
+        val v3y = (midPointEndY - perp.y * DASH_DISTANCE / 2)
+        val v3 = Vector2d(v3x, v3y)
+
+        uiTriangles.add(UITriangle(v3, v2, v1))
+    }
 
     private fun addDashedWedgeLines(absoluteBond: UILine, chemBond: ChemMolecule.ChemBond) {
         val vec = calculateVector(absoluteBond)
@@ -89,20 +125,27 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
         val currentPos = Vector2d(absoluteBond.startX, absoluteBond.startY)
         val lastPos = Vector2d(absoluteBond.endX, absoluteBond.endY)
 
-        val dist = currentPos.distance(lastPos)
-        val toRepeat = (dist / INTER_DASH_DISTANCE).toInt()
 
-        repeat(toRepeat) {
+        val dist = currentPos.distance(lastPos)
+        val linesToDraw: Double = (dist / INTER_DASH_DISTANCE) //Problem: Need this to be integer
+        val roundedLinesToDraw = linesToDraw.roundToInt()
+        val relaxedInterDashDistance = (dist / linesToDraw).toInt()
+
+        //The total number of lines to draw, needs to be a perfect integer
+        //This implementation produces an okay-ish result. I'm happy with it for now
+        //but todo need to rethink how dashed lines should be drawn
+
+        repeat(roundedLinesToDraw + 1) {
             //As the loop progresses, the size of the dashes increases
-            val sideLength = (it / toRepeat.toDouble()) * DASH_DISTANCE
+            val sideLength = (it / roundedLinesToDraw.toDouble()) * DASH_DISTANCE
 
             val newStartX = (currentPos.x + perp.x * sideLength /2)
             val newStartY = (currentPos.y + perp.y * sideLength /2)
             val newEndX = (currentPos.x - perp.x * sideLength /2)
             val newEndY = (currentPos.y - perp.y * sideLength /2)
             uiLines.add(UILine(newStartX, newStartY, newEndX, newEndY))
-            currentPos.x += vec.x * INTER_DASH_DISTANCE
-            currentPos.y += vec.y * INTER_DASH_DISTANCE
+            currentPos.x += vec.x * relaxedInterDashDistance
+            currentPos.y += vec.y * relaxedInterDashDistance
         }
     }
 
@@ -120,14 +163,14 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
      * @return UI information to show where a bond really starts and really ends
      */
     private fun getAbsoluteBond(chemBond: ChemMolecule.ChemBond) : UILine {
-        val atomA = ChemAtom(chemBond.bond.getAtom(0), chemBond.molecule)
-        val atomB = ChemAtom(chemBond.bond.getAtom(1), chemBond.molecule)
+        val atomA = ChemAtom(chemBond.bond.begin, chemBond.molecule)
+        val atomB = ChemAtom(chemBond.bond.end, chemBond.molecule)
         val aPos = atomA.getPos()
         val bPos = atomB.getPos()
         val aVis = atomA.isVisible()
         val bVis = atomB.isVisible()
-        val start = if (bVis) getCappedEnd(aPos, bPos) else bPos
-        val end = if (aVis) getCappedEnd(bPos, aPos) else aPos
+        val start = if (aVis) getCappedEnd(bPos, aPos) else aPos
+        val end = if (bVis) getCappedEnd(aPos, bPos) else bPos
         val id = chemBond.bond.id
         val uiLine: UILine = UILine(start.x, start.y, end.x, end.y)
         return uiLine
@@ -331,15 +374,14 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
     private fun clearUI() {
         uiAtoms.clear()
         uiLines.clear()
+        uiTriangles.clear()
     }
 
 
     fun getSelectedFormula(): String {
-        val s = selectionManager.primarySelection
-        if (s is SelectionManager.Type.ActiveAtom) {
-            return s.chemAtom.molecule.getFormulaString()
-        }
-        return ""
+        val s = selectionManager.getMolecule() ?: return ""
+        return s.getFormulaString()
+
     }
 
     fun isAtomSelected() : Boolean {
@@ -354,7 +396,8 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
         val selection = selectionManager.primarySelection
         if (selection is SelectionManager.Type.ActiveBond) {
             val chemBond = selection.chemBond
-            return UIBondContext(chemBond.bond.order.numeric(), chemBond.midPoint(), chemBond.bond.isAromatic, chemBond.stereo())
+            val stereo = chemBond.stereo()
+            return UIBondContext(chemBond.bond.order.numeric(), chemBond.midPoint(), chemBond.bond.isAromatic, stereo)
         }
         return null
     }
@@ -369,18 +412,14 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
     }
 
     fun getSelectedWeight(): Double {
-
-        val s = selectionManager.primarySelection
-        if (s is SelectionManager.Type.ActiveAtom) {
-            return s.chemAtom.molecule.getMolecularWeight()
-        }
-        return 0.0
+        val s = selectionManager.getMolecule() ?: return 0.0
+        return s.getMolecularWeight()
     }
 
 
     companion object {
         private const val INTER_BOND_DISTANCE = 6.0
         private const val INTER_DASH_DISTANCE = AtomBondTool.CONNECTION_DISTANCE / 10.0
-        private const val DASH_DISTANCE = AtomBondTool.CONNECTION_DISTANCE / 2.0
+        private const val DASH_DISTANCE = AtomBondTool.CONNECTION_DISTANCE / 3.0
     }
 }

@@ -26,13 +26,29 @@ import uk.co.jcox.molglide.StereoChem
 import java.util.UUID
 import javax.vecmath.Point2d
 
+/**
+ * A Handy wrapper for a CDK IAtomContainer
+ *
+ * Important: All data is actually attached to CDK objects, this just provides helper functions
+ *
+ *
+ * When providing your own IAtomContainer, this class will automatically apply its own properties to the CDK object
+ * see ChemMolecule#initDefaultAtomProperties!
+ */
 class ChemMolecule (
     private val container: IAtomContainer = AtomContainer(),
 ) {
 
+    init {
+        container.atoms().forEach { atom ->
+            if (atom != null) {
+                initDefaultAtomProperties(atom)
+            }
+        }
+    }
+
     fun addAtom(element: String, positionX: Double, positionY: Double) : ChemAtom {
         val atom: IAtom = Atom(element)
-        atom.id = UUID.randomUUID().toString()
         atom.point2d = Point2d(positionX, positionY)
         initDefaultAtomProperties(atom)
         return directlyAddAtom(atom)
@@ -181,6 +197,7 @@ class ChemMolecule (
     }
 
     private fun initDefaultAtomProperties(atom: IAtom) {
+        atom.id = UUID.randomUUID().toString()
         atom.setProperty(VISIBLE, true)
         atom.setProperty(TRAILING_POS, TrailingGroupPosition.RIGHT)
     }
@@ -234,8 +251,8 @@ class ChemMolecule (
         }
 
         fun isTerminal(): Boolean {
-            val atomA = bond.getAtom(0)
-            val atomB = bond.getAtom(1)
+            val atomA = bond.begin
+            val atomB = bond.end
 
             if (atomA.bondCount > 1 || atomB.bondCount > 1) {
                 return false
@@ -244,17 +261,13 @@ class ChemMolecule (
         }
 
         fun midPoint(): Vector2d {
-            val atomA = bond.getAtom(0).point2d
-            val atomB = bond.getAtom(1).point2d
+            val atomA = bond.begin.point2d
+            val atomB = bond.end.point2d
             return Vector2d((atomA.x + atomB.x) / 2, (atomA.y + atomB.y) /2)
         }
 
         fun stereo(): StereoChem {
-            return when (bond.display) {
-                IBond.Display.WedgedHashEnd -> StereoChem.DASHED
-                IBond.Display.WedgeEnd -> StereoChem.WEDGED
-                else -> StereoChem.NORMAL
-            }
+            return StereoChem.getType(bond.display)
         }
     }
 
