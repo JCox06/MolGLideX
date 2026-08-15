@@ -1,5 +1,6 @@
 package uk.co.jcox.molglide.ui
 
+import org.apache.jena.sparql.pfunction.library.container
 import org.joda.time.DateTime
 import uk.co.jcox.molglide.LabelToSmiles
 import uk.co.jcox.molglide.MolGLideUtils
@@ -71,7 +72,8 @@ class NewProjectAction (val mainFrame: MolGlideFrame,val appManager: AppManager)
         val data = appManager.getDataForState(newID)
         val dataController = EditorStateController(appManager, data)
         val editorPanel = EditorPanel(dataController)
-        mainFrame.addDockingPanel(newID, "New Document (${data.currentID})", editorPanel, true)    }
+        mainFrame.addDockingPanel(newID, "Document ${data.currentID + 1}", editorPanel, true)
+    }
 
 }
 
@@ -246,6 +248,69 @@ class DeleteBondMenuAction (val controller: EditorStateController) : AbstractAct
 
     override fun actionPerformed(e: ActionEvent?) {
         controller.deleteSelectedBond()
+    }
+}
+
+
+class SaveFileAction (val appManager: AppManager) : AbstractAction("Save file") {
+    init {
+        putValue(SHORT_DESCRIPTION, "Saves current progress as .mgx file")
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK))
+
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        val controller = appManager.activeTab ?: return
+
+        val lastSaveFile = controller.lastUsedSaveFile
+        if (lastSaveFile != null) {
+            controller.saveProject(lastSaveFile)
+            return
+        }
+        //If the save file does not exist, delegate to the Save As File Action
+        val newAction = SaveAsFileAction(appManager)
+        newAction.actionPerformed(null)
+    }
+}
+
+
+class SaveAsFileAction (val appManager: AppManager) : AbstractAction("Save as") {
+    init {
+        putValue(SHORT_DESCRIPTION, "Saves current progress as a new .mgx file")
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK or InputEvent.SHIFT_DOWN_MASK))
+
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        val panel = appManager.activePanel
+        val controller = appManager.activeTab
+        if (panel != null && controller != null) {
+            val saveLocation = MolGLideUtils.showSaveDialogue(panel)
+            if (saveLocation != null) {
+                controller.saveProject(saveLocation)
+            }
+        }
+    }
+}
+
+
+class LoadFileAction (val appManager: AppManager, val mainFrame: MolGlideFrame) : AbstractAction("Load file") {
+
+    init {
+        putValue(SHORT_DESCRIPTION, "Load a MolGLide project (.mgx file)")
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK))
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        val file = MolGLideUtils.showOpenDialogue()
+
+        if (file != null) {
+            val dockingID = appManager.loadFile(file)
+            val data = appManager.getDataForState(dockingID)
+            val dataController = EditorStateController(appManager, data)
+            val editorPanel = EditorPanel(dataController)
+            mainFrame.addDockingPanel(dockingID, file.name, editorPanel, true)
+        }
     }
 }
 

@@ -1,7 +1,5 @@
 package uk.co.jcox.molglide.control
 
-import com.sun.org.apache.xpath.internal.operations.Bool
-import org.apache.jena.vocabulary.TestManifest.action
 import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.StereoChem
@@ -16,8 +14,10 @@ import uk.co.jcox.molglide.control.actions.UpdateBondOrderAction
 import uk.co.jcox.molglide.control.tool.AtomBondTool
 import uk.co.jcox.molglide.control.tool.TemplateRingTool
 import uk.co.jcox.molglide.control.tool.Tool
-import uk.co.jcox.molglide.ui.DeleteBondMenuAction
+import uk.co.jcox.molglide.io.LevelSerializer
 import uk.co.jcox.molglide.ui.EditorPanel
+import java.io.File
+import java.nio.file.Files
 
 class EditorStateController (
     private val appManager: AppManager,
@@ -27,6 +27,16 @@ class EditorStateController (
 
     private val selectionManager: SelectionManager = SelectionManager()
     private var currentTool: Tool = AtomBondTool(appManager, actionManager, selectionManager, stateData)
+
+    /**
+     * If this document has been saved before, then this is not null
+     * If the document has been saved, it returns the file it was saved to
+     * (useful in save as, and save operations!)
+     *
+     * The lastest save as operation will override the previous name!
+     */
+    var lastUsedSaveFile: File? = null
+    private set
 
     val uiBuilder = UIBuilder(stateData, selectionManager)
 
@@ -145,5 +155,11 @@ class EditorStateController (
             val action = BondDeletionAction(selection.chemBond)
             actionManager.executeAction(action)
         }
+    }
+
+    fun saveProject(file: File) {
+        val levelSerializer = LevelSerializer()
+        val json = levelSerializer.getJSONEncoding(stateData)
+        file.writeText(json)
     }
 }

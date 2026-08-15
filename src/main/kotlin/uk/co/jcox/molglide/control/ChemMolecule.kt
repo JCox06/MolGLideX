@@ -109,12 +109,21 @@ class ChemMolecule (
 
 
 
+    fun updateBondOrder(chemBond: ChemBond, newOrder: Int) {
+        val order = when (newOrder) {
+            1 -> IBond.Order.SINGLE
+            2 -> IBond.Order.DOUBLE
+            3 -> IBond.Order.TRIPLE
+            else -> IBond.Order.SINGLE
+        }
+    }
+
     fun updateBondOrder(chemBond: ChemBond, newOrder: IBond.Order) {
         chemBond.bond.order = newOrder
         calculateAtomProperties()
     }
 
-    private fun calculateAtomProperties() {
+    fun calculateAtomProperties() {
         try {
             val atomMatcher = CDKAtomTypeMatcher.getInstance(container.builder)
             for (atom in container.atoms()) {
@@ -209,6 +218,7 @@ class ChemMolecule (
     }
 
     private fun initDefaultBondProperties(cdkBond: IBond) {
+        cdkBond.id = UUID.randomUUID().toString()
         cdkBond.setProperty(FLIP_BOND, false)
     }
 
@@ -241,7 +251,7 @@ class ChemMolecule (
         }
 
         override fun equals(other: Any?): Boolean {
-            return atom == other
+            return other is ChemAtom && this.atom == other.atom
         }
     }
 
@@ -252,7 +262,7 @@ class ChemMolecule (
 
     ) {
         override fun equals(other: Any?): Boolean {
-            return bond == other
+            return other is ChemBond && this.bond == other.bond
         }
 
         override fun hashCode(): Int {
@@ -278,12 +288,21 @@ class ChemMolecule (
         fun stereo(): StereoChem {
             return StereoChem.getType(bond.display)
         }
-
+        fun setStereo(s: StereoChem) {
+            val cdkType = s.cdk
+            bond.display = cdkType
+        }
         fun shouldFlip(): Boolean {
             return bond.getProperty<Boolean>(FLIP_BOND)
         }
         fun setFlip(flip: Boolean) {
             bond.setProperty(FLIP_BOND, flip)
+        }
+        fun getStart(): ChemAtom {
+            return ChemAtom(bond.begin, molecule)
+        }
+        fun getEnd(): ChemAtom {
+            return ChemAtom(bond.end, molecule)
         }
     }
 

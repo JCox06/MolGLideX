@@ -6,6 +6,8 @@ import io.github.andrewauclair.moderndocking.app.Docking
 import io.github.andrewauclair.moderndocking.app.RootDockingPanel
 import io.github.andrewauclair.moderndocking.ext.ui.DockingUI
 import jdk.internal.vm.ThreadContainers.root
+import org.joda.time.DateTime
+import uk.co.jcox.molglide.MolGLideUtils
 import uk.co.jcox.molglide.control.AppManager
 import java.awt.BorderLayout
 import java.awt.Dimension
@@ -14,6 +16,9 @@ import java.awt.event.MouseEvent
 import java.awt.event.MouseListener
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.Date
 import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JComponent
@@ -24,7 +29,7 @@ import javax.swing.JPanel
 import javax.swing.JToolBar
 import javax.swing.SwingUtilities
 
-class MolGlideFrame : JFrame("MolGLideX (INDEV)") {
+class MolGlideFrame : JFrame("MolGLideX ${LocalDate.now()}") {
 
     private val windows: MutableList<DockingPanel> = mutableListOf()
     private val appManager: AppManager = AppManager()
@@ -115,7 +120,7 @@ class MolGlideFrame : JFrame("MolGLideX (INDEV)") {
         statusBar.setLayout(BorderLayout())
         statusBar.add(statusLabel, BorderLayout.WEST)
 
-        val label = JLabel("MolGLideX (v0.0.1)")
+        val label = JLabel("MolGLideX ${MolGLideUtils.VERSION}")
         statusBar.add(label, BorderLayout.EAST)
 
         return statusBar

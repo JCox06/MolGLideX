@@ -28,6 +28,10 @@ class MainMenu(val mainFrame: MolGlideFrame, val appManager: AppManager) : JMenu
 
         menuFile.add(NewProjectAction(mainFrame, appManager))
 
+        menuFile.add(LoadFileAction(appManager, mainFrame))
+        menuFile.add(SaveFileAction(appManager))
+        menuFile.add(SaveAsFileAction(appManager))
+
         menuFile.addSeparator()
 
         menuFile.add(QuickCaptureAction(appManager))

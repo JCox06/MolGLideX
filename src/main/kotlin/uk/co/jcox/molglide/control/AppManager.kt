@@ -2,6 +2,7 @@ package uk.co.jcox.molglide.control
 
 import org.checkerframework.checker.units.qual.mol
 import uk.co.jcox.molglide.EditMode
+import uk.co.jcox.molglide.io.LevelLoader
 import uk.co.jcox.molglide.ui.EditorPanel
 import java.io.File
 import javax.swing.JPanel
@@ -36,6 +37,22 @@ class AppManager {
         editorStateData[newID] = state
         return newID
     }
+
+    fun loadFile(file: File) : String {
+        val newID = "${EDITOR_PREFIX}${idIncrement}"
+        val id = idIncrement
+        idIncrement++
+
+        if (isRegistered(newID)) {
+            return loadFile(file)
+        }
+
+        val levelLoader = LevelLoader()
+        val state = levelLoader.loadLevel(file, id)
+        editorStateData[newID] = state
+        return newID
+    }
+
 
 
     fun handleGlobalUndo() {
