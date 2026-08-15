@@ -45,6 +45,11 @@ class ChemMolecule (
                 initDefaultAtomProperties(atom)
             }
         }
+        container.bonds().forEach{bond ->
+            if (bond != null) {
+                initDefaultBondProperties(bond)
+            }
+        }
     }
 
     fun addAtom(element: String, positionX: Double, positionY: Double) : ChemAtom {

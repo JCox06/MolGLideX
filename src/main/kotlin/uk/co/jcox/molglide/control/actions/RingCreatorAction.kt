@@ -61,7 +61,7 @@ class RingCreatorAction (
     }
 
     private fun specialHandlingForBenzene(newRing: ChemMolecule) {
-        var makeDouble = true
+        var makeDouble = false
         newRing.bonds().forEach { bond ->
             if (makeDouble) {
                 newRing.updateBondOrder(bond, IBond.Order.DOUBLE)

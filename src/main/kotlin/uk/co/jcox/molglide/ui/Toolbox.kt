@@ -4,6 +4,7 @@ import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.control.AppManager
 import java.awt.BorderLayout
 import java.awt.GridLayout
+import java.awt.Insets
 import java.awt.Point
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
@@ -19,12 +20,6 @@ class Toolbox(private val appManager: AppManager) : JToolBar("Toolbox") {
         isRollover = true
 
         val panel = JPanel(GridLayout(2, 2, 5, 5))
-
-//        for (i in 1..5) {
-//            for (j in 1..5) {
-//                panel.add(addButtonControl("${i}, ${j}"))
-//            }
-//        }
 
         setupToolbox(panel)
 
@@ -59,18 +54,22 @@ class Toolbox(private val appManager: AppManager) : JToolBar("Toolbox") {
     private fun setupToolbox(panel: JPanel) {
         val elementGroup = ButtonGroup()
         EditMode.entries.forEach { mode ->
-            val button = addButtonControl(mode.symbol, mode == appManager.editMode)
+            val button = JToggleButton()
+            button.isSelected = mode == appManager.editMode
+            if (mode.icon != null) {
+                val icon = mode.icon.derive(16, 16)
+                button.icon = icon
+            } else {
+                button.text = mode.symbol
+            }
+            button.preferredSize = button.minimumSize
+            button.margin = Insets(0, 0, 0, 0)
             button.addActionListener {appManager.editMode = mode}
             elementGroup.add(button)
-            panel.add(button, BorderLayout.CENTER)
+            panel.add(button)
         }
     }
 
-
-    private fun addButtonControl(label: String, toggled: Boolean) : JToggleButton {
-        val button =  JToggleButton(label, toggled)
-        return button
-    }
 
 
 }

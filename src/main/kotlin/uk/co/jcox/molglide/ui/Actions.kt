@@ -71,7 +71,7 @@ class NewProjectAction (val mainFrame: MolGlideFrame,val appManager: AppManager)
         val data = appManager.getDataForState(newID)
         val dataController = EditorStateController(appManager, data)
         val editorPanel = EditorPanel(dataController)
-        mainFrame.addDockingPanel(newID, "Editor${data.currentID}", editorPanel, true)    }
+        mainFrame.addDockingPanel(newID, "New Document (${data.currentID})", editorPanel, true)    }
 
 }
 
