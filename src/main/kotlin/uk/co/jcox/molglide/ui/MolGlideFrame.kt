@@ -12,6 +12,7 @@ import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.time.LocalDate
 import javax.swing.JComponent
+import javax.swing.JDialog
 import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JOptionPane
@@ -67,6 +68,18 @@ class MolGlideFrame : JFrame("MolGLideX ${LocalDate.now()}") {
     }
 
     private fun confirmClose() : Boolean {
+        //First ask the user to if they want to quit and show them the open documents
+        val panel = JPanel(BorderLayout())
+        panel.add(JLabel("Please review your open documents before quiting the application"), BorderLayout.NORTH)
+
+
+        //todo Need to show a table of all the open documents
+        //Query the controller of each document, and ask it if the actionManager is dirty
+        //Display all documents in a table, with the name of the document, followed by a save button (if its dirty) or green text that says "document saved" if not
+        //Clicking the button starts a save action
+        val result = JOptionPane.showConfirmDialog(this, panel, "Quit MolGLide ?", JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE)
+
         return true
     }
 

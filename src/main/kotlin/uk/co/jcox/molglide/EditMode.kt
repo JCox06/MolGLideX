@@ -4,7 +4,7 @@ import com.formdev.flatlaf.extras.FlatSVGIcon
 
 enum class EditMode (val symbol: String, val ringSize: Int, val type: ToolType, val icon: FlatSVGIcon? = null) {
 
-    GENERIC_SELECT("Select", 0, ToolType.GENERIC_TOOL, FlatSVGIcon("uk/co/jcox/molglide/select.svg", javaClass.classLoader)),
+    GENERIC_SELECT("Select", 0, ToolType.SELECT_TOOL, FlatSVGIcon("uk/co/jcox/molglide/select.svg", javaClass.classLoader)),
 
     INSERT_CARBON("C", 0, ToolType.ATOM_INSERT),
     INSERT_HYDROGEN("H", 0, ToolType.ATOM_INSERT),
@@ -33,7 +33,7 @@ enum class EditMode (val symbol: String, val ringSize: Int, val type: ToolType, 
     enum class ToolType {
         ATOM_INSERT,
         RING_INSERT,
-        GENERIC_TOOL,
+        SELECT_TOOL,
     }
 }
 

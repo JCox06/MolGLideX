@@ -29,9 +29,9 @@ import javax.swing.Timer
 import javax.swing.event.PopupMenuEvent
 import javax.swing.event.PopupMenuListener
 import kotlin.collections.toIntArray
+import kotlin.math.absoluteValue
 import kotlin.math.max
 import kotlin.math.sqrt
-import kotlin.time.times
 
 /*
 The editor panel is the class that actually draws the chemistry stuff
@@ -55,6 +55,9 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
     private var lastMousePos: Point = Point()
 
     private var pauseEvents = false
+
+    private var transientSelectionBoxStart = Point()
+    private var transientSelectionBoxAdvance = Point()
 
     init {
         val timer = Timer(16) {
@@ -146,6 +149,7 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
     override fun paintComponent(g: Graphics?) {
         super.paintComponent(g)
         val g2d = preparePainter(g)
+        paintGenericSelectionBox(g2d)
         paintAtoms(g2d)
         paintBondSelection(g2d)
         paintLines(g2d)
@@ -164,6 +168,43 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
 
 
         return g2d
+    }
+
+
+    /**
+     * This is not for painting the selection markers as seen by the selection boxes
+     * that show up on atoms and bonds when the mouse is near
+     *
+     * This is for painting the wide selection box that appears when using the selection box tool
+     *
+     * This is a special UI element, because it is drawn, regardless if the controller
+     * has validated it.
+     * -> As in, this is the only UI component that is painted from data that does not come from the
+     * UIBuilder in the controller
+     */
+    private fun paintGenericSelectionBox(g2d: Graphics2D) {
+        var startX = cameraZoom * transientSelectionBoxStart.x
+        var startY = cameraZoom * transientSelectionBoxStart.y
+        var advX = cameraZoom * transientSelectionBoxAdvance.x
+        var advY = cameraZoom * transientSelectionBoxAdvance.y
+
+        //Java's painter ensures that width is positive, and height negative
+        //So we need to convert that here if that is not the case
+        if (advX < 0) {
+            startX += advX
+            advX = advX.absoluteValue
+        }
+        if (advY < 0) {
+            startY += advY
+            advY = advY.absoluteValue
+        }
+
+        val oldColour = g2d.color
+        g2d.color = MolGLideUtils.getFocusColour()
+        g2d.fillRect(startX.toInt(), startY.toInt(), advX.toInt(), advY.toInt())
+        g2d.color = MolGLideUtils.getAccentColour()
+        g2d.drawRect(startX.toInt(), startY.toInt(), advX.toInt(), advY.toInt())
+        g2d.color = oldColour
     }
 
     private fun paintAtoms(g2d: Graphics2D) {
@@ -288,7 +329,7 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         val bondPos = bondContext.midPoint
         val width = BOND_MARKER * cameraZoom
         val height = BOND_MARKER * cameraZoom
-        val start = getBoxStart(bondPos, width, height)
+        val start = getDiscreteSelectionBoxStart(bondPos, width, height)
 
         val oldColour = g2d.color
         g2d.color = MolGLideUtils.getAccentColour()
@@ -299,7 +340,7 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         g2d.color = oldColour
     }
 
-    private fun getBoxStart(bondPos: Vector2d, width: Float, height: Float): Vector2d {
+    private fun getDiscreteSelectionBoxStart(bondPos: Vector2d, width: Float, height: Float): Vector2d {
         val startX = bondPos.x * cameraZoom
         val startY = bondPos.y * cameraZoom
         return Vector2d(startX - width / 2, startY - height / 2)
@@ -328,6 +369,12 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
             if (e == null || pauseEvents) {
                 return
             }
+
+            if (dataController.canDrawSelectOnClick()) {
+                val point = screenToWorld(e.point)
+                transientSelectionBoxStart = point
+            }
+
             val point = screenToWorld(e.point)
             if (SwingUtilities.isLeftMouseButton(e)) {
                 dataController.handleMouseClick(point.x, point.y)
@@ -344,6 +391,11 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
             dataController.handleMouseRelease(point.x, point.y)
 
             maybeShowPopup(e)
+
+            transientSelectionBoxStart.x = 0
+            transientSelectionBoxStart.y = 0
+            transientSelectionBoxAdvance.x = 0
+            transientSelectionBoxAdvance.y = 0
         }
 
         override fun mouseEntered(e: MouseEvent?) {
@@ -372,10 +424,15 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
             dataController.handleMouseDrag(worldPoint.x, worldPoint.y)
 
             updateMouse(e)
+            val moveX = offsetX * MOUSE_SENSE
+            val moveY = offsetY * MOUSE_SENSE
             if (SwingUtilities.isMiddleMouseButton(e)) {
-                cameraX += offsetX * MOUSE_SENSE
-                cameraY += offsetY * MOUSE_SENSE
-
+                cameraX += moveX
+                cameraY += moveY
+            }
+            if (dataController.canDrawSelectOnClick()) {
+                transientSelectionBoxAdvance.x = worldPoint.x - transientSelectionBoxStart.x
+                transientSelectionBoxAdvance.y = worldPoint.y - transientSelectionBoxStart.y
             }
         }
 

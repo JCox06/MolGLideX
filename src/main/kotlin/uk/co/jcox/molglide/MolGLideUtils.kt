@@ -32,6 +32,10 @@ object MolGLideUtils {
         return UIManager.getColor("Component.accentColor") ?: Color.PINK
     }
 
+    fun getFocusColour() : Color {
+        return UIManager.getColor("Component.focusColor") ?: Color.PINK
+    }
+
 
     /**
      * Presents the user with a dialogue to choose where to the file to

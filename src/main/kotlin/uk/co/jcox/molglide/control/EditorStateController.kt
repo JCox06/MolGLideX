@@ -1,5 +1,6 @@
 package uk.co.jcox.molglide.control
 
+import com.sun.org.apache.xpath.internal.operations.Bool
 import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.StereoChem
@@ -12,12 +13,12 @@ import uk.co.jcox.molglide.control.actions.ToggleAtomVisibilityAction
 import uk.co.jcox.molglide.control.actions.UpdateBondAromaticityAction
 import uk.co.jcox.molglide.control.actions.UpdateBondOrderAction
 import uk.co.jcox.molglide.control.tool.AtomBondTool
+import uk.co.jcox.molglide.control.tool.SelectTool
 import uk.co.jcox.molglide.control.tool.TemplateRingTool
 import uk.co.jcox.molglide.control.tool.Tool
 import uk.co.jcox.molglide.io.LevelSerializer
 import uk.co.jcox.molglide.ui.EditorPanel
 import java.io.File
-import java.nio.file.Files
 
 class EditorStateController (
     private val appManager: AppManager,
@@ -67,11 +68,14 @@ class EditorStateController (
         if (appManager.editMode.type == EditMode.ToolType.RING_INSERT) {
             currentTool = TemplateRingTool(appManager, actionManager, selectionManager, stateData)
         }
+        if (appManager.editMode.type == EditMode.ToolType.SELECT_TOOL) {
+            currentTool = SelectTool(appManager, actionManager, selectionManager, stateData)
+        }
     }
 
     fun update(worldX: Int, worldY: Int) {
         currentTool.updateMouseWorld(worldX, worldY)
-        selectionManager.update(stateData, worldX, worldY)
+        selectionManager.updatePrimarySelection(stateData, worldX, worldY)
         if (actionManager.isDirty) {
             uiBuilder.rebuild()
         }
@@ -162,6 +166,10 @@ class EditorStateController (
         val json = levelSerializer.getJSONEncoding(stateData)
         file.writeText(json)
         lastUsedSaveFile = file
+    }
+
+    fun canDrawSelectOnClick(): Boolean {
+        return currentTool is SelectTool
     }
 
     fun getDataID() : Int {
