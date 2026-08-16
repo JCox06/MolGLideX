@@ -1,32 +1,21 @@
 package uk.co.jcox.molglide.ui
 
-import io.github.andrewauclair.moderndocking.DockingProperty
-import io.github.andrewauclair.moderndocking.DockingRegion
 import io.github.andrewauclair.moderndocking.app.Docking
 import io.github.andrewauclair.moderndocking.app.RootDockingPanel
 import io.github.andrewauclair.moderndocking.ext.ui.DockingUI
-import jdk.internal.vm.ThreadContainers.root
-import org.joda.time.DateTime
 import uk.co.jcox.molglide.MolGLideUtils
 import uk.co.jcox.molglide.control.AppManager
 import java.awt.BorderLayout
-import java.awt.Dimension
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import java.awt.event.MouseListener
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.Date
-import javax.swing.BoxLayout
-import javax.swing.JButton
 import javax.swing.JComponent
 import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
-import javax.swing.JToolBar
 import javax.swing.SwingUtilities
 
 class MolGlideFrame : JFrame("MolGLideX ${LocalDate.now()}") {
@@ -93,7 +82,10 @@ class MolGlideFrame : JFrame("MolGLideX ${LocalDate.now()}") {
         panel.add(component)
         windows.add(panel)
         if (enable) {
+//            Docking.dock(panel, this)
+//            Docking.bringToFront(panel)
             Docking.dock(panel, this)
+            Docking.display(panel)
         }
         component.addMouseMotionListener(object : MouseAdapter() {
             override fun mouseMoved(e: MouseEvent?) {
@@ -113,6 +105,12 @@ class MolGlideFrame : JFrame("MolGLideX ${LocalDate.now()}") {
                 }
             }
         })
+    }
+
+    fun updateTabText(id: String, newText: String) {
+        val dockingPanel = windows.find { it.persistentID == id }
+        dockingPanel?.internalText = newText
+        Docking.updateTabInfo(id)
     }
 
     private fun buildStatusBar() : JPanel {

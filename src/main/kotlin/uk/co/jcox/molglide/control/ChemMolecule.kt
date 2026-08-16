@@ -12,6 +12,7 @@ import org.openscience.cdk.AtomContainer
 import org.openscience.cdk.RingSet
 import org.openscience.cdk.atomtype.CDKAtomTypeMatcher
 import org.openscience.cdk.exception.CDKException
+import org.openscience.cdk.geometry.cip.CIPTool.order
 import org.openscience.cdk.graph.ConnectivityChecker
 import org.openscience.cdk.interfaces.IAtom
 import org.openscience.cdk.interfaces.IAtomContainer
@@ -116,6 +117,7 @@ class ChemMolecule (
             3 -> IBond.Order.TRIPLE
             else -> IBond.Order.SINGLE
         }
+        updateBondOrder(chemBond, order)
     }
 
     fun updateBondOrder(chemBond: ChemBond, newOrder: IBond.Order) {

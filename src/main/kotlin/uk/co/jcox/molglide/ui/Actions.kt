@@ -72,7 +72,7 @@ class NewProjectAction (val mainFrame: MolGlideFrame,val appManager: AppManager)
         val data = appManager.getDataForState(newID)
         val dataController = EditorStateController(appManager, data)
         val editorPanel = EditorPanel(dataController)
-        mainFrame.addDockingPanel(newID, "Document ${data.currentID + 1}", editorPanel, true)
+        mainFrame.addDockingPanel(newID, "Unsaved Document ${data.currentID + 1}", editorPanel, true)
     }
 
 }
@@ -252,7 +252,7 @@ class DeleteBondMenuAction (val controller: EditorStateController) : AbstractAct
 }
 
 
-class SaveFileAction (val appManager: AppManager) : AbstractAction("Save file") {
+class SaveFileAction (val appManager: AppManager, val mainFrame: MolGlideFrame) : AbstractAction("Save file") {
     init {
         putValue(SHORT_DESCRIPTION, "Saves current progress as .mgx file")
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK))
@@ -268,13 +268,13 @@ class SaveFileAction (val appManager: AppManager) : AbstractAction("Save file") 
             return
         }
         //If the save file does not exist, delegate to the Save As File Action
-        val newAction = SaveAsFileAction(appManager)
+        val newAction = SaveAsFileAction(appManager, mainFrame)
         newAction.actionPerformed(null)
     }
 }
 
 
-class SaveAsFileAction (val appManager: AppManager) : AbstractAction("Save as") {
+class SaveAsFileAction (val appManager: AppManager, val mainFrame: MolGlideFrame) : AbstractAction("Save as") {
     init {
         putValue(SHORT_DESCRIPTION, "Saves current progress as a new .mgx file")
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK or InputEvent.SHIFT_DOWN_MASK))
@@ -288,6 +288,8 @@ class SaveAsFileAction (val appManager: AppManager) : AbstractAction("Save as") 
             val saveLocation = MolGLideUtils.showSaveDialogue(panel)
             if (saveLocation != null) {
                 controller.saveProject(saveLocation)
+                val dockingID = AppManager.getDockingID(controller.getDataID())
+                mainFrame.updateTabText(dockingID, saveLocation.name)
             }
         }
     }
@@ -305,6 +307,8 @@ class LoadFileAction (val appManager: AppManager, val mainFrame: MolGlideFrame) 
         val file = MolGLideUtils.showOpenDialogue()
 
         if (file != null) {
+            //todo I would make a method to avoid code duplication with this and the new document action
+            //However, I am not sure if this is even good enough just yet, so I shall hold off for the moment
             val dockingID = appManager.loadFile(file)
             val data = appManager.getDataForState(dockingID)
             val dataController = EditorStateController(appManager, data)

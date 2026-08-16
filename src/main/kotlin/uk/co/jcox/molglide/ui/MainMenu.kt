@@ -1,16 +1,12 @@
 package uk.co.jcox.molglide.ui
 
 import io.github.andrewauclair.moderndocking.app.DockableMenuItem
-import sun.tools.jconsole.AboutDialog
 import uk.co.jcox.molglide.control.AppManager
-import uk.co.jcox.molglide.control.EditorStateController
 import java.awt.Desktop
-import java.awt.event.WindowEvent
 import java.net.URI
 import javax.swing.JMenu
 import javax.swing.JMenuBar
 import javax.swing.JMenuItem
-import javax.swing.JToolBar
 import javax.swing.event.MenuEvent
 import javax.swing.event.MenuListener
 
@@ -29,8 +25,8 @@ class MainMenu(val mainFrame: MolGlideFrame, val appManager: AppManager) : JMenu
         menuFile.add(NewProjectAction(mainFrame, appManager))
 
         menuFile.add(LoadFileAction(appManager, mainFrame))
-        menuFile.add(SaveFileAction(appManager))
-        menuFile.add(SaveAsFileAction(appManager))
+        menuFile.add(SaveFileAction(appManager, mainFrame))
+        menuFile.add(SaveAsFileAction(appManager, mainFrame))
 
         menuFile.addSeparator()
 
@@ -68,7 +64,7 @@ class MainMenu(val mainFrame: MolGlideFrame, val appManager: AppManager) : JMenu
                 menuWindows.addSeparator()
 
                 mainFrame.getWindows().forEach { win ->
-                    val item = DockableMenuItem(win.persistentID, win.tabText)
+                    val item = DockableMenuItem(win.persistentID, win.internalText)
                     menuWindows.add(item)
                 }
             }

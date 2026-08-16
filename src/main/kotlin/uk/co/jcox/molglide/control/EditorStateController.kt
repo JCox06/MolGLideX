@@ -161,5 +161,10 @@ class EditorStateController (
         val levelSerializer = LevelSerializer()
         val json = levelSerializer.getJSONEncoding(stateData)
         file.writeText(json)
+        lastUsedSaveFile = file
+    }
+
+    fun getDataID() : Int {
+        return stateData.currentID
     }
 }

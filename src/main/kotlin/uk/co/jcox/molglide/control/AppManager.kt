@@ -78,5 +78,10 @@ class AppManager {
     companion object {
         private const val EDITOR_PREFIX: String = "internal_editor_"
 
+
+        fun getDockingID(id: Int) : String {
+            return "${EDITOR_PREFIX}${id}"
+        }
+
     }
 }
