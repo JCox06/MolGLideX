@@ -1,5 +1,6 @@
 package uk.co.jcox.molglide.control
 
+import com.sun.org.apache.xpath.internal.operations.Bool
 import org.joml.Vector2d
 import javax.vecmath.Point2d
 
@@ -56,6 +57,10 @@ class SelectionManager (
         }
 
         batchSelection = BatchSelection(atoms, bonds)
+    }
+
+    fun clearSelectionBoundingBox() {
+        batchSelection = BatchSelection(emptyList(), emptyList())
     }
 
     private fun checkInside(boxX1: Int, boxY1: Int, boxX2: Int, boxY2: Int, checkAgainst: Vector2d) : Boolean {
@@ -135,10 +140,65 @@ class SelectionManager (
         return null
     }
 
+    /**
+     * This method checks if the object is active either
+     * in the primary selection (discrete) or if it is active
+     * in the batch selection
+     */
+    fun isSelected(bond: ChemMolecule.ChemBond): Boolean {
+        val p = primarySelection
+        if (p is Type.ActiveBond && p.chemBond == bond) {
+            return true
+        }
+        if (batchSelection.bonds.contains(bond)) {
+            return true
+        }
+        return false
+    }
+
+    fun isSelected(atom: ChemMolecule.ChemAtom): Boolean {
+        val p = primarySelection
+        if (p is Type.ActiveAtom && p.chemAtom == atom) {
+            return true
+        }
+        if (batchSelection.atoms.contains(atom)) {
+            return true
+        }
+        return false
+    }
+
+
+
     sealed class Type {
-        object None: Type()
-        data class ActiveAtom(val chemAtom: ChemMolecule.ChemAtom): Type()
-        data class ActiveBond(val chemBond: ChemMolecule.ChemBond): Type()
+
+
+        /**
+         * This checks to see if the mouse is hovered over an element
+         * that was also selected in the AABB
+         *
+         * In other words if the user is hovering over something selected
+         *
+         * @return true if mouse is hovering on a selected object
+         */
+        abstract fun inPrimarySelection(batchSelection: SelectionManager.BatchSelection): Boolean
+
+        object None: Type() {
+            override fun inPrimarySelection(batchSelection: BatchSelection): Boolean {
+                return false
+            }
+        }
+
+        data class ActiveAtom(val chemAtom: ChemMolecule.ChemAtom): Type() {
+            override fun inPrimarySelection(batchSelection: BatchSelection): Boolean {
+                return batchSelection.atoms.contains(chemAtom)
+            }
+        }
+
+        data class ActiveBond(val chemBond: ChemMolecule.ChemBond): Type() {
+            override fun inPrimarySelection(batchSelection: BatchSelection): Boolean {
+                return batchSelection.bonds.contains(chemBond)
+            }
+        }
     }
 
     data class BatchSelection (

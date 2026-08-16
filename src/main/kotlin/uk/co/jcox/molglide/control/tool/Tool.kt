@@ -14,7 +14,7 @@ abstract class Tool (
 
     abstract fun onClick(clickX: Int, clickY: Int)
     abstract fun onRelease(clickX: Int, clickY: Int)
-    abstract fun onDragMouse(clickX: Int, clickY: Int)
+    abstract fun onDragMouse(clickX: Int, clickY: Int, dx: Double, dy: Double)
     abstract fun onSuddenMove()
 
     fun updateMouseWorld(mouseX: Int, mouseY: Int) {

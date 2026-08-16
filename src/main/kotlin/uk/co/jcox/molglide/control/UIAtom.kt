@@ -8,4 +8,5 @@ data class UIAtom (
     val trailGroupPos: ChemMolecule.TrailingGroupPosition,
     val visible: Boolean,
     val chemID: String,
+    val selected: Boolean,
 )

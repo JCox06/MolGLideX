@@ -24,7 +24,7 @@ class AtomBondTool(val appManager: AppManager,actionManager: ActionManager,
     var toolMode: Mode = Mode.None
 
 
-    override fun onDragMouse(clickX: Int, clickY: Int) {
+    override fun onDragMouse(clickX: Int, clickY: Int, dx: Double, dy: Double) {
         val currentMode = toolMode
         if (currentMode is Mode.AtomInsertionDragging) {
             handleNewAtomDragging(currentMode, clickX, clickY)

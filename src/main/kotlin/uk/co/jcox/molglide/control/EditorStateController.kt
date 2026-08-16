@@ -57,8 +57,8 @@ class EditorStateController (
         currentTool.onSuddenMove()
     }
 
-    fun handleMouseDrag(mouseX: Int, mouseY: Int) {
-        currentTool.onDragMouse(mouseX, mouseY)
+    fun handleMouseDrag(mouseX: Int, mouseY: Int, dx: Double, dy: Double) {
+        currentTool.onDragMouse(mouseX, mouseY, dx, dy)
     }
 
     private fun prepareTool() {
@@ -169,7 +169,11 @@ class EditorStateController (
     }
 
     fun canDrawSelectOnClick(): Boolean {
-        return currentTool is SelectTool
+        return currentTool is SelectTool && (currentTool as SelectTool).shouldShowAABB()
+    }
+
+    fun updateAxisAlignedBoundingBox(x1: Int, y1: Int, x2: Int, y2: Int) {
+        selectionManager.updateSelectionBoundingBox(stateData, x1, y1, x2, y2)
     }
 
     fun getDataID() : Int {

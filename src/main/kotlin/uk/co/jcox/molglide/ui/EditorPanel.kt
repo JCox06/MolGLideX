@@ -7,8 +7,7 @@ import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.control.ChemMolecule
 import uk.co.jcox.molglide.control.EditorStateController
 import uk.co.jcox.molglide.control.UIAtom
-import uk.co.jcox.molglide.control.UIAtomContext
-import uk.co.jcox.molglide.control.UIBondContext
+import uk.co.jcox.molglide.control.UIBond
 import java.awt.BasicStroke
 import java.awt.Font
 import java.awt.Graphics
@@ -74,7 +73,7 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
     }
 
 
-    private fun buildBondContextMenu(bondContext: UIBondContext) : JPopupMenu {
+    private fun buildBondContextMenu(bondContext: UIBond) : JPopupMenu {
         val menu = JPopupMenu()
 
         val menuSingle = JMenu("Single")
@@ -104,12 +103,12 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         return menu
     }
 
-    private fun buildAtomContextMenu(atomContext: UIAtomContext) : JPopupMenu {
+    private fun buildAtomContextMenu(atomContext: UIAtom) : JPopupMenu {
         val menu = JPopupMenu()
 
         val editLabelAction = EditLabelMenuAction(this,dataController)
         val deleteAtomMenuAction = DeleteAtomMenuAction(dataController)
-        val toggleAtomVisibilityMenuActionAction = ToggleAtomVisibilityMenuAction(dataController, atomContext.isVisible)
+        val toggleAtomVisibilityMenuActionAction = ToggleAtomVisibilityMenuAction(dataController, atomContext.visible)
 
         menu.add(editLabelAction)
         menu.add(deleteAtomMenuAction)
@@ -238,7 +237,7 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
     }
 
     private fun paintAtomSelection(g2d: Graphics2D, uiAtom: UIAtom, m: MasterAtomMetric) {
-        if (dataController.checkSelected(uiAtom)) {
+        if (uiAtom.selected) {
             val oldColour = g2d.color
             val newColour = MolGLideUtils.getAccentColour()
             g2d.color = newColour
@@ -300,7 +299,7 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
 
     private fun paintLines(g2d: Graphics2D) {
         g2d.stroke = BasicStroke(LINE_STROKE * cameraZoom, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
-        val bondsToPaint = dataController.uiBuilder.getUIBonds()
+        val bondsToPaint = dataController.uiBuilder.getUILines()
         bondsToPaint.forEach { bondUI ->
             val startX = bondUI.startX * cameraZoom
             val startY = bondUI.startY * cameraZoom
@@ -325,18 +324,32 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
     }
 
     private fun paintBondSelection(g2d: Graphics2D) {
-        val bondContext = dataController.uiBuilder.getSelectedBond() ?: return
-        val bondPos = bondContext.midPoint
+//        val bondContext = dataController.uiBuilder.getSelectedBond() ?: return
+//        val bondPos = bondContext.midPoint
+//        val width = BOND_MARKER * cameraZoom
+//        val height = BOND_MARKER * cameraZoom
+//        val start = getDiscreteSelectionBoxStart(bondPos, width, height)
+//
+//        val oldColour = g2d.color
+//        g2d.color = MolGLideUtils.getAccentColour()
+//
+//        g2d.fillRect(
+//            start.x.toInt(), start.y.toInt(), width.toInt(), height.toInt()
+//                    )
+//        g2d.color = oldColour
+
+
+        val bondContexts = dataController.uiBuilder.getUIBonds()
         val width = BOND_MARKER * cameraZoom
         val height = BOND_MARKER * cameraZoom
-        val start = getDiscreteSelectionBoxStart(bondPos, width, height)
-
         val oldColour = g2d.color
         g2d.color = MolGLideUtils.getAccentColour()
-
-        g2d.fillRect(
-            start.x.toInt(), start.y.toInt(), width.toInt(), height.toInt()
-                    )
+        bondContexts.forEach { bondContext ->
+            if (bondContext.isSelected) {
+                val start = getDiscreteSelectionBoxStart(bondContext.midPoint, width, height)
+                g2d.fillRect(start.x.toInt(), start.y.toInt(), width.toInt(), height.toInt())
+            }
+        }
         g2d.color = oldColour
     }
 
@@ -370,16 +383,16 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
                 return
             }
 
-            if (dataController.canDrawSelectOnClick()) {
-                val point = screenToWorld(e.point)
-                transientSelectionBoxStart = point
-            }
+//            if (dataController.canDrawSelectOnClick() && SwingUtilities.isLeftMouseButton(e)) {
+//                val point = screenToWorld(e.point)
+
+//            }
 
             val point = screenToWorld(e.point)
             if (SwingUtilities.isLeftMouseButton(e)) {
                 dataController.handleMouseClick(point.x, point.y)
             }
-
+            transientSelectionBoxStart = point
             maybeShowPopup(e)
         }
 
@@ -421,18 +434,19 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
             }
 
             val worldPoint = screenToWorld(e.point)
-            dataController.handleMouseDrag(worldPoint.x, worldPoint.y)
-
             updateMouse(e)
             val moveX = offsetX * MOUSE_SENSE
             val moveY = offsetY * MOUSE_SENSE
+            dataController.handleMouseDrag(worldPoint.x, worldPoint.y, moveX, moveY)
+
             if (SwingUtilities.isMiddleMouseButton(e)) {
                 cameraX += moveX
                 cameraY += moveY
             }
-            if (dataController.canDrawSelectOnClick()) {
+            if (dataController.canDrawSelectOnClick() && SwingUtilities.isLeftMouseButton(e)) {
                 transientSelectionBoxAdvance.x = worldPoint.x - transientSelectionBoxStart.x
                 transientSelectionBoxAdvance.y = worldPoint.y - transientSelectionBoxStart.y
+                dataController.updateAxisAlignedBoundingBox(transientSelectionBoxStart.x, transientSelectionBoxStart.y, worldPoint.x, worldPoint.y)
             }
         }
 

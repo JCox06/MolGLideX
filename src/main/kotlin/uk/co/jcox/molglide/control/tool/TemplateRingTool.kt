@@ -40,7 +40,7 @@ class TemplateRingTool(val appManager: AppManager, actionManager: ActionManager,
         toolMode = Mode.None
     }
 
-    override fun onDragMouse(clickX: Int, clickY: Int) {
+    override fun onDragMouse(clickX: Int, clickY: Int, dx: Double, dy: Double) {
         val currentMode = toolMode
         if (currentMode is Mode.Rotate) {
             rotateRingAngle(clickX, clickY, currentMode)

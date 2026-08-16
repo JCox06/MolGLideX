@@ -1,6 +1,5 @@
 package uk.co.jcox.molglide.control
 
-import jdk.internal.org.jline.utils.Display
 import org.joml.Vector2d
 import org.joml.minus
 import org.joml.plus
@@ -11,8 +10,6 @@ import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.control.ChemMolecule.ChemAtom
 import uk.co.jcox.molglide.control.tool.AtomBondTool
-import kotlin.math.abs
-import kotlin.math.round
 import kotlin.math.roundToInt
 
 class UIBuilder (private val data: EditorStateData, private val selectionManager: SelectionManager) {
@@ -25,9 +22,13 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
     //For wedged bonds, UITriangles must be used, since these are triangular in shapep
     private val uiTriangles: MutableList<UITriangle> = mutableListOf()
 
+    //For the actual bond data - Stores if the bond is selected or not
+    private val uiBonds: MutableList<UIBond> = mutableListOf()
+
     fun getUIAtoms(): List<UIAtom> = uiAtoms
-    fun getUIBonds(): List<UILine> = uiLines
+    fun getUILines(): List<UILine> = uiLines
     fun getUITriangles(): List<UITriangle> = uiTriangles
+    fun getUIBonds(): List<UIBond> = uiBonds
 
     fun rebuild() {
         clearUI()
@@ -38,19 +39,25 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
     private fun buildAtomUI() {
         data.getMolecules().forEach { chemMolecule ->
             chemMolecule.atoms().forEach { chemAtom ->
-                val pos = chemAtom.getPos()
-                val ui: UIAtom = UIAtom(
-                    chemAtom.atom.symbol,
-                    pos.x,
-                    pos.y,
-                    calculateTrailGroup(chemAtom.atom),
-                    chemAtom.getTrailPos(),
-                    chemAtom.isVisible(),
-                    chemAtom.atom.id
-                )
+                val ui = buildUIAtom(chemAtom)
                 uiAtoms.add(ui)
             }
         }
+    }
+
+    private fun buildUIAtom(chemAtom: ChemAtom) : UIAtom {
+        val pos = chemAtom.getPos()
+        val ui: UIAtom = UIAtom(
+            chemAtom.atom.symbol,
+            pos.x,
+            pos.y,
+            calculateTrailGroup(chemAtom.atom),
+            chemAtom.getTrailPos(),
+            chemAtom.isVisible(),
+            chemAtom.atom.id,
+            selectionManager.isSelected(chemAtom)
+        )
+        return ui
     }
 
     private fun calculateTrailGroup(atom: IAtom): String {
@@ -68,13 +75,14 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
             chemMolecule.bonds().forEach { chemBond ->
 
                 val absoluteBond = getAbsoluteBond(chemBond)
-
                 when (chemBond.bond.order) {
                     IBond.Order.SINGLE -> handleSingleStereo(absoluteBond, chemBond)
                     IBond.Order.DOUBLE -> uiLines.addAll(calculatePositionForDoubleBond(absoluteBond, chemBond))
                     IBond.Order.TRIPLE -> uiLines.addAll(calculatePositionForTripleBond(absoluteBond, chemBond))
                     else -> {}
                 }
+                val uiInfo = buildUIBond(chemBond)
+                uiBonds.add(uiInfo)
             }
         }
     }
@@ -384,6 +392,7 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
         uiAtoms.clear()
         uiLines.clear()
         uiTriangles.clear()
+        uiBonds.clear()
     }
 
 
@@ -401,21 +410,25 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
         return false
     }
 
-    fun getSelectedBond(): UIBondContext? {
+    fun getSelectedBond(): UIBond? {
         val selection = selectionManager.primarySelection
         if (selection is SelectionManager.Type.ActiveBond) {
             val chemBond = selection.chemBond
-            val stereo = chemBond.stereo()
-            return UIBondContext(chemBond.bond.order.numeric(), chemBond.midPoint(), chemBond.bond.isAromatic, stereo)
+            return buildUIBond(chemBond)
         }
         return null
     }
 
-    fun getSelectedAtom(): UIAtomContext? {
+    private fun buildUIBond(chemBond: ChemMolecule.ChemBond): UIBond {
+        val ui = UIBond(chemBond.bond.order.numeric(), chemBond.midPoint(), chemBond.bond.isAromatic, chemBond.stereo(), selectionManager.isSelected(chemBond))
+        return ui
+    }
+
+    fun getSelectedAtom(): UIAtom? {
         val selection = selectionManager.primarySelection
         if (selection is SelectionManager.Type.ActiveAtom) {
             val chemAtom = selection.chemAtom
-            return UIAtomContext(chemAtom.isVisible())
+            return buildUIAtom(chemAtom)
         }
         return null
     }
