@@ -5,6 +5,7 @@ import java.awt.Color
 import java.awt.Image
 import java.awt.image.ImageFilter
 import java.io.File
+import java.time.LocalTime
 import javax.swing.JPanel
 import javax.swing.UIManager
 
@@ -59,5 +60,18 @@ object MolGLideUtils {
         fileChooser.showOpenDialog(null)
         val file = fileChooser.selectedFile
         return file
+    }
+
+
+    fun writeTempFile(content: String) : File {
+        val temp = getTempFile()
+        temp.writeText(content)
+        return temp
+    }
+
+    fun getTempFile(): File {
+        val temp = File.createTempFile("molglide_graphics_${LocalTime.now()}", ".svg")
+        temp.deleteOnExit()
+        return temp
     }
 }

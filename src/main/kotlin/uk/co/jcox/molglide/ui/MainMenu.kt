@@ -30,10 +30,6 @@ class MainMenu(val mainFrame: MolGlideFrame, val appManager: AppManager) : JMenu
 
         menuFile.addSeparator()
 
-        menuFile.add(QuickCaptureAction(appManager))
-
-        menuFile.addSeparator()
-
         menuFile.add(JMenuItem(abstractAction("Visit Website") {Desktop.getDesktop().browse(URI("https://molglide.com"))}))
 
         menuFile.add(JMenuItem(abstractAction("Report Bugs") {Desktop.getDesktop().browse(URI("https://molglide.com/bugs"))}))

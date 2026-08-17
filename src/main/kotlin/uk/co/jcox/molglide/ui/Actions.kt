@@ -7,7 +7,9 @@ import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.control.AppManager
 import uk.co.jcox.molglide.control.EditorStateController
 import uk.co.jcox.molglide.control.SVGExporter
+import uk.co.jcox.molglide.io.ClipboardMoleculePayload
 import java.awt.Desktop
+import java.awt.Toolkit
 import java.awt.event.ActionEvent
 import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
@@ -76,25 +78,6 @@ class NewProjectAction (val mainFrame: MolGlideFrame,val appManager: AppManager)
 
 }
 
-
-class QuickCaptureAction (val appManager: AppManager) : AbstractAction("Quick Capture") {
-
-    init {
-        putValue(SHORT_DESCRIPTION, "Captures, saves, and opens the current view as an SVG image.")
-        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK))
-    }
-
-    override fun actionPerformed(e: ActionEvent?) {
-        val currentPane = appManager.activePanel
-        if (currentPane != null) {
-            val exporter = SVGExporter()
-            val userHome = File(System.getProperty("user.home"))
-            val file = File(MolGLideUtils.getQuickCaptureDirectory(), DateTime.now().toString())
-            exporter.quickExport(currentPane, file)
-            Desktop.getDesktop().browse(file.toURI())
-        }
-    }
-}
 
 class EditLabelMenuAction (val panel: JPanel, val controller: EditorStateController) : AbstractAction("Edit Label") {
     init {
@@ -319,14 +302,23 @@ class LoadFileAction (val appManager: AppManager, val mainFrame: MolGlideFrame) 
 }
 
 
-class CopySelection(val controller: EditorStateController) : AbstractAction("Copy Selection") {
+class CopySelection(val controller: EditorStateController, val editorPanel: EditorPanel) : AbstractAction("Copy Selection") {
 
     init {
         putValue(SHORT_DESCRIPTION, "Copy selected components to the clipboard")
     }
 
+    //The copy selection needs to do two things
+    //1) Copy the selected components in SVG format to the clipboard to use in external applications
+    //2) Copy the selected components in MGX format to the clipboard to use in MolGLide applications
     override fun actionPerformed(e: ActionEvent?) {
-
+        val svgGen = SVGExporter()
+        val svgPayload = svgGen.quickExport(editorPanel)
+        val mgxPayload = "TODO"
+        val filePayload = listOf(MolGLideUtils.writeTempFile(svgPayload))
+        val payload = ClipboardMoleculePayload(mgxPayload, svgPayload, filePayload)
+        val clipboard = Toolkit.getDefaultToolkit().systemClipboard
+        clipboard.setContents(payload, null)
     }
 }
 
@@ -341,14 +333,14 @@ class PasteSelection(val controller: EditorStateController) : AbstractAction("Pa
     }
 }
 
-class CutSelection(val controller: EditorStateController) : AbstractAction("Cut Selection") {
+class CutSelection(val controller: EditorStateController, val editorPanel: EditorPanel) : AbstractAction("Cut Selection") {
 
     init {
         putValue(SHORT_DESCRIPTION, "Delete and copy selected components")
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        val copy = CopySelection(controller)
+        val copy = CopySelection(controller, editorPanel)
         copy.actionPerformed(e)
         val delete = DeleteSelection(controller)
         delete.actionPerformed(e)

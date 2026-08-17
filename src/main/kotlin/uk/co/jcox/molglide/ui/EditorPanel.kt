@@ -1,6 +1,7 @@
 package uk.co.jcox.molglide.ui
 
 import com.github.jsonldjava.shaded.com.google.common.math.IntMath.pow
+import com.sun.org.apache.xpath.internal.operations.Bool
 import org.joml.Vector2d
 import uk.co.jcox.molglide.MolGLideUtils
 import uk.co.jcox.molglide.StereoChem
@@ -76,8 +77,8 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
 
     private fun buildBatchContextMenu(): JPopupMenu {
         val menu = JPopupMenu()
-        menu.add(CopySelection(dataController))
-        menu.add(CutSelection(dataController))
+        menu.add(CopySelection(dataController, this))
+        menu.add(CutSelection(dataController, this))
         menu.add(DeleteSelection(dataController))
         return menu
     }
@@ -155,28 +156,51 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         })
     }
 
-    override fun paintComponent(g: Graphics?) {
-        super.paintComponent(g)
-        val g2d = preparePainter(g)
-        paintGenericSelectionBox(g2d)
-        paintAtoms(g2d)
-        paintBondSelection(g2d)
+
+    /**
+     * Paints the editor to a supplied Graphics2D object
+     * @param g2d the Graphics2D object to paint to
+     * @param drawSelectionMarkers Tells the painter to not draw square selection/anchor markers over atoms that
+     * are selected
+     * @param onlyDrawSelected By default, this is false. When set to true, the UIBuilder is called again, but this time
+     * the UIBuilder will only build UI elements that are currently selected
+     */
+    fun paintEditor(g2d: Graphics2D, drawSelectionMarkers: Boolean = true, onlyDrawSelected: Boolean = false) {
+        if (onlyDrawSelected) dataController.uiBuilder.rebuild(true)
+        preparePainter(g2d)
+
+        if (drawSelectionMarkers) {
+            paintGenericSelectionBox(g2d)
+            paintBondSelection(g2d)
+        }
+        //For the case of atoms, unfortunately, the selection marker
+        //is coupled with the atom itself, so this has to be checked individually
+        paintAtoms(g2d, drawSelectionMarkers)
         paintLines(g2d)
         paintTriangles(g2d)
     }
 
 
-    private fun preparePainter(graphics: Graphics?) : Graphics2D {
-        val g2d = graphics as Graphics2D
+    /**
+     * Should only be called by Java Swing
+     * For external painting use EditorPanel#paintEditor
+     */
+    protected override fun paintComponent(g: Graphics?) {
+        super.paintComponent(g)
+
+        val g2d = g as? Graphics2D ?: return
+
+        paintEditor(g2d, true, false)
+    }
+
+
+    private fun preparePainter(g2d: Graphics2D) {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
         g2d.font = Font("Liberation Serif", Font.PLAIN, -5)
         g2d.font = g2d.font.deriveFont(Font.PLAIN, UNMODDED_TEXT_SIZE * cameraZoom)
 
         g2d.translate(cameraX, cameraY)
-
-
-        return g2d
     }
 
 
@@ -216,14 +240,16 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         g2d.color = oldColour
     }
 
-    private fun paintAtoms(g2d: Graphics2D) {
+    private fun paintAtoms(g2d: Graphics2D, paintSelection: Boolean) {
         val atomsToPaint = dataController.uiBuilder.getUIAtoms()
         atomsToPaint.forEach { ui ->
             val x = ui.posX * cameraZoom
             val y = ui.posY * cameraZoom
 
             val metrics = getMasterMetrics(g2d, ui, x, y)
-            paintAtomSelection(g2d, ui, metrics)
+
+            if (paintSelection) paintAtomSelection(g2d, ui, metrics)
+
             if (ui.visible) {
                 paintMasterAtom(g2d, ui, metrics)
                 if (ui.trailGroup != "") {

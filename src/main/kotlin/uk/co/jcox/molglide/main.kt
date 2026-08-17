@@ -14,7 +14,7 @@ import javax.swing.SwingUtilities
 import javax.swing.UIManager
 
 fun main() {
-    FlatLightLaf.setup()
+    FlatDarkLaf.setup()
 
     JFrame.setDefaultLookAndFeelDecorated(true)
     JDialog.setDefaultLookAndFeelDecorated(false)

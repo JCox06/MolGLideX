@@ -156,6 +156,11 @@ class SelectionManager (
         return false
     }
 
+    /**
+     * This method checks if the object is active either
+     * in the primary selection (discrete) or if it is active
+     * in the batch selection
+     */
     fun isSelected(atom: ChemMolecule.ChemAtom): Boolean {
         val p = primarySelection
         if (p is Type.ActiveAtom && p.chemAtom == atom) {

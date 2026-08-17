@@ -30,15 +30,18 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
     fun getUITriangles(): List<UITriangle> = uiTriangles
     fun getUIBonds(): List<UIBond> = uiBonds
 
-    fun rebuild() {
+    fun rebuild(includeSelectedOnly: Boolean = false) {
         clearUI()
-        buildAtomUI()
-        buildBondUI()
+        buildAtomUI(includeSelectedOnly)
+        buildBondUI(includeSelectedOnly)
     }
 
-    private fun buildAtomUI() {
+    private fun buildAtomUI(includeSelectedOnly: Boolean) {
         data.getMolecules().forEach { chemMolecule ->
             chemMolecule.atoms().forEach { chemAtom ->
+                if (includeSelectedOnly && !selectionManager.isSelected(chemAtom)) {
+                    return@forEach
+                }
                 val ui = buildUIAtom(chemAtom)
                 uiAtoms.add(ui)
             }
@@ -70,10 +73,12 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
         return ""
     }
 
-    fun buildBondUI() {
+    fun buildBondUI(includeSelectedOnly: Boolean) {
         data.getMolecules().forEach { chemMolecule ->
             chemMolecule.bonds().forEach { chemBond ->
-
+                if (includeSelectedOnly && !selectionManager.isSelected(chemBond)) {
+                    return@forEach
+                }
                 val absoluteBond = getAbsoluteBond(chemBond)
                 when (chemBond.bond.order) {
                     IBond.Order.SINGLE -> handleSingleStereo(absoluteBond, chemBond)

@@ -17,6 +17,7 @@ Everything else aside, the application uses a very similar core to the original 
 
 ## Features
 - [x] Snappy and high-performance editor
+- [x] Seamlessly copy over molecules as SVG images into other applications (Tested on LibreOffice Writer)
 - [x] Create basic and simplistic molecules
 - [x] Create molecules from ring templates (mostly working, but see issues)
 - [ ] Append/Fuse ring fragments to other molecules
