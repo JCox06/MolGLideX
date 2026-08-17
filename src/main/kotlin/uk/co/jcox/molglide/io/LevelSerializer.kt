@@ -33,7 +33,7 @@ class LevelSerializer {
         molecule.atoms().forEach { chemAtom ->
             val id = idMappings.chemAtoms[chemAtom] ?: throw IOException("Level Data ID for atom is missing upon molecule serialization")
             val pos = chemAtom.getPos()
-            val dataAtom = AtomDataObject(id, chemAtom.atom.id, chemAtom.atom.symbol, chemAtom.isVisible(), chemAtom.getTrailPos(), pos.x, pos.y )
+            val dataAtom = AtomDataObject(id, chemAtom.atom.id, chemAtom.atom.symbol, chemAtom.isVisible(), chemAtom.getTrailPos(), pos.x, pos.y, chemAtom.shouldIgnoreErrors())
             dataMolecule.atoms.add(id)
             saveFile.dataAtoms[id] = dataAtom
         }

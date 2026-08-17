@@ -224,6 +224,7 @@ class ChemMolecule (
         atom.id = UUID.randomUUID().toString()
         atom.setProperty(VISIBLE, true)
         atom.setProperty(TRAILING_POS, TrailingGroupPosition.RIGHT)
+        atom.setProperty(IGNORE_ERRORS, false)
     }
 
     private fun initDefaultBondProperties(cdkBond: IBond) {
@@ -249,6 +250,12 @@ class ChemMolecule (
         }
         fun setVisible(visible: Boolean) {
             atom.setProperty(VISIBLE, visible)
+        }
+        fun shouldIgnoreErrors(): Boolean {
+            return atom.getProperty(IGNORE_ERRORS)
+        }
+        fun setIgnoreErrors(ignore: Boolean) {
+            atom.setProperty(IGNORE_ERRORS, ignore)
         }
         fun isCarbon(): Boolean {
             return atom.symbol == "C"
@@ -336,5 +343,7 @@ class ChemMolecule (
         const val VISIBLE = "MOLGLIDE_VISIBLE"
         const val TRAILING_POS = "MOLGLIDE_TRAILING_POS"
         const val FLIP_BOND = "MOLGLIDE_FLIP_BOND"
+        const val IGNORE_ERRORS = "MOLGLIDE_IGNORE_ERRORS"
+        const val UNKNOWN = "X"
     }
 }

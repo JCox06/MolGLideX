@@ -27,6 +27,7 @@ data class AtomDataObject (
     val hydrogenPos: ChemMolecule.TrailingGroupPosition,
     val worldX: Double,
     val worldY: Double,
+    val ignoreErrors: Boolean = false,
 )
 
 @Serializable

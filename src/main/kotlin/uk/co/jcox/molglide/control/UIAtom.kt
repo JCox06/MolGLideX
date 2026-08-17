@@ -9,4 +9,6 @@ data class UIAtom (
     val visible: Boolean,
     val chemID: String,
     val selected: Boolean,
+    val hasErrors: Boolean,
+    val ignoreErrors: Boolean,
 )

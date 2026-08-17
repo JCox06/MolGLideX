@@ -50,6 +50,8 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
 
     private fun buildUIAtom(chemAtom: ChemAtom) : UIAtom {
         val pos = chemAtom.getPos()
+
+
         val ui: UIAtom = UIAtom(
             chemAtom.atom.symbol,
             pos.x,
@@ -58,9 +60,18 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
             chemAtom.getTrailPos(),
             chemAtom.isVisible(),
             chemAtom.atom.id,
-            selectionManager.isSelected(chemAtom)
+            selectionManager.isSelected(chemAtom),
+            checkForAtomErrors(chemAtom),
+            chemAtom.shouldIgnoreErrors(),
         )
         return ui
+    }
+
+    private fun checkForAtomErrors(chemAtom: ChemAtom): Boolean {
+        if (chemAtom.atom.atomTypeName == ChemMolecule.UNKNOWN) {
+            return true
+        }
+        return false
     }
 
     private fun calculateTrailGroup(atom: IAtom): String {
@@ -441,6 +452,11 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
     fun getSelectedWeight(): Double {
         val s = selectionManager.getMolecule() ?: return 0.0
         return s.getMolecularWeight()
+    }
+
+    fun getSelectedHybridisation(): String {
+        val s = selectionManager.getAtom() ?: return ""
+        return s.atom.atomTypeName
     }
 
 

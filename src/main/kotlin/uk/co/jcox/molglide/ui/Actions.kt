@@ -357,3 +357,15 @@ class DeleteSelection(val controller: EditorStateController) : AbstractAction("D
     }
 }
 
+
+class IgnoreErrorAction(val controller: EditorStateController, val currentValue: Boolean) : AbstractAction("Ignore Valency Errors") {
+    init {
+        putValue(SHORT_DESCRIPTION, "Enable/Disable valency checking for this atom")
+        putValue(SELECTED_KEY, currentValue)
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        controller.ignoreErrors(!currentValue)
+    }
+}
+

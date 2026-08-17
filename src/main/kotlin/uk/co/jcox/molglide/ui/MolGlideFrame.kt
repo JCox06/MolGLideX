@@ -118,7 +118,8 @@ class MolGlideFrame : JFrame("MolGLideX ${LocalDate.now()}") {
                     val act = appManager.activeTab
                     if (act != null) {
                         val weight = String.format("%.4f", act.uiBuilder.getSelectedWeight())
-                        statusLabel.text = "${act.uiBuilder.getSelectedFormula()} | ${weight}"
+                        val h = act.uiBuilder.getSelectedHybridisation()
+                        statusLabel.text = "${act.uiBuilder.getSelectedFormula()} | ${weight} g/mol | ${h}"
                     }
                 }
             }

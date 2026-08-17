@@ -1,7 +1,6 @@
 package uk.co.jcox.molglide.ui
 
 import com.github.jsonldjava.shaded.com.google.common.math.IntMath.pow
-import com.sun.org.apache.xpath.internal.operations.Bool
 import org.joml.Vector2d
 import uk.co.jcox.molglide.MolGLideUtils
 import uk.co.jcox.molglide.StereoChem
@@ -10,6 +9,7 @@ import uk.co.jcox.molglide.control.EditorStateController
 import uk.co.jcox.molglide.control.UIAtom
 import uk.co.jcox.molglide.control.UIBond
 import java.awt.BasicStroke
+import java.awt.Color
 import java.awt.Font
 import java.awt.Graphics
 import java.awt.Graphics2D
@@ -117,10 +117,12 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
     private fun buildAtomContextMenu(atomContext: UIAtom) : JPopupMenu {
         val menu = JPopupMenu()
 
+        val ignoreError = IgnoreErrorAction(dataController, atomContext.ignoreErrors)
         val editLabelAction = EditLabelMenuAction(this,dataController)
         val deleteAtomMenuAction = DeleteAtomMenuAction(dataController)
         val toggleAtomVisibilityMenuActionAction = ToggleAtomVisibilityMenuAction(dataController, atomContext.visible)
 
+        menu.add(JCheckBoxMenuItem(ignoreError))
         menu.add(editLabelAction)
         menu.add(deleteAtomMenuAction)
         menu.add(JCheckBoxMenuItem(toggleAtomVisibilityMenuActionAction))
@@ -160,22 +162,22 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
     /**
      * Paints the editor to a supplied Graphics2D object
      * @param g2d the Graphics2D object to paint to
-     * @param drawSelectionMarkers Tells the painter to not draw square selection/anchor markers over atoms that
+     * @param drawTransients Tells the painter to not draw square selection/anchor markers over atoms that
      * are selected
      * @param onlyDrawSelected By default, this is false. When set to true, the UIBuilder is called again, but this time
      * the UIBuilder will only build UI elements that are currently selected
      */
-    fun paintEditor(g2d: Graphics2D, drawSelectionMarkers: Boolean = true, onlyDrawSelected: Boolean = false) {
+    fun paintEditor(g2d: Graphics2D, drawTransients: Boolean = true, onlyDrawSelected: Boolean = false) {
         if (onlyDrawSelected) dataController.uiBuilder.rebuild(true)
         preparePainter(g2d)
 
-        if (drawSelectionMarkers) {
+        if (drawTransients) {
             paintGenericSelectionBox(g2d)
             paintBondSelection(g2d)
         }
         //For the case of atoms, unfortunately, the selection marker
         //is coupled with the atom itself, so this has to be checked individually
-        paintAtoms(g2d, drawSelectionMarkers)
+        paintAtoms(g2d, drawTransients)
         paintLines(g2d)
         paintTriangles(g2d)
     }
@@ -240,7 +242,7 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         g2d.color = oldColour
     }
 
-    private fun paintAtoms(g2d: Graphics2D, paintSelection: Boolean) {
+    private fun paintAtoms(g2d: Graphics2D, paintTransients: Boolean) {
         val atomsToPaint = dataController.uiBuilder.getUIAtoms()
         atomsToPaint.forEach { ui ->
             val x = ui.posX * cameraZoom
@@ -248,7 +250,12 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
 
             val metrics = getMasterMetrics(g2d, ui, x, y)
 
-            if (paintSelection) paintAtomSelection(g2d, ui, metrics)
+            //Draw the selection marker
+            if (paintTransients && ui.selected) paintAtomTextBoxBorder(g2d, ui, metrics, MolGLideUtils.getAccentColour(), true)
+
+            //Check if error
+            val red = Color.red
+            if (paintTransients && !ui.ignoreErrors && ui.hasErrors) paintAtomTextBoxBorder(g2d, ui, metrics, red, false)
 
             if (ui.visible) {
                 paintMasterAtom(g2d, ui, metrics)
@@ -272,17 +279,23 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         return MasterAtomMetric(centreTextWidth, centreTextHeight, centreBoxWidth, centreBoxHeight, textWidth, textHeight)
     }
 
-    private fun paintAtomSelection(g2d: Graphics2D, uiAtom: UIAtom, m: MasterAtomMetric) {
-        if (uiAtom.selected) {
-            val oldColour = g2d.color
-            val newColour = MolGLideUtils.getAccentColour()
-            g2d.color = newColour
+    //Is used for the atom selection marker, but also for any errors that may arise
+    private fun paintAtomTextBoxBorder(g2d: Graphics2D, uiAtom: UIAtom, m: MasterAtomMetric, color: Color, shouldFill: Boolean) {
+        val oldColour = g2d.color
+        val newColour = color
+        g2d.color = newColour
+        if (shouldFill) {
             g2d.fillRoundRect((m.centreBoxWidth).toInt(),
                 (m.centreBoxHeight).toInt(),
                 (m.textWidth * 2),
                 (m.textWidth * 2), m.textWidth, m.textWidth)
-            g2d.color = oldColour
+        } else {
+            g2d.drawRect((m.centreBoxWidth).toInt(),
+                (m.centreBoxHeight).toInt(),
+                (m.textWidth * 2),
+                (m.textWidth * 2))
         }
+        g2d.color = oldColour
     }
 
     private fun paintMasterAtom(g2d: Graphics2D, uiAtom: UIAtom,  m: MasterAtomMetric) {

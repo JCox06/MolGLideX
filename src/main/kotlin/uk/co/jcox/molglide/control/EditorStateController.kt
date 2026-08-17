@@ -11,6 +11,7 @@ import uk.co.jcox.molglide.control.actions.CompoundAction
 import uk.co.jcox.molglide.control.actions.FlipBondAction
 import uk.co.jcox.molglide.control.actions.IDataAction
 import uk.co.jcox.molglide.control.actions.PartitionFragmentsAction
+import uk.co.jcox.molglide.control.actions.SetIgnoreErrorsOnAtom
 import uk.co.jcox.molglide.control.actions.ToggleAtomVisibilityAction
 import uk.co.jcox.molglide.control.actions.UpdateBondAromaticityAction
 import uk.co.jcox.molglide.control.actions.UpdateBondOrderAction
@@ -20,6 +21,7 @@ import uk.co.jcox.molglide.control.tool.TemplateRingTool
 import uk.co.jcox.molglide.control.tool.Tool
 import uk.co.jcox.molglide.io.LevelSerializer
 import uk.co.jcox.molglide.ui.EditorPanel
+import uk.co.jcox.molglide.ui.IgnoreErrorAction
 import java.io.File
 
 class EditorStateController (
@@ -222,5 +224,11 @@ class EditorStateController (
 
     fun getDataID() : Int {
         return stateData.currentID
+    }
+
+    fun ignoreErrors(newValue: Boolean) {
+        val chemAtom = selectionManager.getAtom() ?: return
+        val action = SetIgnoreErrorsOnAtom(chemAtom, newValue)
+        actionManager.executeAction(action)
     }
 }

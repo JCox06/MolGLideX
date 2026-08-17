@@ -23,6 +23,7 @@ class DirectAtomCreationAction (
         newChemAtom = ChemMolecule.ChemAtom(atom, molecule)
         newChemAtom.setVisible(dataAtom.isVisible)
         newChemAtom.setTrailPos(dataAtom.hydrogenPos)
+        newChemAtom.setIgnoreErrors(dataAtom.ignoreErrors)
 
         molecule.directlyAddAtom(atom)
     }
