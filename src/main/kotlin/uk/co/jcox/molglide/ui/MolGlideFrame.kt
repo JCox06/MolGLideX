@@ -1,11 +1,13 @@
 package uk.co.jcox.molglide.ui
 
+import com.formdev.flatlaf.extras.FlatSVGIcon
 import io.github.andrewauclair.moderndocking.app.Docking
 import io.github.andrewauclair.moderndocking.app.RootDockingPanel
 import io.github.andrewauclair.moderndocking.ext.ui.DockingUI
 import uk.co.jcox.molglide.MolGLideUtils
 import uk.co.jcox.molglide.control.AppManager
 import java.awt.BorderLayout
+import java.awt.Dimension
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.event.WindowAdapter
@@ -18,6 +20,7 @@ import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.SwingUtilities
+import javax.swing.UIManager
 
 class MolGlideFrame : JFrame("MolGLideX ${LocalDate.now()}") {
 
@@ -32,6 +35,8 @@ class MolGlideFrame : JFrame("MolGLideX ${LocalDate.now()}") {
         this.setSize(1200, 800)
         this.setLocationRelativeTo(null)
 
+        val svgImg = FlatSVGIcon("uk/co/jcox/molglide/app_logo.svg", javaClass.classLoader)
+        iconImage = svgImg.derive(32, 32).image
 
         initDocking()
         add(Toolbox(appManager), BorderLayout.PAGE_START)
