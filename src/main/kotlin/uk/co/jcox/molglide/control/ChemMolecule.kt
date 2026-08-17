@@ -18,6 +18,7 @@ import org.openscience.cdk.interfaces.IAtom
 import org.openscience.cdk.interfaces.IAtomContainer
 import org.openscience.cdk.interfaces.IBond
 import org.openscience.cdk.ringsearch.RingSearch
+import org.openscience.cdk.silent.SilentChemObjectBuilder
 import org.openscience.cdk.smiles.smarts.parser.SMARTSParserConstants.a
 import org.openscience.cdk.tools.CDKHydrogenAdder
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator
@@ -38,17 +39,20 @@ import javax.vecmath.Point2d
  */
 class ChemMolecule (
     private val container: IAtomContainer = AtomContainer(),
+    initDefaults: Boolean = true
 ) {
 
     init {
-        container.atoms().forEach { atom ->
-            if (atom != null) {
-                initDefaultAtomProperties(atom)
+        if (initDefaults) {
+            container.atoms().forEach { atom ->
+                if (atom != null) {
+                    initDefaultAtomProperties(atom)
+                }
             }
-        }
-        container.bonds().forEach{bond ->
-            if (bond != null) {
-                initDefaultBondProperties(bond)
+            container.bonds().forEach{bond ->
+                if (bond != null) {
+                    initDefaultBondProperties(bond)
+                }
             }
         }
     }
@@ -206,10 +210,13 @@ class ChemMolecule (
         val containers = mutableListOf<ChemMolecule>()
 
         val cdkFragments = ConnectivityChecker.partitionIntoMolecules(container)
+
+
         cdkFragments.forEach { fragment ->
-            val newMolecule = ChemMolecule(fragment)
+            val newMolecule = ChemMolecule(fragment, false)
             containers.add(newMolecule)
         }
+
         return containers
     }
 
@@ -223,6 +230,15 @@ class ChemMolecule (
         cdkBond.id = UUID.randomUUID().toString()
         cdkBond.setProperty(FLIP_BOND, false)
     }
+
+    override fun equals(other: Any?): Boolean {
+        return other is ChemMolecule && this.container == other.container
+    }
+
+    override fun hashCode(): Int {
+        return container.hashCode()
+    }
+
 
     class ChemAtom (
         val atom: IAtom,

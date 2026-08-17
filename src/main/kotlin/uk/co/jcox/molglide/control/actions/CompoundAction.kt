@@ -11,10 +11,12 @@ class CompoundAction (vararg actionSet: IDataAction) : IDataAction {
     }
 
     override fun undo(data: EditorStateData) {
-        actions.forEach { it.undo(data) }
+        val reverse = actions.reversed()
+        reverse.forEach { it.undo(data) }
     }
 
     override fun redo(data: EditorStateData) {
-        actions.forEach { it.redo(data) }
+        val reverse = actions.reversed()
+        reverse.forEach { it.redo(data) }
     }
 }

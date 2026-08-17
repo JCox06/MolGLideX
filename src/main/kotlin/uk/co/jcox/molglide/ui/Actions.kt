@@ -1,6 +1,5 @@
 package uk.co.jcox.molglide.ui
 
-import org.apache.jena.sparql.pfunction.library.container
 import org.joda.time.DateTime
 import uk.co.jcox.molglide.LabelToSmiles
 import uk.co.jcox.molglide.MolGLideUtils
@@ -314,7 +313,55 @@ class LoadFileAction (val appManager: AppManager, val mainFrame: MolGlideFrame) 
             val dataController = EditorStateController(appManager, data)
             val editorPanel = EditorPanel(dataController)
             mainFrame.addDockingPanel(dockingID, file.name, editorPanel, true)
+            dataController.lastUsedSaveFile = file
         }
+    }
+}
+
+
+class CopySelection(val controller: EditorStateController) : AbstractAction("Copy Selection") {
+
+    init {
+        putValue(SHORT_DESCRIPTION, "Copy selected components to the clipboard")
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+
+    }
+}
+
+class PasteSelection(val controller: EditorStateController) : AbstractAction("Paste Selection") {
+
+    init {
+        putValue(SHORT_DESCRIPTION, "Paste selected components from the clipboard")
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+
+    }
+}
+
+class CutSelection(val controller: EditorStateController) : AbstractAction("Cut Selection") {
+
+    init {
+        putValue(SHORT_DESCRIPTION, "Delete and copy selected components")
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        val copy = CopySelection(controller)
+        copy.actionPerformed(e)
+        val delete = DeleteSelection(controller)
+        delete.actionPerformed(e)
+    }
+}
+
+class DeleteSelection(val controller: EditorStateController) : AbstractAction("Delete Selection") {
+    init {
+        putValue(SHORT_DESCRIPTION, "Delete the selected components")
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        controller.deleteSelectedComponents()
     }
 }
 

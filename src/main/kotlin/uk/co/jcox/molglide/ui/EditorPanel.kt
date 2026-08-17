@@ -73,6 +73,16 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
     }
 
 
+
+    private fun buildBatchContextMenu(): JPopupMenu {
+        val menu = JPopupMenu()
+        menu.add(CopySelection(dataController))
+        menu.add(CutSelection(dataController))
+        menu.add(DeleteSelection(dataController))
+        return menu
+    }
+
+
     private fun buildBondContextMenu(bondContext: UIBond) : JPopupMenu {
         val menu = JPopupMenu()
 
@@ -474,18 +484,26 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
 
         private fun maybeShowPopup(e: MouseEvent) {
             if (e.isPopupTrigger && SwingUtilities.isRightMouseButton(e)) {
+                //Check first to see if something is batch selected
+                if (dataController.hasBatchSelection()) {
+                    val batchContextMenu = buildBatchContextMenu()
+                    batchContextMenu.show(e.component, e.x, e.y)
+                    return
+                }
 
-                //Check to see what is selected
+                //If no batch selection was present, need to see what is primary selected
                 val atomContext = dataController.uiBuilder.getSelectedAtom()
                 if (atomContext != null) {
                     val atomContextMenu = buildAtomContextMenu(atomContext)
                     atomContextMenu.show(e.component, e.x, e.y)
+                    return
                 }
 
                 val bondContext = dataController.uiBuilder.getSelectedBond()
                 if (bondContext != null) {
                     val bondContextMenu = buildBondContextMenu(bondContext)
                     bondContextMenu.show(e.component, e.x, e.y)
+                    return
                 }
             }
         }

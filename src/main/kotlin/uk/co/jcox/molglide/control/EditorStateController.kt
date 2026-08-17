@@ -1,6 +1,6 @@
 package uk.co.jcox.molglide.control
 
-import com.sun.org.apache.xpath.internal.operations.Bool
+import org.checkerframework.checker.units.qual.mol
 import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.StereoChem
@@ -9,6 +9,8 @@ import uk.co.jcox.molglide.control.actions.BondDeletionAction
 import uk.co.jcox.molglide.control.actions.ChangeStereoChemAction
 import uk.co.jcox.molglide.control.actions.CompoundAction
 import uk.co.jcox.molglide.control.actions.FlipBondAction
+import uk.co.jcox.molglide.control.actions.IDataAction
+import uk.co.jcox.molglide.control.actions.PartitionFragmentsAction
 import uk.co.jcox.molglide.control.actions.ToggleAtomVisibilityAction
 import uk.co.jcox.molglide.control.actions.UpdateBondAromaticityAction
 import uk.co.jcox.molglide.control.actions.UpdateBondOrderAction
@@ -37,7 +39,6 @@ class EditorStateController (
      * The lastest save as operation will override the previous name!
      */
     var lastUsedSaveFile: File? = null
-    private set
 
     val uiBuilder = UIBuilder(stateData, selectionManager)
 
@@ -93,8 +94,9 @@ class EditorStateController (
 
     fun deleteSelectedAtom() {
         val atom = selectionManager.getAtom() ?: return
-        val action = AtomDeletionAction(atom)
-        actionManager.executeAction(action)
+        val deleteAtom = AtomDeletionAction(atom)
+        val frag = PartitionFragmentsAction(atom.molecule)
+        actionManager.executeAction(CompoundAction(deleteAtom, frag))
     }
 
     fun toggleSelectedAtomVisiblity() {
@@ -156,10 +158,47 @@ class EditorStateController (
     fun deleteSelectedBond() {
         val selection = selectionManager.primarySelection
         if (selection is SelectionManager.Type.ActiveBond) {
-            val action = BondDeletionAction(selection.chemBond)
-            actionManager.executeAction(action)
+            val bondDelete = BondDeletionAction(selection.chemBond)
+            val fragment = PartitionFragmentsAction(selection.chemBond.molecule)
+            actionManager.executeAction(CompoundAction(bondDelete, fragment))
         }
     }
+
+
+    fun deleteSelectedComponents() {
+
+        val molsToCheck = mutableSetOf<ChemMolecule>()
+
+        val actions: MutableList<IDataAction> = mutableListOf()
+        val bs = selectionManager.batchSelection
+
+        //Note: Remove bonds first, and then atoms
+        //On the reverse when the user wants to undo the action, CompoundAction reverses
+        //the order of the actionArray, so the atoms must be present first
+        bs.bonds.forEach { chemBond ->
+            val deleteBondAction = BondDeletionAction(chemBond)
+            actions.add(deleteBondAction)
+            molsToCheck.add(chemBond.molecule)
+        }
+        bs.atoms.forEach { chemAtom ->
+            val deleteAtomAction = AtomDeletionAction(chemAtom)
+            actions.add(deleteAtomAction)
+            molsToCheck.add(chemAtom.molecule)
+        }
+
+        molsToCheck.forEach { molecule ->
+            val partition = PartitionFragmentsAction(molecule)
+            actions.add(partition)
+        }
+
+        val actionArray = actions.toTypedArray()
+
+        val compoundAction = CompoundAction(*actionArray)
+        actionManager.executeAction(compoundAction)
+
+        selectionManager.clearSelectionBoundingBox()
+    }
+
 
     fun saveProject(file: File) {
         val levelSerializer = LevelSerializer()
@@ -174,6 +213,11 @@ class EditorStateController (
 
     fun updateAxisAlignedBoundingBox(x1: Int, y1: Int, x2: Int, y2: Int) {
         selectionManager.updateSelectionBoundingBox(stateData, x1, y1, x2, y2)
+    }
+
+    fun hasBatchSelection(): Boolean {
+        val bs = selectionManager.batchSelection
+        return bs.bonds.isNotEmpty() || bs.atoms.isNotEmpty()
     }
 
     fun getDataID() : Int {

@@ -11,20 +11,22 @@ class AtomDeletionAction (val toDelete: ChemMolecule.ChemAtom) : IDataAction {
     //Stuff to restore if the action is to be undone
     private var memberBonds = listOf<ChemMolecule.ChemBond>()
 
-    //Fragments created that must be removed if the action is to be undone
-    private var fragments = listOf<ChemMolecule>()
 
     override fun execute(data: EditorStateData) {
         //First delete the atom and connected bonds
         deleteAtomAndBonds()
-
-        //After a deletion, the atomContainer might be fragmented
-        //If that is the case, each fragment must belong to its own atom container
-        fragments = furtherFragment(data, chemMolecule)
     }
 
     override fun undo(data: EditorStateData) {
         restoreAtomAndBonds(data)
+    }
+
+
+    override fun redo(data: EditorStateData) {
+        memberBonds.forEach { chemBond ->
+            chemMolecule.removeConnection(chemBond)
+        }
+        chemMolecule.removeAtom(toDelete)
     }
 
     private fun deleteAtomAndBonds() {
@@ -38,13 +40,6 @@ class AtomDeletionAction (val toDelete: ChemMolecule.ChemAtom) : IDataAction {
     }
 
     private fun restoreAtomAndBonds(data: EditorStateData) {
-        //In Reverse order, if fragments exist, then remove them
-        if (fragments.isNotEmpty()) {
-            fragments.forEach { data.removeMolecule(it) }
-
-            //Then add back the original singular fragmented atom container
-            data.addMolecule(chemMolecule)
-        }
 
         //In Reverse order add the atom, followed by the bonds
         //IMPORTANT: Make sure they are the same original CDK Object!
