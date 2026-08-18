@@ -455,8 +455,8 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
     }
 
     fun getSelectedHybridisation(): String {
-        val s = selectionManager.getAtom() ?: return ""
-        return s.atom.atomTypeName
+        val s = selectionManager.getAtom()
+        return s?.atom?.atomTypeName ?: ""
     }
 
 

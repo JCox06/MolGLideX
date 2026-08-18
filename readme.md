@@ -15,8 +15,9 @@ Everything else aside, the application uses a very similar core to the original 
 ![MolGLideX Screenshot](img.png)
 
 
-## Features
+## Features and Todo List
 - [x] Snappy and high-performance editor
+- [x] Detect valency and other chemical errors
 - [x] Seamlessly copy over molecules as SVG images into other applications (Tested on LibreOffice Writer)
 - [x] Create basic and simplistic molecules
 - [x] Create molecules from ring templates (mostly working, but see issues)
@@ -28,6 +29,7 @@ Everything else aside, the application uses a very similar core to the original 
 - [ ] Exporting to other software
 - [ ] Reaction Arrows, Curly Arrows, Custom text boxes
 - [ ] Editing label of atom with custom text - like (Me, Et, CH2CH(OMe)CH3)
+- [ ] Formal charge and lone pairs tool 
 
 ## Building
 To build the project install maven or use an inbuilt version in your IDE
