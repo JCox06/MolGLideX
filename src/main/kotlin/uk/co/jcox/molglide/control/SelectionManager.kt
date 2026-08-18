@@ -1,6 +1,7 @@
 package uk.co.jcox.molglide.control
 
 import com.sun.org.apache.xpath.internal.operations.Bool
+import org.checkerframework.checker.units.qual.mol
 import org.joml.Vector2d
 import javax.vecmath.Point2d
 
@@ -61,6 +62,20 @@ class SelectionManager (
 
     fun clearSelectionBoundingBox() {
         batchSelection = BatchSelection(emptyList(), emptyList())
+    }
+
+
+    fun clearAndAddSelection(molecules: List<ChemMolecule>) {
+
+        val selectedBonds = mutableListOf<ChemMolecule.ChemBond>()
+        val selectedAtoms = mutableListOf<ChemMolecule.ChemAtom>()
+
+        molecules.forEach { chemMolecule ->
+            selectedAtoms.addAll(chemMolecule.atoms())
+            selectedBonds.addAll(chemMolecule.bonds())
+        }
+
+        batchSelection = BatchSelection(selectedAtoms, selectedBonds)
     }
 
     private fun checkInside(boxX1: Int, boxY1: Int, boxX2: Int, boxY2: Int, checkAgainst: Vector2d) : Boolean {

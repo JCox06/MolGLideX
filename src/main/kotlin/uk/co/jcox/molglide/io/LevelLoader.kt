@@ -15,6 +15,8 @@ import java.io.IOException
 class LevelLoader {
 
     private val idChemAtomMap: MutableMap<Int, ChemMolecule.ChemAtom> = mutableMapOf()
+    var metaData: MolGLideMetaData = MolGLideMetaData()
+    private set
 
     fun loadLevel(file: File, id: Int): EditorStateData {
 
@@ -22,9 +24,14 @@ class LevelLoader {
             throw IOException("File for loading does not exist!")
         }
         val jsonString = file.readText()
-        val dataSaveFile = Json.decodeFromString<DataSaveFile>(jsonString)
+        return loadLevel(jsonString, id)
+    }
 
+
+    fun loadLevel(jsonString: String, id: Int): EditorStateData {
+        val dataSaveFile = Json.decodeFromString<DataSaveFile>(jsonString)
         val level = reconstructLevel(dataSaveFile, id)
+        metaData = dataSaveFile.metaData
         return level
     }
 
@@ -37,7 +44,6 @@ class LevelLoader {
 
         return levelData
     }
-
 
     private fun runDirectDataActions(saveFile: DataSaveFile, actionManager: ActionManager) {
         saveFile.dataMolecules.forEach { dataMolecule ->

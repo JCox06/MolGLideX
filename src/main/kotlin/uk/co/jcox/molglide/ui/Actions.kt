@@ -8,6 +8,8 @@ import uk.co.jcox.molglide.control.AppManager
 import uk.co.jcox.molglide.control.EditorStateController
 import uk.co.jcox.molglide.control.SVGExporter
 import uk.co.jcox.molglide.io.ClipboardMoleculePayload
+import uk.co.jcox.molglide.io.LevelLoader
+import uk.co.jcox.molglide.io.MolGLideMetaData
 import java.awt.Desktop
 import java.awt.Toolkit
 import java.awt.event.ActionEvent
@@ -15,6 +17,7 @@ import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
 import java.awt.event.WindowEvent
 import java.io.File
+import javax.sound.sampled.Clip
 import javax.swing.AbstractAction
 import javax.swing.JOptionPane
 import javax.swing.JPanel
@@ -314,7 +317,7 @@ class CopySelection(val controller: EditorStateController, val editorPanel: Edit
     override fun actionPerformed(e: ActionEvent?) {
         val svgGen = SVGExporter()
         val svgPayload = svgGen.quickExport(editorPanel)
-        val mgxPayload = "TODO"
+        val mgxPayload = controller.serializeSelectedMolecules(MolGLideMetaData(editorPanel.lastMousePos.x, editorPanel.lastMousePos.y))
         val filePayload = listOf(MolGLideUtils.writeTempFile(svgPayload))
         val payload = ClipboardMoleculePayload(mgxPayload, svgPayload, filePayload)
         val clipboard = Toolkit.getDefaultToolkit().systemClipboard
@@ -322,14 +325,27 @@ class CopySelection(val controller: EditorStateController, val editorPanel: Edit
     }
 }
 
-class PasteSelection(val controller: EditorStateController) : AbstractAction("Paste Selection") {
+class PasteSelection(val controller: EditorStateController, val panel: EditorPanel) : AbstractAction("Paste Selection") {
+
+    private val clipboard = Toolkit.getDefaultToolkit().systemClipboard
 
     init {
         putValue(SHORT_DESCRIPTION, "Paste selected components from the clipboard")
+        isEnabled = clipboard.isDataFlavorAvailable(ClipboardMoleculePayload.JSON_FLAVOUR)
     }
 
     override fun actionPerformed(e: ActionEvent?) {
+        if (! clipboard.isDataFlavorAvailable(ClipboardMoleculePayload.JSON_FLAVOUR)) {
+            return
+        }
+        val mgxData = clipboard.getData(ClipboardMoleculePayload.JSON_FLAVOUR)
+        if (mgxData !is String) {
+            return
+        }
+        val levelLoader = LevelLoader()
+        val tempLevel = levelLoader.loadLevel(mgxData, -1)
 
+        controller.importLevel(tempLevel, levelLoader.metaData, panel.mousePosition.x, panel.mousePosition.y)
     }
 }
 

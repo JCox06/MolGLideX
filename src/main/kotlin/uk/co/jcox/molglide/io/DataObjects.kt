@@ -3,10 +3,12 @@ package uk.co.jcox.molglide.io
 import kotlinx.serialization.Serializable
 import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.control.ChemMolecule
+import uk.co.jcox.molglide.ui.MolGlideFrame
 
 
 @Serializable
 data class DataSaveFile (
+    val metaData: MolGLideMetaData = MolGLideMetaData(),
     val dataMolecules: MutableList<MoleculeDataObject> = mutableListOf(),
     val dataBonds: MutableMap<Int, BondDataObject> = mutableMapOf(),
     val dataAtoms: MutableMap<Int, AtomDataObject> = mutableMapOf(),
@@ -41,8 +43,17 @@ data class BondDataObject (
     val aromatic: Boolean,
 )
 
+
+
+@Serializable
+data class MolGLideMetaData (
+    val copyAtScreenX: Int = 0,
+    val copyAtScreenY: Int = 0,
+)
+
 data class DataObjectIDMap (
     val chemMolecules: MutableMap<ChemMolecule, Int> = mutableMapOf(),
     val chemAtoms: MutableMap<ChemMolecule.ChemAtom, Int> = mutableMapOf(),
     val chemBonds: MutableMap<ChemMolecule.ChemBond, Int> = mutableMapOf(),
 )
+

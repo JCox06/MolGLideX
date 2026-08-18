@@ -1,6 +1,7 @@
 package uk.co.jcox.molglide.control
 
-import org.checkerframework.checker.units.qual.mol
+import org.apache.jena.vocabulary.TestManifest.action
+import org.joml.Vector2d
 import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.StereoChem
@@ -10,9 +11,12 @@ import uk.co.jcox.molglide.control.actions.ChangeStereoChemAction
 import uk.co.jcox.molglide.control.actions.CompoundAction
 import uk.co.jcox.molglide.control.actions.FlipBondAction
 import uk.co.jcox.molglide.control.actions.IDataAction
+import uk.co.jcox.molglide.control.actions.ImportMoleculesAction
+import uk.co.jcox.molglide.control.actions.MoveAtomAction
 import uk.co.jcox.molglide.control.actions.PartitionFragmentsAction
 import uk.co.jcox.molglide.control.actions.SetIgnoreErrorsOnAtom
 import uk.co.jcox.molglide.control.actions.ToggleAtomVisibilityAction
+import uk.co.jcox.molglide.control.actions.TranslateAtomAction
 import uk.co.jcox.molglide.control.actions.UpdateBondAromaticityAction
 import uk.co.jcox.molglide.control.actions.UpdateBondOrderAction
 import uk.co.jcox.molglide.control.tool.AtomBondTool
@@ -20,8 +24,8 @@ import uk.co.jcox.molglide.control.tool.SelectTool
 import uk.co.jcox.molglide.control.tool.TemplateRingTool
 import uk.co.jcox.molglide.control.tool.Tool
 import uk.co.jcox.molglide.io.LevelSerializer
+import uk.co.jcox.molglide.io.MolGLideMetaData
 import uk.co.jcox.molglide.ui.EditorPanel
-import uk.co.jcox.molglide.ui.IgnoreErrorAction
 import java.io.File
 
 class EditorStateController (
@@ -67,9 +71,11 @@ class EditorStateController (
     private fun prepareTool() {
         if (appManager.editMode.type == EditMode.ToolType.ATOM_INSERT) {
             currentTool = AtomBondTool(appManager, actionManager, selectionManager, stateData)
+            selectionManager.clearSelectionBoundingBox()
         }
         if (appManager.editMode.type == EditMode.ToolType.RING_INSERT) {
             currentTool = TemplateRingTool(appManager, actionManager, selectionManager, stateData)
+            selectionManager.clearSelectionBoundingBox()
         }
         if (appManager.editMode.type == EditMode.ToolType.SELECT_TOOL) {
             currentTool = SelectTool(appManager, actionManager, selectionManager, stateData)
@@ -209,6 +215,12 @@ class EditorStateController (
         lastUsedSaveFile = file
     }
 
+    fun serializeSelectedMolecules(metaData: MolGLideMetaData = MolGLideMetaData()): String {
+        val levelSerializer = LevelSerializer()
+        val customJSON = levelSerializer.getJSONEncoding(stateData, metaData, selectionManager.batchSelection)
+        return customJSON
+    }
+
     fun canDrawSelectOnClick(): Boolean {
         return currentTool is SelectTool && (currentTool as SelectTool).shouldShowAABB()
     }
@@ -230,5 +242,44 @@ class EditorStateController (
         val chemAtom = selectionManager.getAtom() ?: return
         val action = SetIgnoreErrorsOnAtom(chemAtom, newValue)
         actionManager.executeAction(action)
+    }
+
+
+    fun getCameraPos(): Vector2d {
+        return Vector2d(stateData.cameraX, stateData.cameraY)
+    }
+
+
+
+    fun translateCamPos(x: Double, y: Double) {
+        stateData.cameraX += x
+        stateData.cameraY += y
+    }
+
+    fun importLevel(importData: EditorStateData, metaData: MolGLideMetaData, screenX: Int, screenY: Int) {
+
+        //The meta data contains the mouse click on copy
+        //Compare this with the current screen x, and y, to get dy, and dx, for the copy
+
+        val dx = screenX - metaData.copyAtScreenX
+        val dy = screenY - metaData.copyAtScreenY
+
+        val importActionManager = ActionManager(importData)
+        importData.getMolecules().forEach { chemMolecule ->
+            chemMolecule.atoms().forEach { chemAtom ->
+                val moveAtom = TranslateAtomAction(chemAtom, dx, dy)
+                importActionManager.executeAction(moveAtom)
+            }
+            //Then validate the data in the level and ensure it is all properly
+            //fragmented
+            val partitionAction = PartitionFragmentsAction(chemMolecule)
+            importActionManager.executeAction(partitionAction)
+        }
+        //Now import the data
+        val importAction = ImportMoleculesAction(importData)
+        this.actionManager.executeAction(importAction)
+
+        //Now remove the old selection, and highlight the newly selected data
+        this.selectionManager.clearAndAddSelection(importData.getMolecules())
     }
 }

@@ -48,11 +48,9 @@ or UIAtomContext, or directly query if an entity is selected from the controller
  */
 class EditorPanel(val dataController: EditorStateController) : JPanel() {
 
-    private var cameraX: Double = 0.0
-    private var cameraY: Double = 0.0
     private var cameraZoom: Float = 1.0f
         set(value) {field = max(1.0f, value)}
-    private var lastMousePos: Point = Point()
+    var lastMousePos: Point = Point()
 
     private var pauseEvents = false
 
@@ -75,9 +73,20 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
 
 
 
+    //Used when the current situation does not require
+    //a context menu
+    private fun buildDefaultContextMenu(): JPopupMenu {
+        val menu = JPopupMenu()
+        menu.add(PasteSelection(dataController, this))
+        return menu
+    }
+
     private fun buildBatchContextMenu(): JPopupMenu {
         val menu = JPopupMenu()
         menu.add(CopySelection(dataController, this))
+
+        menu.add(PasteSelection(dataController, this))
+
         menu.add(CutSelection(dataController, this))
         menu.add(DeleteSelection(dataController))
         return menu
@@ -202,7 +211,8 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         g2d.font = Font("Liberation Serif", Font.PLAIN, -5)
         g2d.font = g2d.font.deriveFont(Font.PLAIN, UNMODDED_TEXT_SIZE * cameraZoom)
 
-        g2d.translate(cameraX, cameraY)
+        val vec = dataController.getCameraPos()
+        g2d.translate(vec.x, vec.y)
     }
 
 
@@ -411,8 +421,9 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
     private fun screenToWorld(screen: Point) : Point {
         var x: Double = screen.x.toDouble()
         var y: Double = screen.y.toDouble()
-        x -= cameraX
-        y -= cameraY
+        val camPos = dataController.getCameraPos()
+        x -= camPos.x
+        y -= camPos.y
         x /= cameraZoom
         y /= cameraZoom
         return Point(x.toInt(), y.toInt())
@@ -489,8 +500,7 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
             dataController.handleMouseDrag(worldPoint.x, worldPoint.y, moveX, moveY)
 
             if (SwingUtilities.isMiddleMouseButton(e)) {
-                cameraX += moveX
-                cameraY += moveY
+                dataController.translateCamPos(moveX, moveY)
             }
             if (dataController.canDrawSelectOnClick() && SwingUtilities.isLeftMouseButton(e)) {
                 transientSelectionBoxAdvance.x = worldPoint.x - transientSelectionBoxStart.x
@@ -544,6 +554,8 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
                     bondContextMenu.show(e.component, e.x, e.y)
                     return
                 }
+                val default = buildDefaultContextMenu()
+                default.show(e.component, e.x, e.y)
             }
         }
     }

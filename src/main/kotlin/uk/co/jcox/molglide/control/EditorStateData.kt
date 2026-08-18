@@ -12,8 +12,17 @@ class EditorStateData (
      * different next time
      */
     val currentID: Int,
+
+
     private val molecules: MutableList<ChemMolecule> = mutableListOf(),
     ) {
+
+
+    //Store camera positions so they can be incorporated into the save file
+    //at a later date
+    var cameraX: Double = 0.0
+    var cameraY: Double = 0.0
+
 
     fun createMolecule(initialAtom: String, positionX: Int, positionY: Int) : ChemMolecule {
         //Create the new atom container
@@ -33,6 +42,10 @@ class EditorStateData (
 
     fun removeMolecule(molecule: ChemMolecule) {
         molecules.remove(molecule)
+    }
+
+    fun removeMolecules(remove: Collection<ChemMolecule>) {
+        molecules.removeAll(remove)
     }
 
     fun getAtoms() : List<ChemMolecule.ChemAtom> {
