@@ -6,8 +6,8 @@ import javax.vecmath.Point2d
 
 class TranslateAtomAction (
     private val chemAtom: ChemMolecule.ChemAtom,
-    private val dx: Int,
-    private val dy: Int,
+    private val dx: Double,
+    private val dy: Double,
 ) : IDataAction {
 
     override fun execute(data: EditorStateData) {

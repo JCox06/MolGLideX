@@ -11,6 +11,7 @@ import uk.co.jcox.molglide.io.ClipboardMoleculePayload
 import uk.co.jcox.molglide.io.LevelLoader
 import uk.co.jcox.molglide.io.MolGLideMetaData
 import java.awt.Desktop
+import java.awt.Point
 import java.awt.Toolkit
 import java.awt.event.ActionEvent
 import java.awt.event.InputEvent
@@ -345,7 +346,13 @@ class PasteSelection(val controller: EditorStateController, val panel: EditorPan
         val levelLoader = LevelLoader()
         val tempLevel = levelLoader.loadLevel(mgxData, -1)
 
-        controller.importLevel(tempLevel, levelLoader.metaData, panel.mousePosition.x, panel.mousePosition.y)
+        val p = panel.lastMousePos
+        val w = panel.screenToWorld(p)
+        val md = levelLoader.metaData
+        val lastS = Point(md.copyAtScreenX, md.copyAtScreenY)
+        val lastW = panel.screenToWorld(lastS)
+        controller.importLevel(tempLevel, w.x, w.y, lastW.x, lastW.y)
+
     }
 }
 

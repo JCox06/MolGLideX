@@ -1,7 +1,7 @@
 package uk.co.jcox.molglide.control
 
-import org.apache.jena.vocabulary.TestManifest.action
 import org.joml.Vector2d
+import org.joml.minus
 import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.StereoChem
@@ -12,7 +12,6 @@ import uk.co.jcox.molglide.control.actions.CompoundAction
 import uk.co.jcox.molglide.control.actions.FlipBondAction
 import uk.co.jcox.molglide.control.actions.IDataAction
 import uk.co.jcox.molglide.control.actions.ImportMoleculesAction
-import uk.co.jcox.molglide.control.actions.MoveAtomAction
 import uk.co.jcox.molglide.control.actions.PartitionFragmentsAction
 import uk.co.jcox.molglide.control.actions.SetIgnoreErrorsOnAtom
 import uk.co.jcox.molglide.control.actions.ToggleAtomVisibilityAction
@@ -256,17 +255,21 @@ class EditorStateController (
         stateData.cameraY += y
     }
 
-    fun importLevel(importData: EditorStateData, metaData: MolGLideMetaData, screenX: Int, screenY: Int) {
+    fun importLevel(importData: EditorStateData, newWorldX: Int, newWorldY: Int, oldWorldX: Int, oldWorldY: Int) {
 
         //The meta data contains the mouse click on copy
         //Compare this with the current screen x, and y, to get dy, and dx, for the copy
 
-        val dx = screenX - metaData.copyAtScreenX
-        val dy = screenY - metaData.copyAtScreenY
-
         val importActionManager = ActionManager(importData)
         importData.getMolecules().forEach { chemMolecule ->
+            val rel = chemMolecule.atoms().first().getPos()
             chemMolecule.atoms().forEach { chemAtom ->
+                //First we need to move the atom to a new position based on where the mouse clicked
+                //A simple move action would move all the atoms to the same position
+                //So we have to calculate the dx, dy for each individual atom as to
+                //preserve the original structure
+                val dx = newWorldX - rel.x
+                val dy = newWorldY - rel.y
                 val moveAtom = TranslateAtomAction(chemAtom, dx, dy)
                 importActionManager.executeAction(moveAtom)
             }

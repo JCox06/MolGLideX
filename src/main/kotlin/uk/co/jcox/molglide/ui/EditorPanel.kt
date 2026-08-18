@@ -418,7 +418,7 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
         return Vector2d(startX - width / 2, startY - height / 2)
     }
 
-    private fun screenToWorld(screen: Point) : Point {
+    fun screenToWorld(screen: Point) : Point {
         var x: Double = screen.x.toDouble()
         var y: Double = screen.y.toDouble()
         val camPos = dataController.getCameraPos()
