@@ -2,6 +2,7 @@ package uk.co.jcox.molglide.control
 
 import org.joml.Vector2d
 import org.joml.minus
+import org.openscience.cdk.config.Elements
 import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.StereoChem
@@ -13,12 +14,14 @@ import uk.co.jcox.molglide.control.actions.FlipBondAction
 import uk.co.jcox.molglide.control.actions.IDataAction
 import uk.co.jcox.molglide.control.actions.ImportMoleculesAction
 import uk.co.jcox.molglide.control.actions.PartitionFragmentsAction
+import uk.co.jcox.molglide.control.actions.ReplaceAtomAction
 import uk.co.jcox.molglide.control.actions.SetIgnoreErrorsOnAtom
 import uk.co.jcox.molglide.control.actions.ToggleAtomVisibilityAction
 import uk.co.jcox.molglide.control.actions.TranslateAtomAction
 import uk.co.jcox.molglide.control.actions.UpdateBondAromaticityAction
 import uk.co.jcox.molglide.control.actions.UpdateBondOrderAction
 import uk.co.jcox.molglide.control.tool.AtomBondTool
+import uk.co.jcox.molglide.control.tool.FormalChargeLonePairTool
 import uk.co.jcox.molglide.control.tool.SelectTool
 import uk.co.jcox.molglide.control.tool.TemplateRingTool
 import uk.co.jcox.molglide.control.tool.Tool
@@ -78,6 +81,10 @@ class EditorStateController (
         }
         if (appManager.editMode.type == EditMode.ToolType.SELECT_TOOL) {
             currentTool = SelectTool(appManager, actionManager, selectionManager, stateData)
+        }
+
+        if (appManager.editMode.type == EditMode.ToolType.FORMAL_CHARGE) {
+            currentTool = FormalChargeLonePairTool(appManager, actionManager, selectionManager, stateData)
         }
     }
 
@@ -284,5 +291,14 @@ class EditorStateController (
 
         //Now remove the old selection, and highlight the newly selected data
         this.selectionManager.clearAndAddSelection(importData.getMolecules())
+    }
+
+
+    fun updateSelectedSymbol(newLabel: String) {
+        val atom = selectionManager.getAtom() ?: return
+        val action = ReplaceAtomAction(atom, newLabel)
+        if (Elements.ofString(newLabel) != null) {
+            actionManager.executeAction(action)
+        }
     }
 }

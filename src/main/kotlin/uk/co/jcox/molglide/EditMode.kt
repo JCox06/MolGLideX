@@ -28,12 +28,17 @@ enum class EditMode (val symbol: String, val ringSize: Int, val type: ToolType, 
     RING_CYCLOPENTANE("Cyclopentane", 5, ToolType.RING_INSERT, FlatSVGIcon("uk/co/jcox/molglide/cyclopentane.svg", javaClass.classLoader)),
     RING_CYCLOOCTANE("Cyclooctane", 8, ToolType.RING_INSERT, FlatSVGIcon("uk/co/jcox/molglide/cyclooctane.svg", javaClass.classLoader)),
 
-;
+    LONE_PAIR("Lone Pair", 0,ToolType.FORMAL_CHARGE, FlatSVGIcon("uk/co/jcox/molglide/lone_pair.svg", javaClass.classLoader)),
+    CHARGE_PLUS("+", 0,ToolType.FORMAL_CHARGE),
+    CHARGE_NEGATIVE("-", 0,ToolType.FORMAL_CHARGE),
+
+    ;
 
     enum class ToolType {
         ATOM_INSERT,
         RING_INSERT,
         SELECT_TOOL,
+        FORMAL_CHARGE,
     }
 }
 

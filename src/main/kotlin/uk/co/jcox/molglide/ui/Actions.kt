@@ -1,7 +1,5 @@
 package uk.co.jcox.molglide.ui
 
-import org.joda.time.DateTime
-import uk.co.jcox.molglide.LabelToSmiles
 import uk.co.jcox.molglide.MolGLideUtils
 import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.control.AppManager
@@ -10,16 +8,15 @@ import uk.co.jcox.molglide.control.SVGExporter
 import uk.co.jcox.molglide.io.ClipboardMoleculePayload
 import uk.co.jcox.molglide.io.LevelLoader
 import uk.co.jcox.molglide.io.MolGLideMetaData
-import java.awt.Desktop
 import java.awt.Point
 import java.awt.Toolkit
 import java.awt.event.ActionEvent
 import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
 import java.awt.event.WindowEvent
-import java.io.File
-import javax.sound.sampled.Clip
 import javax.swing.AbstractAction
+import javax.swing.Action.ACCELERATOR_KEY
+import javax.swing.Action.SHORT_DESCRIPTION
 import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.KeyStroke
@@ -88,9 +85,6 @@ class EditLabelMenuAction (val panel: JPanel, val controller: EditorStateControl
         putValue(SHORT_DESCRIPTION, "Edits the atom label")
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0))
     }
-
-
-
     //todo I'm going to have a think about how to do this
     //I want it to work exactly like ChemDraws Inline edit label feature
     //Where all the atoms you write (for instance -OCH2CH(OMe)CH3) are all inteligent, and can be selected exactly like any other
@@ -99,21 +93,12 @@ class EditLabelMenuAction (val panel: JPanel, val controller: EditorStateControl
     //The only thing I am happy doing differently is having the dialogue for the text, I personally think writing text (with the cursor)
     //directly in the editor is too hard to get it to work nicely!
     override fun actionPerformed(e: ActionEvent?) {
-        val label = JOptionPane.showInputDialog(panel, "Type a chemical element, molecule, or any text", "Edit Label", JOptionPane.QUESTION_MESSAGE)
-
-        if (label != null) {
-            label.trim()
-            val common = LabelToSmiles.lookUp(label)
-            if (common == null) {
-                val result = JOptionPane.showConfirmDialog(panel, "Your label could not be interpreted. Continuing will disable some chemical intelligence for this molecule Do you want to continue", "Lookup Failed", JOptionPane.YES_NO_OPTION)
-                if (result == 0) {
-                   //todo IGNORING THIS FOR NOW
-                    TODO()
-                }
-                return
-            }
-
+        val label = JOptionPane.showInputDialog(panel, "THIS TOOL IS IN PROGRESS. ONLY TYPE ATOMS FOR NOW!", "Edit Label", JOptionPane.QUESTION_MESSAGE)
+        if (label == null) {
+            return
         }
+        label.trim()
+        controller.updateSelectedSymbol(label)
     }
 }
 

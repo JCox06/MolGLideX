@@ -49,6 +49,10 @@ class MolGlideFrame : JFrame("MolGLideX ${LocalDate.now()}") {
 
         JOptionPane.showMessageDialog(this, "MolGLideX is a continuation of MolGLide (legacy edition). MolGLideX is in development and unstable and crashes and bugs are expected to occur", "INDEV", JOptionPane.WARNING_MESSAGE)
 
+
+        //todo remove during next refactor
+        val act = NewProjectAction(this, appManager)
+        act.actionPerformed(null)
     }
 
 
