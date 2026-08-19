@@ -1,7 +1,6 @@
 package uk.co.jcox.molglide.control
 
 import org.joml.Vector2d
-import org.joml.minus
 import org.openscience.cdk.config.Elements
 import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.EditMode
@@ -27,17 +26,18 @@ import uk.co.jcox.molglide.control.tool.TemplateRingTool
 import uk.co.jcox.molglide.control.tool.Tool
 import uk.co.jcox.molglide.io.LevelSerializer
 import uk.co.jcox.molglide.io.MolGLideMetaData
+import uk.co.jcox.molglide.mainframe.IMainAppData
 import uk.co.jcox.molglide.ui.EditorPanel
 import java.io.File
 
 class EditorStateController (
-    private val appManager: AppManager,
+    private val globalContext: IMainAppData,
     private val stateData : EditorStateData,
 ) {
     val actionManager: ActionManager = ActionManager(stateData)
 
     private val selectionManager: SelectionManager = SelectionManager()
-    private var currentTool: Tool = AtomBondTool(appManager, actionManager, selectionManager, stateData)
+    private var currentTool: Tool = AtomBondTool(globalContext, actionManager, selectionManager)
 
     /**
      * If this document has been saved before, then this is not null
@@ -71,20 +71,20 @@ class EditorStateController (
     }
 
     private fun prepareTool() {
-        if (appManager.editMode.type == EditMode.ToolType.ATOM_INSERT) {
-            currentTool = AtomBondTool(appManager, actionManager, selectionManager, stateData)
+        if (globalContext.getEditMode().type == EditMode.ToolType.ATOM_INSERT) {
+            currentTool = AtomBondTool(globalContext, actionManager, selectionManager)
             selectionManager.clearSelectionBoundingBox()
         }
-        if (appManager.editMode.type == EditMode.ToolType.RING_INSERT) {
-            currentTool = TemplateRingTool(appManager, actionManager, selectionManager, stateData)
+        if (globalContext.getEditMode().type == EditMode.ToolType.RING_INSERT) {
+            currentTool = TemplateRingTool(globalContext, actionManager, selectionManager)
             selectionManager.clearSelectionBoundingBox()
         }
-        if (appManager.editMode.type == EditMode.ToolType.SELECT_TOOL) {
-            currentTool = SelectTool(appManager, actionManager, selectionManager, stateData)
+        if (globalContext.getEditMode().type == EditMode.ToolType.SELECT_TOOL) {
+            currentTool = SelectTool(actionManager, selectionManager, stateData)
         }
 
-        if (appManager.editMode.type == EditMode.ToolType.FORMAL_CHARGE) {
-            currentTool = FormalChargeLonePairTool(appManager, actionManager, selectionManager, stateData)
+        if (globalContext.getEditMode().type == EditMode.ToolType.FORMAL_CHARGE) {
+            currentTool = FormalChargeLonePairTool(globalContext, actionManager, selectionManager)
         }
     }
 
@@ -99,11 +99,6 @@ class EditorStateController (
     fun checkSelected(atom: UIAtom) : Boolean {
         val selection = selectionManager.primarySelection
         return selection is SelectionManager.Type.ActiveAtom && selection.chemAtom.atom.id == atom.chemID
-    }
-
-    fun nowActive(panel: EditorPanel) {
-        appManager.activeTab = this
-        appManager.activePanel = panel
     }
 
     fun deleteSelectedAtom() {

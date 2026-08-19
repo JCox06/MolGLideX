@@ -1,34 +1,43 @@
-package uk.co.jcox.molglide.ui
+package uk.co.jcox.molglide.mainframe
 
 import com.formdev.flatlaf.extras.FlatSVGIcon
 import io.github.andrewauclair.moderndocking.app.Docking
 import io.github.andrewauclair.moderndocking.app.RootDockingPanel
 import io.github.andrewauclair.moderndocking.ext.ui.DockingUI
+import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.MolGLideUtils
-import uk.co.jcox.molglide.control.AppManager
+import uk.co.jcox.molglide.ui.DockingPanel
+import uk.co.jcox.molglide.ui.NewProjectAction
 import java.awt.BorderLayout
-import java.awt.Dimension
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.time.LocalDate
 import javax.swing.JComponent
-import javax.swing.JDialog
 import javax.swing.JFrame
 import javax.swing.JLabel
+import javax.swing.JMenu
+import javax.swing.JMenuBar
+import javax.swing.JMenuItem
 import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.SwingUtilities
-import javax.swing.UIManager
 
-class MolGlideFrame : JFrame("MolGLideX ${LocalDate.now()}") {
+class MolGlideFrame (
+    private val appData: IMainAppData,
+) : JFrame("MolGLideX ${LocalDate.now()}") {
 
-    private val windows: MutableList<DockingPanel> = mutableListOf()
-    private val appManager: AppManager = AppManager()
+    private val menuBar = JMenuBar()
+    val fileMenu = JMenu("File")
+    val editMenu = JMenu("Edit")
+    val windowMenu = JMenu("Windows")
+    val helpMenu = JMenu("Help")
+
+
+    val toolBox = Toolbox(appData)
 
     private lateinit var dockRoot: RootDockingPanel
-
     private val statusLabel = JLabel()
 
     init {
@@ -39,22 +48,22 @@ class MolGlideFrame : JFrame("MolGLideX ${LocalDate.now()}") {
         iconImage = svgImg.derive(32, 32).image
 
         initDocking()
-        add(Toolbox(appManager), BorderLayout.PAGE_START)
+        add(toolBox, BorderLayout.PAGE_START)
         add(buildStatusBar(), BorderLayout.PAGE_END)
         addQuitHandler()
-        registerDefaultWindows()
 
-        jMenuBar = MainMenu(this, appManager)
+
+        menuBar.add(fileMenu)
+        menuBar.add(editMenu)
+        menuBar.add(windowMenu)
+        menuBar.add(helpMenu)
+        jMenuBar = menuBar
+
+
         this.isVisible = true
 
         JOptionPane.showMessageDialog(this, "MolGLideX is a continuation of MolGLide (legacy edition). MolGLideX is in development and unstable and crashes and bugs are expected to occur", "INDEV", JOptionPane.WARNING_MESSAGE)
-
-
-        //todo remove during next refactor
-        val act = NewProjectAction(this, appManager)
-        act.actionPerformed(null)
     }
-
 
     private fun initDocking() {
         Docking.initialize(this)
@@ -81,7 +90,6 @@ class MolGlideFrame : JFrame("MolGLideX ${LocalDate.now()}") {
         val panel = JPanel(BorderLayout())
         panel.add(JLabel("Please review your open documents before quiting the application"), BorderLayout.NORTH)
 
-
         //todo Need to show a table of all the open documents
         //Query the controller of each document, and ask it if the actionManager is dirty
         //Display all documents in a table, with the name of the document, followed by a save button (if its dirty) or green text that says "document saved" if not
@@ -92,63 +100,23 @@ class MolGlideFrame : JFrame("MolGLideX ${LocalDate.now()}") {
         return true
     }
 
-    private fun registerDefaultWindows() {
-        addDockingPanel("debug1", "DummyEditor1", JPanel(BorderLayout()))
-        addDockingPanel("debug2", "DummyEditor2", JPanel(BorderLayout()))
-        addDockingPanel("debug3", "DummyEditor3", JPanel(BorderLayout()))
-    }
-
-
-    fun addDockingPanel(persistentID: String, tabText: String, component: JComponent, enable: Boolean = false) {
-        val panel = DockingPanel(persistentID, tabText)
-        panel.add(component)
-        windows.add(panel)
-        if (enable) {
-//            Docking.dock(panel, this)
-//            Docking.bringToFront(panel)
-            Docking.dock(panel, this)
-            Docking.display(panel)
-        }
-        component.addMouseMotionListener(object : MouseAdapter() {
-            override fun mouseMoved(e: MouseEvent?) {
-                handle()
-            }
-            override fun mouseDragged(e: MouseEvent?) {
-                handle()
-            }
-
-            fun handle() {
-                SwingUtilities.invokeLater {
-                    val act = appManager.activeTab
-                    if (act != null) {
-                        val weight = String.format("%.4f", act.uiBuilder.getSelectedWeight())
-                        val h = act.uiBuilder.getSelectedHybridisation()
-                        statusLabel.text = "${act.uiBuilder.getSelectedFormula()} | ${weight} g/mol | ${h}"
-                    }
-                }
-            }
-        })
-    }
-
-    fun updateTabText(id: String, newText: String) {
-        val dockingPanel = windows.find { it.persistentID == id }
-        dockingPanel?.internalText = newText
-        Docking.updateTabInfo(id)
-    }
 
     private fun buildStatusBar() : JPanel {
         val statusBar = JPanel()
         statusBar.setLayout(BorderLayout())
         statusBar.add(statusLabel, BorderLayout.WEST)
-
         val label = JLabel("MolGLideX ${MolGLideUtils.VERSION}")
         statusBar.add(label, BorderLayout.EAST)
-
         return statusBar
     }
 
-    fun getWindows() : List<DockingPanel> {
-        return windows
+    fun updateStatusBar() {
+        SwingUtilities.invokeLater {
+            val weight = String.format("%.4f", appData.getSelectedWeight())
+            val hybrid = appData.getSelectedHybrid()
+            val formula = appData.getSelectedFormula()
+            statusLabel.text = "${formula} | ${weight} g/mol | ${hybrid}"
+        }
     }
 
 }

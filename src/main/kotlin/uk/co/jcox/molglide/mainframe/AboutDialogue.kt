@@ -1,6 +1,5 @@
-package uk.co.jcox.molglide.ui
+package uk.co.jcox.molglide.mainframe
 
-import java.awt.Component
 import java.awt.Font
 import javax.swing.BorderFactory
 import javax.swing.BoxLayout

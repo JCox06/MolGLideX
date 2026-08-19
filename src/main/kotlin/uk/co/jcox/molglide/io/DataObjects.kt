@@ -3,7 +3,6 @@ package uk.co.jcox.molglide.io
 import kotlinx.serialization.Serializable
 import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.control.ChemMolecule
-import uk.co.jcox.molglide.ui.MolGlideFrame
 
 
 @Serializable

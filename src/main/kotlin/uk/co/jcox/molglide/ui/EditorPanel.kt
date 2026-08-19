@@ -514,7 +514,6 @@ class EditorPanel(val dataController: EditorStateController) : JPanel() {
                 return
             }
             updateMouse(e)
-            dataController.nowActive(this@EditorPanel)
         }
 
         private fun updateMouse(e: MouseEvent?) {

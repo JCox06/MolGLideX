@@ -7,7 +7,6 @@ import uk.co.jcox.molglide.control.SelectionManager
 abstract class Tool (
     protected val actionManager: ActionManager,
     protected val selectionManager: SelectionManager,
-    protected val editorData: EditorStateData
 ) {
     protected var mouseX: Int = 0
     protected var mouseY: Int = 0

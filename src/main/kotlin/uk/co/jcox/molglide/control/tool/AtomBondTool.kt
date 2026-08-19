@@ -4,7 +4,7 @@ import org.joml.Vector2f
 import org.joml.minus
 import org.joml.plus
 import uk.co.jcox.molglide.control.ActionManager
-import uk.co.jcox.molglide.control.AppManager
+import uk.co.jcox.molglide.mainframe.MainController
 import uk.co.jcox.molglide.control.ChemMolecule
 import uk.co.jcox.molglide.control.EditorStateData
 import uk.co.jcox.molglide.control.SelectionManager
@@ -13,13 +13,13 @@ import uk.co.jcox.molglide.control.actions.CreateMoleculeAction
 import uk.co.jcox.molglide.control.actions.IncrementBondOrderAction
 import uk.co.jcox.molglide.control.actions.ReplaceAtomAction
 import uk.co.jcox.molglide.control.actions.RingCyclisationAction
+import uk.co.jcox.molglide.mainframe.IMainAppData
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
-class AtomBondTool(val appManager: AppManager,actionManager: ActionManager,
-                   selectionManager: SelectionManager, editorData: EditorStateData
-) : Tool(actionManager, selectionManager, editorData) {
+class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager,
+                   selectionManager: SelectionManager) : Tool(actionManager, selectionManager) {
 
     var toolMode: Mode = Mode.None
 
@@ -167,7 +167,7 @@ class AtomBondTool(val appManager: AppManager,actionManager: ActionManager,
     }
 
     private fun setupDraggingAtom(currentMode: Mode.PostReplacement) {
-        val atomInsertionAction = AtomInsertionAction(appManager.editMode.symbol, currentMode.insertTo, mouseX, mouseY)
+        val atomInsertionAction = AtomInsertionAction(globalContext.getEditMode().symbol, currentMode.insertTo, mouseX, mouseY)
         actionManager.executeAction(atomInsertionAction)
         atomInsertionAction.newAtom?.let { toolMode = Mode.AtomInsertionDragging(it, currentMode.insertTo, true) }
     }
@@ -186,12 +186,12 @@ class AtomBondTool(val appManager: AppManager,actionManager: ActionManager,
     }
 
     private fun createNewMolecule(molCreation: Mode.MolCreation) {
-        val atomCreationAction = CreateMoleculeAction(molCreation.xPos, molCreation.yPos, appManager.editMode.symbol)
+        val atomCreationAction = CreateMoleculeAction(molCreation.xPos, molCreation.yPos, globalContext.getEditMode().symbol)
         actionManager.executeAction(atomCreationAction)
     }
 
     private fun replaceAtom(atomInsertion: Mode.AtomReplacement) {
-        val atomReplacementAction = ReplaceAtomAction(atomInsertion.replace, appManager.editMode.symbol)
+        val atomReplacementAction = ReplaceAtomAction(atomInsertion.replace, globalContext.getEditMode().symbol)
         actionManager.executeAction(atomReplacementAction)
         toolMode = Mode.PostReplacement(atomInsertion.replace)
     }

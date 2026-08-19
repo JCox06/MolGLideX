@@ -1,11 +1,9 @@
-package uk.co.jcox.molglide.ui
+package uk.co.jcox.molglide.mainframe
 
+import com.sun.java.accessibility.util.AWTEventMonitor.addComponentListener
 import uk.co.jcox.molglide.EditMode
-import uk.co.jcox.molglide.control.AppManager
-import java.awt.BorderLayout
 import java.awt.GridLayout
 import java.awt.Insets
-import java.awt.Point
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
 import java.awt.event.HierarchyEvent
@@ -14,7 +12,15 @@ import javax.swing.plaf.basic.BasicToolBarUI
 import kotlin.math.max
 
 
-class Toolbox(private val appManager: AppManager) : JToolBar("Toolbox") {
+class Toolbox(private val data: IMainAppData) : JToolBar("Toolbox") {
+
+    private var changeEditMode: (editMode: EditMode) -> Unit = {}
+
+    fun registerEditModeCallback(action: (editMode: EditMode) -> Unit) {
+        this.changeEditMode = action
+    }
+
+
     init {
         isFloatable = true
         isRollover = true
@@ -55,7 +61,7 @@ class Toolbox(private val appManager: AppManager) : JToolBar("Toolbox") {
         val elementGroup = ButtonGroup()
         EditMode.entries.forEach { mode ->
             val button = JToggleButton()
-            button.isSelected = mode == appManager.editMode
+            button.isSelected = mode == data.getEditMode()
             if (mode.icon != null) {
                 val icon = mode.icon.derive(16, 16)
                 button.icon = icon
@@ -64,7 +70,7 @@ class Toolbox(private val appManager: AppManager) : JToolBar("Toolbox") {
             }
             button.preferredSize = button.minimumSize
             button.margin = Insets(0, 0, 0, 0)
-            button.addActionListener {appManager.editMode = mode}
+            button.addActionListener { changeEditMode(mode) }
             elementGroup.add(button)
             panel.add(button)
         }

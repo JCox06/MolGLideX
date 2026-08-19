@@ -1,9 +1,6 @@
 package uk.co.jcox.molglide.control.tool
 
-import com.sun.org.apache.xpath.internal.operations.Mod
-import org.checkerframework.checker.units.qual.m
 import uk.co.jcox.molglide.control.ActionManager
-import uk.co.jcox.molglide.control.AppManager
 import uk.co.jcox.molglide.control.ChemMolecule
 import uk.co.jcox.molglide.control.EditorStateData
 import uk.co.jcox.molglide.control.SelectionManager
@@ -34,9 +31,7 @@ import javax.vecmath.Point2d
 
 
 
-class SelectTool(val appManager: AppManager, actionManager: ActionManager, selectionManager: SelectionManager, editorData: EditorStateData) : Tool(actionManager,
-    selectionManager, editorData
-) {
+class SelectTool(actionManager: ActionManager, selectionManager: SelectionManager, editorData: EditorStateData) : Tool(actionManager, selectionManager) {
 
     private var toolMode: ToolMode = ToolMode.None
 

@@ -1,22 +1,18 @@
 package uk.co.jcox.molglide.control.tool
 
-import org.apache.jena.sparql.function.library.leviathan.cube
 import org.joml.Vector2d
-import org.joml.Vector2i
 import org.joml.minus
-import org.openscience.cdk.interfaces.IAtom
 import uk.co.jcox.molglide.control.ActionManager
-import uk.co.jcox.molglide.control.AppManager
+import uk.co.jcox.molglide.mainframe.MainController
 import uk.co.jcox.molglide.control.ChemMolecule
 import uk.co.jcox.molglide.control.EditorStateData
 import uk.co.jcox.molglide.control.SelectionManager
 import uk.co.jcox.molglide.control.actions.RingCreatorAction
+import uk.co.jcox.molglide.mainframe.IMainAppData
 import javax.vecmath.Point2d
 import kotlin.math.roundToInt
 
-class TemplateRingTool(val appManager: AppManager, actionManager: ActionManager, selectionManager: SelectionManager, editorData: EditorStateData) : Tool(actionManager,
-    selectionManager, editorData
-) {
+class TemplateRingTool(val globalContext: IMainAppData, actionManager: ActionManager, selectionManager: SelectionManager) : Tool(actionManager, selectionManager) {
 
     private var toolMode: Mode = Mode.None
 
@@ -30,7 +26,7 @@ class TemplateRingTool(val appManager: AppManager, actionManager: ActionManager,
 
     private fun addIsolatedRing(centreX: Int, centreY: Int) {
         //Add the ring as an isolated ring since the user is not selecting anything
-        val action = RingCreatorAction(centreX, centreY, appManager.editMode)
+        val action = RingCreatorAction(centreX, centreY, globalContext.getEditMode())
         actionManager.executeAction(action)
         val c = action.getRingCentre()
         toolMode = Mode.Rotate(action.placedRing, c.x, c.y, 0)
@@ -67,7 +63,7 @@ class TemplateRingTool(val appManager: AppManager, actionManager: ActionManager,
 
         val angle = randomUpVector.angle(vecToMouse)
         val angleDeg = Math.toDegrees(angle)
-        val angleIncr = 360 / appManager.editMode.ringSize
+        val angleIncr = 360 / globalContext.getEditMode().ringSize
 
         val nearest60: Int = ((angleDeg / angleIncr.toDouble()).roundToInt() * angleIncr)
 

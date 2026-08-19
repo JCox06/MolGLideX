@@ -1,13 +1,9 @@
 package uk.co.jcox.molglide
 
-import com.formdev.flatlaf.FlatDarculaLaf
-import com.formdev.flatlaf.FlatDarkLaf
-import com.formdev.flatlaf.FlatIntelliJLaf
 import com.formdev.flatlaf.FlatLightLaf
-import com.formdev.flatlaf.themes.FlatMacDarkLaf
-import com.formdev.flatlaf.themes.FlatMacLightLaf
-import com.formdev.flatlaf.ui.FlatUIUtils
-import uk.co.jcox.molglide.ui.MolGlideFrame
+import uk.co.jcox.molglide.mainframe.MainController
+import uk.co.jcox.molglide.mainframe.MainData
+import uk.co.jcox.molglide.mainframe.MolGlideFrame
 import javax.swing.JDialog
 import javax.swing.JFrame
 import javax.swing.SwingUtilities
@@ -21,6 +17,8 @@ fun main() {
     UIManager.put("PopupMenu.consumeEventOnClose", true)
 
     SwingUtilities.invokeLater {
-        val mainFrame = MolGlideFrame()
+        val mainData = MainData()
+        val mainFrame = MolGlideFrame(mainData)
+        val mainController = MainController(mainFrame, mainData)
     }
 }

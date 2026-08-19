@@ -1,27 +1,27 @@
 package uk.co.jcox.molglide.ui
 
+import org.apache.jena.sparql.function.library.localname
 import uk.co.jcox.molglide.MolGLideUtils
 import uk.co.jcox.molglide.StereoChem
-import uk.co.jcox.molglide.control.AppManager
+import uk.co.jcox.molglide.mainframe.MainController
 import uk.co.jcox.molglide.control.EditorStateController
 import uk.co.jcox.molglide.control.SVGExporter
 import uk.co.jcox.molglide.io.ClipboardMoleculePayload
 import uk.co.jcox.molglide.io.LevelLoader
 import uk.co.jcox.molglide.io.MolGLideMetaData
+import uk.co.jcox.molglide.mainframe.MolGlideFrame
 import java.awt.Point
 import java.awt.Toolkit
 import java.awt.event.ActionEvent
 import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
-import java.awt.event.WindowEvent
 import javax.swing.AbstractAction
-import javax.swing.Action.ACCELERATOR_KEY
-import javax.swing.Action.SHORT_DESCRIPTION
+import javax.swing.JFrame
 import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.KeyStroke
 
-class UndoAction (val appManager: AppManager) : AbstractAction("Undo") {
+class UndoAction (val mainController: MainController) : AbstractAction("Undo") {
 
     init {
         putValue(NAME, "Undo")
@@ -30,11 +30,11 @@ class UndoAction (val appManager: AppManager) : AbstractAction("Undo") {
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        appManager.handleGlobalUndo()
+        mainController.handleGlobalUndo()
     }
 }
 
-class RedoAction (val appManager: AppManager) : AbstractAction("Redo") {
+class RedoAction (val mainController: MainController) : AbstractAction("Redo") {
 
     init {
         putValue(NAME, "Redo")
@@ -43,12 +43,12 @@ class RedoAction (val appManager: AppManager) : AbstractAction("Redo") {
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        appManager.handleGlobalRedo()
+        mainController.handleGlobalRedo()
     }
 
 }
 
-class QuitAction (val mainFrame: MolGlideFrame) : AbstractAction("Quit") {
+class QuitAction (val mainController: MainController) : AbstractAction("Quit") {
 
     init {
         putValue(SHORT_DESCRIPTION, "Quits the Application")
@@ -56,13 +56,13 @@ class QuitAction (val mainFrame: MolGlideFrame) : AbstractAction("Quit") {
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        mainFrame.dispatchEvent(WindowEvent(mainFrame, WindowEvent.WINDOW_CLOSING))
+        mainController.shutdown()
     }
 
 }
 
 
-class NewProjectAction (val mainFrame: MolGlideFrame,val appManager: AppManager) : AbstractAction("New MGF Project") {
+class NewProjectAction (val mainController: MainController) : AbstractAction("New MGF Project") {
 
     init {
         putValue(SHORT_DESCRIPTION, "Create a new MolGLideX project")
@@ -70,11 +70,7 @@ class NewProjectAction (val mainFrame: MolGlideFrame,val appManager: AppManager)
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        val newID = appManager.createEmpty()
-        val data = appManager.getDataForState(newID)
-        val dataController = EditorStateController(appManager, data)
-        val editorPanel = EditorPanel(dataController)
-        mainFrame.addDockingPanel(newID, "Unsaved Document ${data.currentID + 1}", editorPanel, true)
+        mainController.newProject()
     }
 
 }
@@ -223,7 +219,7 @@ class DeleteBondMenuAction (val controller: EditorStateController) : AbstractAct
 }
 
 
-class SaveFileAction (val appManager: AppManager, val mainFrame: MolGlideFrame) : AbstractAction("Save file") {
+class SaveFileAction (val mainController: MainController) : AbstractAction("Save file") {
     init {
         putValue(SHORT_DESCRIPTION, "Saves current progress as .mgx file")
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK))
@@ -231,21 +227,13 @@ class SaveFileAction (val appManager: AppManager, val mainFrame: MolGlideFrame) 
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        val controller = appManager.activeTab ?: return
-
-        val lastSaveFile = controller.lastUsedSaveFile
-        if (lastSaveFile != null) {
-            controller.saveProject(lastSaveFile)
-            return
-        }
-        //If the save file does not exist, delegate to the Save As File Action
-        val newAction = SaveAsFileAction(appManager, mainFrame)
-        newAction.actionPerformed(null)
+        mainController.saveActiveProject()
     }
+
 }
 
 
-class SaveAsFileAction (val appManager: AppManager, val mainFrame: MolGlideFrame) : AbstractAction("Save as") {
+class SaveAsFileAction (val mainController: MainController, val mainFrame: MolGlideFrame) : AbstractAction("Save as") {
     init {
         putValue(SHORT_DESCRIPTION, "Saves current progress as a new .mgx file")
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK or InputEvent.SHIFT_DOWN_MASK))
@@ -253,21 +241,15 @@ class SaveAsFileAction (val appManager: AppManager, val mainFrame: MolGlideFrame
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        val panel = appManager.activePanel
-        val controller = appManager.activeTab
-        if (panel != null && controller != null) {
-            val saveLocation = MolGLideUtils.showSaveDialogue(panel)
-            if (saveLocation != null) {
-                controller.saveProject(saveLocation)
-                val dockingID = AppManager.getDockingID(controller.getDataID())
-                mainFrame.updateTabText(dockingID, saveLocation.name)
-            }
+        val location = MolGLideUtils.showSaveDialogue(mainFrame)
+        if (location != null) {
+            mainController.saveActiveProjectAs(location)
         }
     }
 }
 
 
-class LoadFileAction (val appManager: AppManager, val mainFrame: MolGlideFrame) : AbstractAction("Load file") {
+class LoadFileAction (val mainController: MainController, val mainFrame: MolGlideFrame) : AbstractAction("Load file") {
 
     init {
         putValue(SHORT_DESCRIPTION, "Load a MolGLide project (.mgx file)")
@@ -276,16 +258,8 @@ class LoadFileAction (val appManager: AppManager, val mainFrame: MolGlideFrame) 
 
     override fun actionPerformed(e: ActionEvent?) {
         val file = MolGLideUtils.showOpenDialogue()
-
         if (file != null) {
-            //todo I would make a method to avoid code duplication with this and the new document action
-            //However, I am not sure if this is even good enough just yet, so I shall hold off for the moment
-            val dockingID = appManager.loadFile(file)
-            val data = appManager.getDataForState(dockingID)
-            val dataController = EditorStateController(appManager, data)
-            val editorPanel = EditorPanel(dataController)
-            mainFrame.addDockingPanel(dockingID, file.name, editorPanel, true)
-            dataController.lastUsedSaveFile = file
+            mainController.openProject(file)
         }
     }
 }
