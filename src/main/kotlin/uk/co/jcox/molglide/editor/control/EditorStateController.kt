@@ -2,6 +2,7 @@ package uk.co.jcox.molglide.editor.control
 
 import com.github.jsonldjava.shaded.com.google.common.math.IntMath.pow
 import uk.co.jcox.molglide.EditMode
+import uk.co.jcox.molglide.IEditorSessionOrganiser
 import uk.co.jcox.molglide.editor.control.tool.AtomBondTool
 import uk.co.jcox.molglide.editor.control.tool.FormalChargeLonePairTool
 import uk.co.jcox.molglide.editor.control.tool.SelectTool
@@ -25,6 +26,7 @@ class EditorStateController (
     private val globalContext: IMainAppData,
     private val stateData : EditorStateData,
     private val editorPanel: EditorPanel,
+    private val sessionOrganiser: IEditorSessionOrganiser,
 ) {
     val actionManager: ActionManager = ActionManager(stateData) { dataHasChanged() }
     private var currentTool: Tool = AtomBondTool(globalContext, actionManager, stateData.selectionManager)
@@ -43,6 +45,9 @@ class EditorStateController (
             stateData.uiDataBuilder.rebuild(false)
         }
         timer.start()
+
+        //First time run immediately do a full UI rebuild
+        stateData.uiDataBuilder.rebuild(true)
     }
 
     private fun handleMouseClick(clickX: Int, clickY: Int) {
@@ -112,6 +117,7 @@ class EditorStateController (
     //Rebuilds the entire UI
     private fun dataHasChanged() {
         rebuildEntireUI()
+        sessionOrganiser.onDocumentDirty(stateData.sessionID)
     }
 
     private fun rebuildEntireUI() {

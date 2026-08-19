@@ -26,6 +26,7 @@ class EditorStateData (
     var transientBoxSelectAdvX: Int = 0
     var transientBoxSelectAdvY: Int = 0
 
+    var sessionID: String = ""
 
 
     fun createMolecule(initialAtom: String, positionX: Int, positionY: Int) : ChemMolecule {

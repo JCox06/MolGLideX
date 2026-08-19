@@ -4,10 +4,12 @@ import uk.co.jcox.molglide.editor.control.EditorStateController
 import uk.co.jcox.molglide.editor.io.ClipboardMoleculePayload
 import uk.co.jcox.molglide.editor.io.LevelLoader
 import uk.co.jcox.molglide.editor.ui.EditorPanel
+import java.awt.Desktop
 import java.awt.Toolkit
 import java.awt.event.ActionEvent
 import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
+import java.net.URI
 import javax.swing.AbstractAction
 import javax.swing.JOptionPane
 import javax.swing.JPanel
@@ -19,6 +21,8 @@ class UndoAction (val mainController: MainController) : AbstractAction("Undo") {
         putValue(NAME, "Undo")
         putValue(SHORT_DESCRIPTION, "Undo the last operation")
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK))
+
+        isEnabled = false
     }
 
     override fun actionPerformed(e: ActionEvent?) {
@@ -32,6 +36,8 @@ class RedoAction (val mainController: MainController) : AbstractAction("Redo") {
         putValue(NAME, "Redo")
         putValue(SHORT_DESCRIPTION, "Redo the last operation")
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK))
+
+        isEnabled = false
     }
 
     override fun actionPerformed(e: ActionEvent?) {
@@ -343,3 +349,40 @@ class IgnoreErrorAction(val controller: EditorStateController, val currentValue:
     }
 }
 
+
+class VisitWebsite(): AbstractAction("Visit Website") {
+    init {
+        putValue(SHORT_DESCRIPTION, "Visit the MolGLide website")
+    }
+    override fun actionPerformed(e: ActionEvent?) {
+        Desktop.getDesktop().browse(URI(MolGLideUtils.WEBSITE))
+    }
+}
+
+class VisitRepoAction(): AbstractAction("Visit Repository") {
+    init {
+        putValue(SHORT_DESCRIPTION, "Visit GitHub Repository")
+    }
+    override fun actionPerformed(e: ActionEvent?) {
+        Desktop.getDesktop().browse(URI(MolGLideUtils.REPO))
+    }
+}
+
+class VisitBugTrackerAction(): AbstractAction("Report Bugs") {
+    init {
+        putValue(SHORT_DESCRIPTION, "Visit the MolGLide issue tracker")
+    }
+    override fun actionPerformed(e: ActionEvent?) {
+        Desktop.getDesktop().browse(URI(MolGLideUtils.BUG_TRACKER))
+    }
+}
+
+class ShowAboutMenuAction(val mainFrame: MolGlideFrame) : AbstractAction("About MolGLide") {
+    init {
+        putValue(SHORT_DESCRIPTION, "About MolGLide")
+    }
+    override fun actionPerformed(e: ActionEvent?) {
+        val dialogue = AboutDialogue(mainFrame)
+        dialogue.isVisible = true
+    }
+}

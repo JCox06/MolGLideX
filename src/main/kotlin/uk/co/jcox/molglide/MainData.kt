@@ -6,12 +6,12 @@ class MainData : IMainAppData{
     var editToolMode = EditMode.INSERT_CARBON
 
     //A list of editor sessions
-    val sessions = mutableListOf<EditorSession>()
+    val sessions = mutableMapOf<String, EditorSession>()
 
     //I am making the list of dockable panels separate to the editor sessions
     //since at some point, it might be beneficial to have a global list of dockable panels
     //that may or may not be editor sessions
-    val modernDockingManaged = mutableListOf<DockingPanel>()
+    val modernDockingManaged = mutableMapOf<String, DockingPanel>()
 
     var activeSession: EditorSession? = null
 

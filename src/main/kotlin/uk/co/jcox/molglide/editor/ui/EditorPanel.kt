@@ -29,6 +29,9 @@ class EditorPanel(private val uiData: IDataModelUI) : JPanel() {
             if (drawTransients) {
                 uiComp.drawSelectionMarker(g2d, uiData.cameraZoom())
             }
+            if (!uiComp.selected && onlyDrawSelected) {
+                return@forEach
+            }
             uiComp.drawComponent(g2d, uiData.cameraZoom())
         }
     }
@@ -36,7 +39,7 @@ class EditorPanel(private val uiData: IDataModelUI) : JPanel() {
     protected override fun paintComponent(g: Graphics?) {
         super.paintComponent(g)
         val g2d = g as? Graphics2D ?: return
-        paintEditor(g2d)
+        paintEditor(g2d, true, false)
     }
 
     private fun preparePainter(g2d: Graphics2D) {

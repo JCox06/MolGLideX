@@ -20,7 +20,7 @@ class SVGExporter {
         val svgGenerator = SVGGraphics2D(ctx, false)
         svgGenerator.color = Color.BLACK
 
-        panel.paintEditor(svgGenerator)
+        panel.paintEditor(svgGenerator, false, true)
         val stringWriter = StringWriter()
         svgGenerator.stream(stringWriter)
         val output = stringWriter.toString()

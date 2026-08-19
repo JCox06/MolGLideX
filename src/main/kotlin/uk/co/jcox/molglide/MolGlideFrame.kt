@@ -23,6 +23,7 @@ class MolGlideFrame (
     private val menuBar = JMenuBar()
     val fileMenu = JMenu("File")
     val editMenu = JMenu("Edit")
+    val objectMenu = JMenu("Objects")
     val windowMenu = JMenu("Windows")
     val helpMenu = JMenu("Help")
 
@@ -47,6 +48,7 @@ class MolGlideFrame (
 
         menuBar.add(fileMenu)
         menuBar.add(editMenu)
+        menuBar.add(objectMenu)
         menuBar.add(windowMenu)
         menuBar.add(helpMenu)
         jMenuBar = menuBar
