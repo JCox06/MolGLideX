@@ -2,9 +2,12 @@ package uk.co.jcox.molglide.mainframe
 
 import io.github.andrewauclair.moderndocking.app.DockableMenuItem
 import io.github.andrewauclair.moderndocking.app.Docking
+import org.apache.jena.sparql.function.library.date
 import uk.co.jcox.molglide.control.EditorStateController
 import uk.co.jcox.molglide.control.EditorStateData
 import uk.co.jcox.molglide.io.LevelLoader
+import uk.co.jcox.molglide.io.LevelSerializer
+import uk.co.jcox.molglide.main
 import uk.co.jcox.molglide.ui.DockingPanel
 import uk.co.jcox.molglide.ui.EditorPanel
 import uk.co.jcox.molglide.ui.LoadFileAction
@@ -62,32 +65,43 @@ class MainController (
 
 
     fun newProject() {
-        val newData = EditorStateData(0)
-        createSession(newData)
+        val newData = EditorStateData()
+        createSession(newData, null)
     }
 
 
     fun openProject(file: File) {
         val levelLoader = LevelLoader()
-        val data = levelLoader.loadLevel(file, 0)
-        createSession(data)
+        val data = levelLoader.loadLevel(file)
+        createSession(data, file)
     }
 
-
     fun saveActiveProject() {
-
+        val session = mainData.activeSession ?: return
+        val saveFile = session.saveFile
+        if (saveFile == null) {
+            val saveAsAction = SaveAsFileAction(this, mainFrame)
+            saveAsAction.actionPerformed(null)
+        }
+        val levelSerializer = LevelSerializer()
+        val json = levelSerializer.getJSONEncoding(session.editorData)
+        saveFile?.writeText(json)
     }
 
     fun saveActiveProjectAs(file: File) {
-
+        mainData.activeSession?.saveFile = file
+        saveActiveProject()
     }
 
-    private fun createSession(data: EditorStateData) {
+    private fun createSession(data: EditorStateData, file: File? = null) {
         val editorController = EditorStateController(mainData, data)
         val editorPanel = EditorPanel(editorController)
-        val session = EditorSession(UUID.randomUUID().toString(), data, editorController, editorPanel)
+        val session = EditorSession(UUID.randomUUID().toString(), data, editorController, editorPanel, file)
         mainData.sessions.add(session)
-        manageByDocking(editorPanel, session.id, "TODO")
+        var tabname = "Untitled Document ${mainData.sessions.size}"
+        if (file != null) tabname = file.name
+
+        manageByDocking(editorPanel, session.id, tabname)
         createAlertListener(session)
     }
 

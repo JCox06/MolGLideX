@@ -303,7 +303,7 @@ class PasteSelection(val controller: EditorStateController, val panel: EditorPan
             return
         }
         val levelLoader = LevelLoader()
-        val tempLevel = levelLoader.loadLevel(mgxData, -1)
+        val tempLevel = levelLoader.loadLevel(mgxData)
 
         val p = panel.lastMousePos
         val w = panel.screenToWorld(p)

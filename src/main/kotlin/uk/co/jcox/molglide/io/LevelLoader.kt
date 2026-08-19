@@ -18,26 +18,26 @@ class LevelLoader {
     var metaData: MolGLideMetaData = MolGLideMetaData()
     private set
 
-    fun loadLevel(file: File, id: Int): EditorStateData {
+    fun loadLevel(file: File): EditorStateData {
 
         if (!file.exists()) {
             throw IOException("File for loading does not exist!")
         }
         val jsonString = file.readText()
-        return loadLevel(jsonString, id)
+        return loadLevel(jsonString)
     }
 
 
-    fun loadLevel(jsonString: String, id: Int): EditorStateData {
+    fun loadLevel(jsonString: String): EditorStateData {
         val dataSaveFile = Json.decodeFromString<DataSaveFile>(jsonString)
-        val level = reconstructLevel(dataSaveFile, id)
+        val level = reconstructLevel(dataSaveFile)
         metaData = dataSaveFile.metaData
         return level
     }
 
 
-    private fun reconstructLevel(dataSaveFile: DataSaveFile, id: Int) : EditorStateData {
-        val levelData = EditorStateData(id)
+    private fun reconstructLevel(dataSaveFile: DataSaveFile) : EditorStateData {
+        val levelData = EditorStateData()
         val levelActionBuilder = ActionManager(levelData)
 
         runDirectDataActions(dataSaveFile, levelActionBuilder)

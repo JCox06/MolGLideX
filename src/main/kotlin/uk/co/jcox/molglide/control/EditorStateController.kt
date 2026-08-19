@@ -39,15 +39,6 @@ class EditorStateController (
     private val selectionManager: SelectionManager = SelectionManager()
     private var currentTool: Tool = AtomBondTool(globalContext, actionManager, selectionManager)
 
-    /**
-     * If this document has been saved before, then this is not null
-     * If the document has been saved, it returns the file it was saved to
-     * (useful in save as, and save operations!)
-     *
-     * The lastest save as operation will override the previous name!
-     */
-    var lastUsedSaveFile: File? = null
-
     val uiBuilder = UIBuilder(stateData, selectionManager)
 
 
@@ -208,14 +199,6 @@ class EditorStateController (
         selectionManager.clearSelectionBoundingBox()
     }
 
-
-    fun saveProject(file: File) {
-        val levelSerializer = LevelSerializer()
-        val json = levelSerializer.getJSONEncoding(stateData)
-        file.writeText(json)
-        lastUsedSaveFile = file
-    }
-
     fun serializeSelectedMolecules(metaData: MolGLideMetaData = MolGLideMetaData()): String {
         val levelSerializer = LevelSerializer()
         val customJSON = levelSerializer.getJSONEncoding(stateData, metaData, selectionManager.batchSelection)
@@ -235,9 +218,6 @@ class EditorStateController (
         return bs.bonds.isNotEmpty() || bs.atoms.isNotEmpty()
     }
 
-    fun getDataID() : Int {
-        return stateData.currentID
-    }
 
     fun ignoreErrors(newValue: Boolean) {
         val chemAtom = selectionManager.getAtom() ?: return

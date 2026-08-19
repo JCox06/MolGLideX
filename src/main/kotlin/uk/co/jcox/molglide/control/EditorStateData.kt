@@ -5,14 +5,6 @@ import org.openscience.cdk.interfaces.IAtom
 
 
 class EditorStateData (
-    /**
-     * Has nothing to do with the actual data
-     * Just handy to use while the level is loaded
-     * When saved, the currentID is removed, and will be loaded with a potentially
-     * different next time
-     */
-    val currentID: Int,
-
 
     private val molecules: MutableList<ChemMolecule> = mutableListOf(),
     ) {
