@@ -2,6 +2,7 @@ package uk.co.jcox.molglide.control
 
 import com.github.jsonldjava.shaded.com.google.common.math.IntMath.pow
 import org.apache.jena.sparql.function.library.sqrt
+import org.checkerframework.checker.guieffect.qual.UI
 import org.joml.Vector2d
 import org.openscience.cdk.config.Elements
 import org.openscience.cdk.interfaces.IBond
@@ -61,8 +62,6 @@ class EditorStateController (
             val world = screenToWorld(stateData.mouseX.toDouble(), stateData.mouseY.toDouble())
             update(world.x, world.y)
 
-            //Todo - For the time being, the transients are baked into the actual
-            //UI data, so for now, just refresh the entire UI per frame
             stateData.uiDataBuilder.rebuild(false)
         }
         timer.start()
@@ -138,7 +137,7 @@ class EditorStateController (
     }
 
     private fun rebuildEntireUI() {
-        stateData.uiDataBuilder.rebuild(false)
+        stateData.uiDataBuilder.rebuild(true)
     }
 
     inner class PanelMouseEvents: MouseAdapter() {

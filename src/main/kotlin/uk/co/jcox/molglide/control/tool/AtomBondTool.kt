@@ -169,7 +169,13 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
     private fun setupDraggingAtom(currentMode: Mode.PostReplacement) {
         val atomInsertionAction = AtomInsertionAction(globalContext.getEditMode().symbol, currentMode.insertTo, mouseX, mouseY)
         actionManager.executeAction(atomInsertionAction)
-        atomInsertionAction.newAtom?.let { toolMode = Mode.AtomInsertionDragging(it, currentMode.insertTo, true) }
+        val newAtom = atomInsertionAction.newAtom
+        val newBond = atomInsertionAction.newBond
+        if (newAtom != null && newBond != null) {
+            toolMode = Mode.AtomInsertionDragging(newAtom, currentMode.insertTo, true, newBond)
+            newAtom.setTransient(true)
+            newBond.setTransient(true)
+        }
     }
 
     override fun onClick(clickX: Int, clickY: Int) {
@@ -197,6 +203,11 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
     }
 
     override fun onRelease(clickX: Int, clickY: Int) {
+        val m = toolMode
+        if (m is Mode.AtomInsertionDragging) {
+            m.draggingAtom.setTransient(false)
+            m.newBond.setTransient(false)
+        }
         toolMode = Mode.None
     }
 
@@ -233,7 +244,7 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
         //insertion has taken place. This allows the user to drag around and decide
         //on the new bond angle
         //The atom that was just added becomes dragging, and this was inserted into the already existing atom
-        class AtomInsertionDragging(val draggingAtom: ChemMolecule.ChemAtom, val insertedTo: ChemMolecule.ChemAtom, var allowBondChanges: Boolean) : Mode()
+        class AtomInsertionDragging(val draggingAtom: ChemMolecule.ChemAtom, val insertedTo: ChemMolecule.ChemAtom, var allowBondChanges: Boolean, val newBond: ChemMolecule.ChemBond) : Mode()
     }
 
     companion object {

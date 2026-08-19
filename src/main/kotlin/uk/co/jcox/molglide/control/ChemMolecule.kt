@@ -17,6 +17,7 @@ import org.openscience.cdk.graph.ConnectivityChecker
 import org.openscience.cdk.interfaces.IAtom
 import org.openscience.cdk.interfaces.IAtomContainer
 import org.openscience.cdk.interfaces.IBond
+import org.openscience.cdk.interfaces.IChemObject
 import org.openscience.cdk.ringsearch.RingSearch
 import org.openscience.cdk.silent.SilentChemObjectBuilder
 import org.openscience.cdk.smiles.smarts.parser.SMARTSParserConstants.a
@@ -224,10 +225,12 @@ class ChemMolecule (
         atom.setProperty(VISIBLE, true)
         atom.setProperty(TRAILING_POS, TrailingGroupPosition.RIGHT)
         atom.setProperty(IGNORE_ERRORS, false)
+        atom.setProperty(TRANSIENT, false)
     }
 
     private fun initDefaultBondProperties(cdkBond: IBond) {
         cdkBond.setProperty(FLIP_BOND, false)
+        cdkBond.setProperty(TRANSIENT, false)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -242,7 +245,7 @@ class ChemMolecule (
     class ChemAtom (
         val atom: IAtom,
         val molecule: ChemMolecule,
-    ) {
+    ) : MolGLideChemData(atom) {
         fun isVisible(): Boolean {
             return atom.getProperty<Boolean>(VISIBLE)
         }
@@ -269,6 +272,8 @@ class ChemMolecule (
             return Vector2d(p2d.x, p2d.y)
         }
 
+
+
         override fun hashCode(): Int {
             return atom.hashCode()
         }
@@ -281,9 +286,7 @@ class ChemMolecule (
     class ChemBond (
         val bond: IBond,
         val molecule: ChemMolecule,
-
-
-    ) {
+    ) : MolGLideChemData(bond) {
         override fun equals(other: Any?): Boolean {
             return other is ChemBond && this.bond == other.bond
         }
@@ -330,6 +333,23 @@ class ChemMolecule (
     }
 
 
+    //For stuff that does not need to be stored with CDK
+    open class MolGLideChemData(
+        /**
+         * Indicates to the renderer that this atom/bond/ may update every frame
+         */
+        private val cdkObject: IChemObject,
+
+    ) {
+        fun isTransient(): Boolean {
+            return cdkObject.getProperty(TRANSIENT)
+        }
+        fun setTransient(value: Boolean) {
+            cdkObject.setProperty(TRANSIENT, value)
+        }
+    }
+
+
     enum class TrailingGroupPosition (val vec: Vector2d) {
         ABOVE(Vector2d(0.0, 1.0)),
         BELOW(Vector2d(0.0, -1.0)),
@@ -342,6 +362,7 @@ class ChemMolecule (
         const val TRAILING_POS = "MOLGLIDE_TRAILING_POS"
         const val FLIP_BOND = "MOLGLIDE_FLIP_BOND"
         const val IGNORE_ERRORS = "MOLGLIDE_IGNORE_ERRORS"
+        const val TRANSIENT = "MOLGLIDE_TRANSIENT"
         const val UNKNOWN = "X"
     }
 }

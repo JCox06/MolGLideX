@@ -7,10 +7,7 @@ interface IDataModelUI {
     fun cameraZoom(): Double
     fun shouldPauseEvents(): Boolean
 
-    fun getLineData(): List<UILine>
-    fun getTriangleData(): List<UITriangle>
-    fun getAtomData(): List<UIAtom>
-    fun getBondData(): List<UIBond>
+    fun getUIComponents(): Collection<AbstractUIComponent>
 
     fun getLastMouseX(): Int
     fun getLastMouseY(): Int

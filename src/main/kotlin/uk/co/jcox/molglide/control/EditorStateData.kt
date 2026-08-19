@@ -1,9 +1,5 @@
 package uk.co.jcox.molglide.control
 
-import com.sun.org.apache.xpath.internal.operations.Bool
-import org.apache.jena.reasoner.rulesys.builtins.Max
-import org.apache.jena.sparql.pfunction.library.container
-import org.openscience.cdk.interfaces.IAtom
 import kotlin.math.max
 
 
@@ -90,20 +86,8 @@ class EditorStateData (
         return pauseEvents
     }
 
-    override fun getLineData(): List<UILine> {
-        return uiDataBuilder.getUILines()
-    }
-
-    override fun getTriangleData(): List<UITriangle> {
-        return uiDataBuilder.getUITriangles()
-    }
-
-    override fun getAtomData(): List<UIAtom> {
-        return uiDataBuilder.getUIAtoms()
-    }
-
-    override fun getBondData(): List<UIBond> {
-        return uiDataBuilder.getUIBonds()
+    override fun getUIComponents(): Collection<AbstractUIComponent> {
+        return uiDataBuilder.getUIData()
     }
 
     override fun getLastMouseX(): Int {

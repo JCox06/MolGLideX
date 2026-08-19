@@ -7,6 +7,7 @@ import org.joml.times
 import org.openscience.cdk.interfaces.IAtom
 import org.openscience.cdk.interfaces.IAtomContainer
 import org.openscience.cdk.interfaces.IBond
+import org.openscience.cdk.smiles.smarts.parser.SMARTSParserConstants.r
 import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.control.ChemMolecule.ChemAtom
 import uk.co.jcox.molglide.control.tool.AtomBondTool
@@ -14,39 +15,48 @@ import kotlin.math.roundToInt
 
 class UIDataBuilder (private val data: EditorStateData, private val selectionManager: SelectionManager) {
 
-    //UIAtom can take care of the atoms
-    //UILines can take care of single, double, triple, single (dashed) bonds
-    private val uiAtoms: MutableList<UIAtom> = mutableListOf()
-    private val uiLines: MutableList<UILine> = mutableListOf()
 
-    //For wedged bonds, UITriangles must be used, since these are triangular in shapep
-    private val uiTriangles: MutableList<UITriangle> = mutableListOf()
+    private val uiComponents: MutableMap<ChemMolecule.MolGLideChemData, AbstractUIComponent> = mutableMapOf()
 
-    //For the actual bond data - Stores if the bond is selected or not
-    private val uiBonds: MutableList<UIBond> = mutableListOf()
-
-    fun getUIAtoms(): List<UIAtom> = uiAtoms
-    fun getUILines(): List<UILine> = uiLines
-    fun getUITriangles(): List<UITriangle> = uiTriangles
-    fun getUIBonds(): List<UIBond> = uiBonds
-
-    fun rebuild(includeSelectedOnly: Boolean = false) {
-        clearUI()
-        buildAtomUI(includeSelectedOnly)
-        buildBondUI(includeSelectedOnly)
+    fun getUIData(): Collection<AbstractUIComponent> {
+        return uiComponents.values
     }
 
-    private fun buildAtomUI(includeSelectedOnly: Boolean) {
+
+    /**
+     * Takes all the complicated CDK chemistry data, and transforms it into simple primitives
+     * such as lines, bits of text, polygons (triangles).
+     *
+     * The specific rebuild operation can be customised to meet the specific criteria
+     *
+     * @param fullBuild Refreshes all the UI (including transient components)
+     *
+     * Transient components are components that have the potential to update every frame. Since the majority of the UI is
+     * static between frames, and only changes on actions, the main UI is therefore only built when the ActionManager recieves a new action.
+     *
+     * Components that are marked as transient are added to separate special lists which are chosen to update every frame
+     */
+    fun rebuild(fullBuild: Boolean = false) {
+        if (fullBuild) uiComponents.clear()
+
+        buildAtomUI(fullBuild)
+        buildBondUI(fullBuild)
+    }
+
+
+    private fun buildAtomUI(fullBuild: Boolean) {
         data.getMolecules().forEach { chemMolecule ->
             chemMolecule.atoms().forEach { chemAtom ->
-                if (includeSelectedOnly && !selectionManager.isSelected(chemAtom)) {
+                uiComponents[chemAtom]?.selected = selectionManager.isSelected(chemAtom)
+                if (!fullBuild && !chemAtom.isTransient()) {
                     return@forEach
                 }
                 val ui = buildUIAtom(chemAtom)
-                uiAtoms.add(ui)
+                uiComponents[chemAtom] = ui
             }
         }
     }
+
 
     private fun buildUIAtom(chemAtom: ChemAtom) : UIAtom {
         val pos = chemAtom.getPos()
@@ -83,45 +93,50 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         return ""
     }
 
-    fun buildBondUI(includeSelectedOnly: Boolean) {
+    fun buildBondUI(fullBuild: Boolean) {
         data.getMolecules().forEach { chemMolecule ->
             chemMolecule.bonds().forEach { chemBond ->
-                if (includeSelectedOnly && !selectionManager.isSelected(chemBond)) {
+
+                uiComponents[chemBond]?.selected = selectionManager.isSelected(chemBond)
+
+                if (!chemBond.isTransient() && !fullBuild) {
                     return@forEach
                 }
+
                 val absoluteBond = getAbsoluteBond(chemBond)
+                val bondComponents = mutableListOf<AbstractUIComponent>()
+
                 when (chemBond.bond.order) {
-                    IBond.Order.SINGLE -> handleSingleStereo(absoluteBond, chemBond)
-                    IBond.Order.DOUBLE -> uiLines.addAll(calculatePositionForDoubleBond(absoluteBond, chemBond))
-                    IBond.Order.TRIPLE -> uiLines.addAll(calculatePositionForTripleBond(absoluteBond, chemBond))
+                    IBond.Order.SINGLE -> handleSingleStereo(absoluteBond, chemBond, bondComponents)
+                    IBond.Order.DOUBLE -> bondComponents.addAll(calculatePositionForDoubleBond(absoluteBond, chemBond))
+                    IBond.Order.TRIPLE -> bondComponents.addAll(calculatePositionForTripleBond(absoluteBond, chemBond))
                     else -> {}
                 }
-                val uiInfo = buildUIBond(chemBond)
-                uiBonds.add(uiInfo)
-            }
+                val uiInfo = buildUIBond(chemBond, bondComponents)
+                uiComponents[chemBond] = uiInfo }
         }
     }
 
 
-    private fun handleSingleStereo(absoluteBond: UILine, chemBond: ChemMolecule.ChemBond) {
+    private fun handleSingleStereo(absoluteBond: UILine, chemBond: ChemMolecule.ChemBond, bondComponents: MutableList<AbstractUIComponent>) {
         //If the stereochem is just normal, then just add the absolute bond
         val s = chemBond.stereo()
         if (s == StereoChem.NORMAL) {
-            uiLines.add(absoluteBond)
+            bondComponents.add(absoluteBond)
             return
         }
         if (s == StereoChem.DASHED) {
-            addDashedWedgeLines(absoluteBond, chemBond)
+            addDashedWedgeLines(absoluteBond, chemBond, bondComponents)
             return
         }
 
         if (s == StereoChem.WEDGED) {
-            addWedgedBonds(absoluteBond, chemBond)
+            addWedgedBonds(absoluteBond, chemBond, bondComponents)
             return
         }
     }
 
-    private fun addWedgedBonds(absoluteBond: UILine, chemBond: ChemMolecule.ChemBond) {
+    private fun addWedgedBonds(absoluteBond: UILine, chemBond: ChemMolecule.ChemBond, bondComponents: MutableList<AbstractUIComponent>) {
         val perp = calculatePerpendicularVector(absoluteBond)
 
         val startX = absoluteBond.startX
@@ -139,10 +154,10 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         val v3y = (midPointEndY - perp.y * DASH_DISTANCE / 2)
         val v3 = Vector2d(v3x, v3y)
 
-        uiTriangles.add(UITriangle(v3, v2, v1))
+        bondComponents.add(UITriangle(v3, v2, v1))
     }
 
-    private fun addDashedWedgeLines(absoluteBond: UILine, chemBond: ChemMolecule.ChemBond) {
+    private fun addDashedWedgeLines(absoluteBond: UILine, chemBond: ChemMolecule.ChemBond, bondComponents: MutableList<AbstractUIComponent>) {
         val vec = calculateVector(absoluteBond)
         val perp = calculatePerpendicularVector(absoluteBond)
         val currentPos = Vector2d(absoluteBond.startX, absoluteBond.startY)
@@ -166,7 +181,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
             val newStartY = (currentPos.y + perp.y * sideLength /2)
             val newEndX = (currentPos.x - perp.x * sideLength /2)
             val newEndY = (currentPos.y - perp.y * sideLength /2)
-            uiLines.add(UILine(newStartX, newStartY, newEndX, newEndY))
+            bondComponents.add(UILine(newStartX, newStartY, newEndX, newEndY))
             currentPos.x += vec.x * relaxedInterDashDistance
             currentPos.y += vec.y * relaxedInterDashDistance
         }
@@ -403,12 +418,6 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
     }
 
 
-    private fun clearUI() {
-        uiAtoms.clear()
-        uiLines.clear()
-        uiTriangles.clear()
-        uiBonds.clear()
-    }
 
 
     fun getSelectedFormula(): String {
@@ -417,35 +426,10 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
 
     }
 
-    fun isAtomSelected() : Boolean {
-        val selection = selectionManager.primarySelection
-        if (selection is SelectionManager.Type.ActiveAtom) {
-            return true
-        }
-        return false
-    }
 
-    fun getSelectedBond(): UIBond? {
-        val selection = selectionManager.primarySelection
-        if (selection is SelectionManager.Type.ActiveBond) {
-            val chemBond = selection.chemBond
-            return buildUIBond(chemBond)
-        }
-        return null
-    }
-
-    private fun buildUIBond(chemBond: ChemMolecule.ChemBond): UIBond {
-        val ui = UIBond(chemBond.bond.order.numeric(), chemBond.midPoint(), chemBond.bond.isAromatic, chemBond.stereo(), selectionManager.isSelected(chemBond))
+    private fun buildUIBond(chemBond: ChemMolecule.ChemBond, bondComponents: MutableList<AbstractUIComponent>): UIBond {
+        val ui = UIBond(chemBond.bond.order.numeric(), chemBond.midPoint(), chemBond.bond.isAromatic, chemBond.stereo(), bondComponents, selectionManager.isSelected(chemBond))
         return ui
-    }
-
-    fun getSelectedAtom(): UIAtom? {
-        val selection = selectionManager.primarySelection
-        if (selection is SelectionManager.Type.ActiveAtom) {
-            val chemAtom = selection.chemAtom
-            return buildUIAtom(chemAtom)
-        }
-        return null
     }
 
     fun getSelectedWeight(): Double {
@@ -457,7 +441,6 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         val s = selectionManager.getAtom()
         return s?.atom?.atomTypeName ?: ""
     }
-
 
     companion object {
         private const val INTER_BOND_DISTANCE = 6.0
