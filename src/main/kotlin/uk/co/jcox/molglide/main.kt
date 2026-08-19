@@ -1,9 +1,6 @@
 package uk.co.jcox.molglide
 
 import com.formdev.flatlaf.FlatLightLaf
-import uk.co.jcox.molglide.mainframe.MainController
-import uk.co.jcox.molglide.mainframe.MainData
-import uk.co.jcox.molglide.mainframe.MolGlideFrame
 import javax.swing.JDialog
 import javax.swing.JFrame
 import javax.swing.SwingUtilities
