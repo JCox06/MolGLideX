@@ -23,15 +23,15 @@ class MainData : IMainAppData{
     }
 
     override fun getSelectedFormula(): String {
-        return activeSession?.editorController?.uiBuilder?.getSelectedFormula() ?: return ""
+        return activeSession?.editorData?.uiDataBuilder?.getSelectedFormula() ?: return ""
     }
 
     override fun getSelectedWeight(): Double {
-        return activeSession?.editorController?.uiBuilder?.getSelectedWeight() ?: 0.0
+        return activeSession?.editorData?.uiDataBuilder?.getSelectedWeight() ?: 0.0
 
     }
 
     override fun getSelectedHybrid(): String {
-        return activeSession?.editorController?.uiBuilder?.getSelectedHybridisation() ?: return ""
+        return activeSession?.editorData?.uiDataBuilder?.getSelectedHybridisation() ?: return ""
     }
 }

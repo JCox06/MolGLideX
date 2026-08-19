@@ -1,8 +1,11 @@
 package uk.co.jcox.molglide.control
 
+import com.github.jsonldjava.shaded.com.google.common.math.IntMath.pow
+import org.apache.jena.sparql.function.library.sqrt
 import org.joml.Vector2d
 import org.openscience.cdk.config.Elements
 import org.openscience.cdk.interfaces.IBond
+import org.openscience.cdk.smiles.smarts.parser.SMARTSParserConstants.x
 import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.control.actions.AtomDeletionAction
@@ -28,247 +31,198 @@ import uk.co.jcox.molglide.io.LevelSerializer
 import uk.co.jcox.molglide.io.MolGLideMetaData
 import uk.co.jcox.molglide.mainframe.IMainAppData
 import uk.co.jcox.molglide.ui.EditorPanel
-import java.io.File
+import uk.co.jcox.molglide.ui.EditorPanel.Companion.MOUSE_SENSE
+import uk.co.jcox.molglide.ui.EditorPanel.Companion.MOUSE_SENSE_ZOOM
+import uk.co.jcox.molglide.ui.EditorPanel.Companion.SIG_MOUSE_DELTA
+import java.awt.Point
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
+import java.awt.event.MouseWheelEvent
+import javax.swing.SwingUtilities
+import javax.swing.Timer
+import kotlin.math.sqrt
 
 class EditorStateController (
     private val globalContext: IMainAppData,
     private val stateData : EditorStateData,
+    private val editorPanel: EditorPanel,
 ) {
-    val actionManager: ActionManager = ActionManager(stateData)
+    val actionManager: ActionManager = ActionManager(stateData) { dataHasChanged() }
+    private var currentTool: Tool = AtomBondTool(globalContext, actionManager, stateData.selectionManager)
 
-    private val selectionManager: SelectionManager = SelectionManager()
-    private var currentTool: Tool = AtomBondTool(globalContext, actionManager, selectionManager)
+    init {
+        val panelMouseEvents = PanelMouseEvents()
+        editorPanel.addMouseMotionListener(panelMouseEvents)
+        editorPanel.addMouseListener(panelMouseEvents)
+        editorPanel.addMouseWheelListener(panelMouseEvents)
 
-    val uiBuilder = UIBuilder(stateData, selectionManager)
+        val timer = Timer(16) {
+            editorPanel.refreshEditor()
+            val world = screenToWorld(stateData.mouseX.toDouble(), stateData.mouseY.toDouble())
+            update(world.x, world.y)
 
+            //Todo - For the time being, the transients are baked into the actual
+            //UI data, so for now, just refresh the entire UI per frame
+            stateData.uiDataBuilder.rebuild(false)
+        }
+        timer.start()
+    }
 
-    fun handleMouseClick(mouseX: Int, mouseY: Int) {
+    private fun handleMouseClick(clickX: Int, clickY: Int) {
         prepareTool()
-        currentTool.onClick(mouseX, mouseY)
-        uiBuilder.rebuild()
+        currentTool.onClick(clickX, clickY)
     }
 
-    fun handleMouseRelease(mouseX: Int, mouseY: Int) {
-        currentTool.onRelease(mouseX, mouseY)
-        uiBuilder.rebuild()
+    private fun handleMouseRelease(clickX: Int, clickY: Int) {
+        currentTool.onRelease(clickX, clickY)
     }
 
-    fun handleSuddenMouseMove() {
+    private fun handleSuddenMouseMove() {
         currentTool.onSuddenMove()
     }
 
-    fun handleMouseDrag(mouseX: Int, mouseY: Int, dx: Double, dy: Double) {
+    private fun handleMouseDrag(mouseX: Int, mouseY: Int, dx: Double, dy: Double) {
         currentTool.onDragMouse(mouseX, mouseY, dx, dy)
     }
 
-    private fun prepareTool() {
-        if (globalContext.getEditMode().type == EditMode.ToolType.ATOM_INSERT) {
-            currentTool = AtomBondTool(globalContext, actionManager, selectionManager)
-            selectionManager.clearSelectionBoundingBox()
-        }
-        if (globalContext.getEditMode().type == EditMode.ToolType.RING_INSERT) {
-            currentTool = TemplateRingTool(globalContext, actionManager, selectionManager)
-            selectionManager.clearSelectionBoundingBox()
-        }
-        if (globalContext.getEditMode().type == EditMode.ToolType.SELECT_TOOL) {
-            currentTool = SelectTool(actionManager, selectionManager, stateData)
-        }
-
-        if (globalContext.getEditMode().type == EditMode.ToolType.FORMAL_CHARGE) {
-            currentTool = FormalChargeLonePairTool(globalContext, actionManager, selectionManager)
-        }
-    }
-
-    fun update(worldX: Int, worldY: Int) {
-        currentTool.updateMouseWorld(worldX, worldY)
-        selectionManager.updatePrimarySelection(stateData, worldX, worldY)
-        if (actionManager.isDirty) {
-            uiBuilder.rebuild()
-        }
-    }
-
-    fun deleteSelectedAtom() {
-        val atom = selectionManager.getAtom() ?: return
-        val deleteAtom = AtomDeletionAction(atom)
-        val frag = PartitionFragmentsAction(atom.molecule)
-        actionManager.executeAction(CompoundAction(deleteAtom, frag))
-    }
-
-    fun toggleSelectedAtomVisiblity() {
-        val atom = selectionManager.getAtom() ?: return
-        val action = ToggleAtomVisibilityAction(atom)
-        actionManager.executeAction(action)
-
-    }
-
-    fun flipSelectedBond() {
-        val bond = selectionManager.getBond() ?: return
-        val action = FlipBondAction(bond)
-        actionManager.executeAction(action)
-    }
-
-    fun updateSingleSelectedBond(bondOptions: StereoChem) {
-        val bond = selectionManager.getBond() ?: return
-
-        //Again as explained below, I am only allowing single bonds to have stereochem
-        val changeOrder = UpdateBondOrderAction(bond, IBond.Order.SINGLE)
-        val changeStereo = ChangeStereoChemAction(bond, bondOptions)
-        val compoundAction = CompoundAction(changeOrder, changeStereo)
-        actionManager.executeAction(compoundAction)
-    }
-
-    fun updateDoubleSelectedBond() {
-        val bond = selectionManager.getBond() ?: return
-        //Although double bonds do have stereochemistry
-        //it is not really depicted in chemical sketchers
-        //So I think for a simple molecular editor, its okay for the moment to assume
-        //double bonds should NOT have stereochemistry information associated with them
-        val removeStereoAction = ChangeStereoChemAction(bond, StereoChem.NORMAL)
-        val updateBondOrderAction = UpdateBondOrderAction(bond, IBond.Order.DOUBLE)
-        val compoundAction = CompoundAction(removeStereoAction, updateBondOrderAction)
-        actionManager.executeAction(compoundAction)
-    }
-
-
-    //Like the methods above, it might look first strange to see that this is not a compound action
-    //that affects the double bond option too.
-    //However in the case of benzene, the CDK recommends to have all the bonds (including formally single bonds)
-    //to be set as aromatic
-    fun updateAromaticSelectedBond() {
-        val bond = selectionManager.getBond() ?: return
-        val action = UpdateBondAromaticityAction(bond)
-        actionManager.executeAction(action)
-    }
-
-    fun invertStereoChemSelectedBond() {
-        TODO()
-    }
-
-    fun setTripleSelectedBond() {
-        val bond = selectionManager.getBond() ?: return
-        val action = UpdateBondOrderAction(bond, IBond.Order.TRIPLE)
-        actionManager.executeAction(action)
-    }
-
-    fun deleteSelectedBond() {
-        val selection = selectionManager.primarySelection
-        if (selection is SelectionManager.Type.ActiveBond) {
-            val bondDelete = BondDeletionAction(selection.chemBond)
-            val fragment = PartitionFragmentsAction(selection.chemBond.molecule)
-            actionManager.executeAction(CompoundAction(bondDelete, fragment))
-        }
-    }
-
-
-    fun deleteSelectedComponents() {
-
-        val molsToCheck = mutableSetOf<ChemMolecule>()
-
-        val actions: MutableList<IDataAction> = mutableListOf()
-        val bs = selectionManager.batchSelection
-
-        //Note: Remove bonds first, and then atoms
-        //On the reverse when the user wants to undo the action, CompoundAction reverses
-        //the order of the actionArray, so the atoms must be present first
-        bs.bonds.forEach { chemBond ->
-            val deleteBondAction = BondDeletionAction(chemBond)
-            actions.add(deleteBondAction)
-            molsToCheck.add(chemBond.molecule)
-        }
-        bs.atoms.forEach { chemAtom ->
-            val deleteAtomAction = AtomDeletionAction(chemAtom)
-            actions.add(deleteAtomAction)
-            molsToCheck.add(chemAtom.molecule)
-        }
-
-        molsToCheck.forEach { molecule ->
-            val partition = PartitionFragmentsAction(molecule)
-            actions.add(partition)
-        }
-
-        val actionArray = actions.toTypedArray()
-
-        val compoundAction = CompoundAction(*actionArray)
-        actionManager.executeAction(compoundAction)
-
-        selectionManager.clearSelectionBoundingBox()
-    }
-
-    fun serializeSelectedMolecules(metaData: MolGLideMetaData = MolGLideMetaData()): String {
-        val levelSerializer = LevelSerializer()
-        val customJSON = levelSerializer.getJSONEncoding(stateData, metaData, selectionManager.batchSelection)
-        return customJSON
-    }
-
-    fun canDrawSelectOnClick(): Boolean {
-        return currentTool is SelectTool && (currentTool as SelectTool).shouldShowAABB()
-    }
-
-    fun updateAxisAlignedBoundingBox(x1: Int, y1: Int, x2: Int, y2: Int) {
-        selectionManager.updateSelectionBoundingBox(stateData, x1, y1, x2, y2)
-    }
-
-    fun hasBatchSelection(): Boolean {
-        val bs = selectionManager.batchSelection
-        return bs.bonds.isNotEmpty() || bs.atoms.isNotEmpty()
-    }
-
-
-    fun ignoreErrors(newValue: Boolean) {
-        val chemAtom = selectionManager.getAtom() ?: return
-        val action = SetIgnoreErrorsOnAtom(chemAtom, newValue)
-        actionManager.executeAction(action)
-    }
-
-
-    fun getCameraPos(): Vector2d {
-        return Vector2d(stateData.cameraX, stateData.cameraY)
-    }
-
-
-
-    fun translateCamPos(x: Double, y: Double) {
+    private fun translateCameraPos(x: Double, y: Double) {
         stateData.cameraX += x
         stateData.cameraY += y
     }
 
-    fun importLevel(importData: EditorStateData, newWorldX: Int, newWorldY: Int, oldWorldX: Int, oldWorldY: Int) {
-
-        //The meta data contains the mouse click on copy
-        //Compare this with the current screen x, and y, to get dy, and dx, for the copy
-
-        val importActionManager = ActionManager(importData)
-        importData.getMolecules().forEach { chemMolecule ->
-            val rel = chemMolecule.atoms().first().getPos()
-            chemMolecule.atoms().forEach { chemAtom ->
-                //First we need to move the atom to a new position based on where the mouse clicked
-                //A simple move action would move all the atoms to the same position
-                //So we have to calculate the dx, dy for each individual atom as to
-                //preserve the original structure
-                val dx = newWorldX - rel.x
-                val dy = newWorldY - rel.y
-                val moveAtom = TranslateAtomAction(chemAtom, dx, dy)
-                importActionManager.executeAction(moveAtom)
-            }
-            //Then validate the data in the level and ensure it is all properly
-            //fragmented
-            val partitionAction = PartitionFragmentsAction(chemMolecule)
-            importActionManager.executeAction(partitionAction)
-        }
-        //Now import the data
-        val importAction = ImportMoleculesAction(importData)
-        this.actionManager.executeAction(importAction)
-
-        //Now remove the old selection, and highlight the newly selected data
-        this.selectionManager.clearAndAddSelection(importData.getMolecules())
+    fun update(worldX: Int, worldY: Int) {
+        currentTool.updateMouseWorld(worldX, worldY)
+        stateData.selectionManager.updatePrimarySelection(stateData, worldX, worldY)
     }
 
+    private fun prepareTool() {
+        if (globalContext.getEditMode().type == EditMode.ToolType.ATOM_INSERT) {
+            currentTool = AtomBondTool(globalContext, actionManager, stateData.selectionManager)
+            stateData.selectionManager.clearSelectionBoundingBox()
+        }
+        if (globalContext.getEditMode().type == EditMode.ToolType.RING_INSERT) {
+            currentTool = TemplateRingTool(globalContext, actionManager, stateData.selectionManager)
+            stateData.selectionManager.clearSelectionBoundingBox()
+        }
+        if (globalContext.getEditMode().type == EditMode.ToolType.SELECT_TOOL) {
+            currentTool = SelectTool(actionManager, stateData.selectionManager, stateData)
+        }
 
-    fun updateSelectedSymbol(newLabel: String) {
-        val atom = selectionManager.getAtom() ?: return
-        val action = ReplaceAtomAction(atom, newLabel)
-        if (Elements.ofString(newLabel) != null) {
-            actionManager.executeAction(action)
+        if (globalContext.getEditMode().type == EditMode.ToolType.FORMAL_CHARGE) {
+            currentTool = FormalChargeLonePairTool(globalContext, actionManager, stateData.selectionManager)
+        }
+    }
+
+    private fun screenToWorld(screen: Point): Point {
+        val x: Double = screen.x.toDouble()
+        val y: Double = screen.y.toDouble()
+        return screenToWorld(x, y)
+    }
+
+    private fun screenToWorld(screenX: Double, screenY: Double) : Point {
+        var x = screenX
+        var y = screenY
+        val camX = stateData.cameraX
+        val camY = stateData.cameraY
+        val camZoom = stateData.cameraZoom
+        x -= camX
+        y -= camY
+        x /= camZoom
+        y /= camZoom
+        return Point(x.toInt(), y.toInt())
+    }
+
+    //Rebuilds the entire UI
+    private fun dataHasChanged() {
+        rebuildEntireUI()
+    }
+
+    private fun rebuildEntireUI() {
+        stateData.uiDataBuilder.rebuild(false)
+    }
+
+    inner class PanelMouseEvents: MouseAdapter() {
+
+        private var offsetX: Int = 0
+        private var offsetY: Int = 0
+
+        override fun mousePressed(e: MouseEvent?) {
+            if (e == null || stateData.pauseEvents) {
+                return
+            }
+            val world = screenToWorld(e.point)
+            if (SwingUtilities.isLeftMouseButton(e)) {
+                handleMouseClick(world.x, world.y)
+            }
+            stateData.transientBoxSelectStartX = world.x
+            stateData.transientBoxSelectStartY = world.y
+        }
+
+        override fun mouseReleased(e: MouseEvent?) {
+            if (e == null || stateData.pauseEvents) {
+                return
+            }
+            val point = screenToWorld(e.point)
+            handleMouseRelease(point.x, point.y)
+
+            stateData.transientBoxSelectStartX = 0
+            stateData.transientBoxSelectStartY = 0
+            stateData.transientBoxSelectAdvY = 0
+            stateData.transientBoxSelectAdvX = 0
+        }
+
+        override fun mouseWheelMoved(e: MouseWheelEvent?) {
+            if (e == null || stateData.pauseEvents) {
+                return
+            }
+
+            if (e.isControlDown) {
+                stateData.cameraZoom -= e.wheelRotation * MOUSE_SENSE_ZOOM
+            }
+        }
+
+        override fun mouseDragged(e: MouseEvent?) {
+            if (e == null || stateData.pauseEvents) {
+                return
+            }
+            updateMouse(e)
+
+            val world = screenToWorld(e.point)
+            val moveX = offsetX * MOUSE_SENSE
+            val moveY = offsetY * MOUSE_SENSE
+            handleMouseDrag(world.x, world.y, moveX, moveY)
+
+            if (SwingUtilities.isMiddleMouseButton(e)) {
+                translateCameraPos(moveX, moveY)
+            }
+
+            if (stateData.canSelectBox && SwingUtilities.isLeftMouseButton(e) && currentTool is SelectTool && (currentTool as SelectTool).shouldShowAABB()) {
+                stateData.transientBoxSelectAdvX = world.x - stateData.transientBoxSelectStartX
+                stateData.transientBoxSelectAdvY = world.y - stateData.transientBoxSelectStartY
+                stateData.selectionManager.updateSelectionBoundingBox(stateData, stateData.transientBoxSelectStartX, stateData.transientBoxSelectStartY, world.x, world.y)
+            }
+        }
+
+        override fun mouseMoved(e: MouseEvent?) {
+            if (e == null || stateData.pauseEvents) {
+                return
+            }
+            updateMouse(e)
+        }
+
+        private fun updateMouse(e: MouseEvent) {
+            if (stateData.pauseEvents) {
+                return
+            }
+            val currentPos = e.point
+            offsetX = currentPos.x - stateData.getLastMouseX()
+            offsetY = currentPos.y - stateData.getLastMouseY()
+            stateData.mouseX = currentPos.x
+            stateData.mouseY = currentPos.y
+
+            if (sqrt((pow(offsetX, 2) + pow(offsetY, 2)).toDouble()) >= SIG_MOUSE_DELTA) {
+                handleSuddenMouseMove()
+            }
         }
     }
 }

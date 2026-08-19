@@ -48,14 +48,8 @@ class MainController (
                     mainFrame.windowMenu.add(item)
                 }
             }
-
-            override fun menuDeselected(e: MenuEvent?) {
-
-            }
-
-            override fun menuCanceled(e: MenuEvent?) {
-
-            }
+            override fun menuDeselected(e: MenuEvent?) {}
+            override fun menuCanceled(e: MenuEvent?) {}
         })
 
         mainFrame.toolBox.registerEditModeCallback { editMode ->
@@ -63,12 +57,10 @@ class MainController (
         }
     }
 
-
     fun newProject() {
         val newData = EditorStateData()
         createSession(newData, null)
     }
-
 
     fun openProject(file: File) {
         val levelLoader = LevelLoader()
@@ -94,8 +86,8 @@ class MainController (
     }
 
     private fun createSession(data: EditorStateData, file: File? = null) {
-        val editorController = EditorStateController(mainData, data)
-        val editorPanel = EditorPanel(editorController)
+        val editorPanel = EditorPanel(data)
+        val editorController = EditorStateController(mainData, data, editorPanel)
         val session = EditorSession(UUID.randomUUID().toString(), data, editorController, editorPanel, file)
         mainData.sessions.add(session)
         var tabname = "Untitled Document ${mainData.sessions.size}"

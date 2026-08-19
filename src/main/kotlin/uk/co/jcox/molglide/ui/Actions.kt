@@ -94,7 +94,7 @@ class EditLabelMenuAction (val panel: JPanel, val controller: EditorStateControl
             return
         }
         label.trim()
-        controller.updateSelectedSymbol(label)
+//        controller.updateSelectedSymbol(label)
     }
 }
 
@@ -105,7 +105,7 @@ class DeleteAtomMenuAction (val controller: EditorStateController) : AbstractAct
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        controller.deleteSelectedAtom()
+//        controller.deleteSelectedAtom()
     }
 }
 
@@ -116,7 +116,7 @@ class ToggleAtomVisibilityMenuAction (val controller: EditorStateController, isV
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        controller.toggleSelectedAtomVisiblity()
+//        controller.toggleSelectedAtomVisiblity()
     }
 }
 
@@ -126,7 +126,7 @@ class FlipBondMenuAction (val controller: EditorStateController) : AbstractActio
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        controller.flipSelectedBond()
+//        controller.flipSelectedBond()
     }
 }
 
@@ -137,7 +137,7 @@ class SetPlainBondMenuAction (val controller: EditorStateController, isPlain: Bo
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        controller.updateSingleSelectedBond(StereoChem.NORMAL)
+//        controller.updateSingleSelectedBond(StereoChem.NORMAL)
     }
 }
 
@@ -148,7 +148,7 @@ class SetWedgedBondMenuAction (val controller: EditorStateController, isWedged: 
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        controller.updateSingleSelectedBond(StereoChem.WEDGED)
+//        controller.updateSingleSelectedBond(StereoChem.WEDGED)
     }
 }
 
@@ -159,7 +159,7 @@ class SetDashedBondMenuAction (val controller: EditorStateController, isDashed: 
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        controller.updateSingleSelectedBond(StereoChem.DASHED)
+//        controller.updateSingleSelectedBond(StereoChem.DASHED)
     }
 }
 
@@ -169,7 +169,7 @@ class FlipStereoChemMenuAction (val controller: EditorStateController) : Abstrac
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        controller.invertStereoChemSelectedBond()
+//        controller.invertStereoChemSelectedBond()
     }
 }
 
@@ -181,7 +181,7 @@ class SetDoubleBondMenuAction (val controller: EditorStateController, isDouble: 
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        controller.updateDoubleSelectedBond()
+//        controller.updateDoubleSelectedBond()
     }
 }
 
@@ -192,7 +192,7 @@ class SetAromaticDoubleBondMenuAction (val controller: EditorStateController, is
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        controller.updateAromaticSelectedBond()
+//        controller.updateAromaticSelectedBond()
     }
 }
 
@@ -203,7 +203,7 @@ class SetTripleBondMenuAction (val controller: EditorStateController, isTriple: 
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        controller.setTripleSelectedBond()
+//        controller.setTripleSelectedBond()
     }
 }
 
@@ -214,7 +214,7 @@ class DeleteBondMenuAction (val controller: EditorStateController) : AbstractAct
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        controller.deleteSelectedBond()
+//        controller.deleteSelectedBond()
     }
 }
 
@@ -275,13 +275,13 @@ class CopySelection(val controller: EditorStateController, val editorPanel: Edit
     //1) Copy the selected components in SVG format to the clipboard to use in external applications
     //2) Copy the selected components in MGX format to the clipboard to use in MolGLide applications
     override fun actionPerformed(e: ActionEvent?) {
-        val svgGen = SVGExporter()
-        val svgPayload = svgGen.quickExport(editorPanel)
-        val mgxPayload = controller.serializeSelectedMolecules(MolGLideMetaData(editorPanel.lastMousePos.x, editorPanel.lastMousePos.y))
-        val filePayload = listOf(MolGLideUtils.writeTempFile(svgPayload))
-        val payload = ClipboardMoleculePayload(mgxPayload, svgPayload, filePayload)
-        val clipboard = Toolkit.getDefaultToolkit().systemClipboard
-        clipboard.setContents(payload, null)
+//        val svgGen = SVGExporter()
+//        val svgPayload = svgGen.quickExport(editorPanel)
+//        val mgxPayload = controller.serializeSelectedMolecules(MolGLideMetaData(editorPanel.lastMousePos.x, editorPanel.lastMousePos.y))
+//        val filePayload = listOf(MolGLideUtils.writeTempFile(svgPayload))
+//        val payload = ClipboardMoleculePayload(mgxPayload, svgPayload, filePayload)
+//        val clipboard = Toolkit.getDefaultToolkit().systemClipboard
+//        clipboard.setContents(payload, null)
     }
 }
 
@@ -304,13 +304,13 @@ class PasteSelection(val controller: EditorStateController, val panel: EditorPan
         }
         val levelLoader = LevelLoader()
         val tempLevel = levelLoader.loadLevel(mgxData)
-
-        val p = panel.lastMousePos
-        val w = panel.screenToWorld(p)
-        val md = levelLoader.metaData
-        val lastS = Point(md.copyAtScreenX, md.copyAtScreenY)
-        val lastW = panel.screenToWorld(lastS)
-        controller.importLevel(tempLevel, w.x, w.y, lastW.x, lastW.y)
+//
+//        val p = panel.lastMousePos
+//        val w = panel.screenToWorld(p)
+//        val md = levelLoader.metaData
+//        val lastS = Point(md.copyAtScreenX, md.copyAtScreenY)
+//        val lastW = panel.screenToWorld(lastS)
+//        controller.importLevel(tempLevel, w.x, w.y, lastW.x, lastW.y)
 
     }
 }
@@ -335,7 +335,7 @@ class DeleteSelection(val controller: EditorStateController) : AbstractAction("D
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        controller.deleteSelectedComponents()
+//        controller.deleteSelectedComponents()
     }
 }
 
@@ -347,7 +347,7 @@ class IgnoreErrorAction(val controller: EditorStateController, val currentValue:
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        controller.ignoreErrors(!currentValue)
+//        controller.ignoreErrors(!currentValue)
     }
 }
 

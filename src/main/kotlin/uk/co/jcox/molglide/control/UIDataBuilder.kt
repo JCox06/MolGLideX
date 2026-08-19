@@ -12,7 +12,7 @@ import uk.co.jcox.molglide.control.ChemMolecule.ChemAtom
 import uk.co.jcox.molglide.control.tool.AtomBondTool
 import kotlin.math.roundToInt
 
-class UIBuilder (private val data: EditorStateData, private val selectionManager: SelectionManager) {
+class UIDataBuilder (private val data: EditorStateData, private val selectionManager: SelectionManager) {
 
     //UIAtom can take care of the atoms
     //UILines can take care of single, double, triple, single (dashed) bonds

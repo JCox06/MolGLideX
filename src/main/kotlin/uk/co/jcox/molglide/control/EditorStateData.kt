@@ -1,19 +1,35 @@
 package uk.co.jcox.molglide.control
 
+import com.sun.org.apache.xpath.internal.operations.Bool
+import org.apache.jena.reasoner.rulesys.builtins.Max
 import org.apache.jena.sparql.pfunction.library.container
 import org.openscience.cdk.interfaces.IAtom
+import kotlin.math.max
 
 
 class EditorStateData (
 
     private val molecules: MutableList<ChemMolecule> = mutableListOf(),
-    ) {
+    ) : IDataModelUI {
 
-
-    //Store camera positions so they can be incorporated into the save file
-    //at a later date
     var cameraX: Double = 0.0
     var cameraY: Double = 0.0
+    var cameraZoom: Double = 1.0
+        set(value) {field = max(1.0, value)}
+    var pauseEvents: Boolean = false
+
+    val selectionManager: SelectionManager = SelectionManager()
+    val uiDataBuilder = UIDataBuilder(this, selectionManager)
+
+    var mouseX: Int = 0
+    var mouseY: Int = 0
+
+    var canSelectBox: Boolean = true
+    var transientBoxSelectStartX: Int = 0
+    var transientBoxSelectStartY: Int = 0
+    var transientBoxSelectAdvX: Int = 0
+    var transientBoxSelectAdvY: Int = 0
+
 
 
     fun createMolecule(initialAtom: String, positionX: Int, positionY: Int) : ChemMolecule {
@@ -57,4 +73,60 @@ class EditorStateData (
     }
 
     fun getMolecules() : List<ChemMolecule> = molecules
+
+    override fun cameraX(): Double {
+        return cameraX
+    }
+
+    override fun cameraY(): Double {
+        return cameraY
+    }
+
+    override fun cameraZoom(): Double {
+        return cameraZoom
+    }
+
+    override fun shouldPauseEvents(): Boolean {
+        return pauseEvents
+    }
+
+    override fun getLineData(): List<UILine> {
+        return uiDataBuilder.getUILines()
+    }
+
+    override fun getTriangleData(): List<UITriangle> {
+        return uiDataBuilder.getUITriangles()
+    }
+
+    override fun getAtomData(): List<UIAtom> {
+        return uiDataBuilder.getUIAtoms()
+    }
+
+    override fun getBondData(): List<UIBond> {
+        return uiDataBuilder.getUIBonds()
+    }
+
+    override fun getLastMouseX(): Int {
+        return mouseX
+    }
+
+    override fun getLastMouseY(): Int {
+        return mouseY
+    }
+
+    override fun getTransientSelectionStartX(): Int {
+        return transientBoxSelectStartX
+    }
+
+    override fun getTransientSelectionStartY(): Int {
+        return transientBoxSelectStartY
+    }
+
+    override fun getTransientSelectionAdvX(): Int {
+        return transientBoxSelectAdvX
+    }
+
+    override fun getTransientSelectionAdvY(): Int {
+        return transientBoxSelectAdvY
+    }
 }

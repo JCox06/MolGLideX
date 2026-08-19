@@ -4,19 +4,18 @@ import uk.co.jcox.molglide.control.actions.IDataAction
 
 
 class ActionManager (
-    private val levelData: EditorStateData
+    private val levelData: EditorStateData,
+    private val dataChanged: () -> Unit = {}
 ) {
 
     private val pastActions = ArrayDeque<IDataAction>()
     private val discardedActions = ArrayDeque<IDataAction>()
-    var isDirty = true
-        private set
 
     fun executeAction(action: IDataAction) {
         action.execute(levelData)
         pastActions.addLast(action)
         discardedActions.clear()
-        isDirty = true
+        dataChanged()
     }
 
     fun canUndo(): Boolean {
@@ -32,7 +31,7 @@ class ActionManager (
             val last = pastActions.removeLast()
             last.undo(levelData)
             discardedActions.addLast(last)
-            isDirty = true
+            dataChanged()
         }
     }
 
@@ -41,11 +40,7 @@ class ActionManager (
             val last = discardedActions.removeLast()
             last.redo(levelData)
             pastActions.addLast(last)
-            isDirty = true
+            dataChanged()
         }
-    }
-
-    fun markNotDirty() {
-        isDirty = false
     }
 }
