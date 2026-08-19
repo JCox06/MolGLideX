@@ -1,6 +1,7 @@
 package uk.co.jcox.molglide.io
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.control.ChemMolecule
 
@@ -22,7 +23,6 @@ data class MoleculeDataObject (
 @Serializable
 data class AtomDataObject (
     val loaderID: Int,
-    val editorID: String,
     val symbol: String,
     val isVisible: Boolean,
     val hydrogenPos: ChemMolecule.TrailingGroupPosition,
@@ -33,7 +33,6 @@ data class AtomDataObject (
 
 @Serializable
 data class BondDataObject (
-    val editorID: String,
     val atomA: Int,
     val atomB: Int,
     val doubleFlip: Boolean,

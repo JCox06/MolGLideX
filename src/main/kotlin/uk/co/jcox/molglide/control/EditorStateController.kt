@@ -87,11 +87,6 @@ class EditorStateController (
         }
     }
 
-    fun checkSelected(atom: UIAtom) : Boolean {
-        val selection = selectionManager.primarySelection
-        return selection is SelectionManager.Type.ActiveAtom && selection.chemAtom.atom.id == atom.chemID
-    }
-
     fun deleteSelectedAtom() {
         val atom = selectionManager.getAtom() ?: return
         val deleteAtom = AtomDeletionAction(atom)

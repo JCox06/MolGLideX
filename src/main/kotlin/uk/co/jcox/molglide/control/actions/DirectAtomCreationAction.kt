@@ -18,7 +18,7 @@ class DirectAtomCreationAction (
     override fun execute(data: EditorStateData) {
         val atom: IAtom = Atom(dataAtom.symbol)
         atom.point2d = Point2d(dataAtom.worldX, dataAtom.worldY)
-        atom.id = dataAtom.editorID
+
 
         newChemAtom = ChemMolecule.ChemAtom(atom, molecule)
         newChemAtom.setVisible(dataAtom.isVisible)

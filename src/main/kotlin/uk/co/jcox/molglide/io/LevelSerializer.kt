@@ -42,7 +42,7 @@ class LevelSerializer {
             }
             val id = idMappings.chemAtoms[chemAtom] ?: throw IOException("Level Data ID for atom is missing upon molecule serialization")
             val pos = chemAtom.getPos()
-            val dataAtom = AtomDataObject(id, chemAtom.atom.id, chemAtom.atom.symbol, chemAtom.isVisible(), chemAtom.getTrailPos(), pos.x, pos.y, chemAtom.shouldIgnoreErrors())
+            val dataAtom = AtomDataObject(id, chemAtom.atom.symbol, chemAtom.isVisible(), chemAtom.getTrailPos(), pos.x, pos.y, chemAtom.shouldIgnoreErrors())
             dataMolecule.atoms.add(id)
             saveFile.dataAtoms[id] = dataAtom
             addMolecule = true
@@ -56,7 +56,7 @@ class LevelSerializer {
             val atomAID = idMappings.chemAtoms[chemBond.getStart()] ?: throw IOException("Level Data ID for atom start of bond is missing upon molecule serialization")
             val atomBID = idMappings.chemAtoms[chemBond.getEnd()] ?: throw IOException("Level Data for ID for atom end of bond is missing upon molecule serialization")
 
-            val dataBond = BondDataObject(chemBond.bond.id, atomAID, atomBID, chemBond.shouldFlip(), chemBond.bond.order.numeric(), chemBond.stereo(), chemBond.bond.isAromatic)
+            val dataBond = BondDataObject(atomAID, atomBID, chemBond.shouldFlip(), chemBond.bond.order.numeric(), chemBond.stereo(), chemBond.bond.isAromatic)
 
             dataMolecule.bonds.add(bondID)
             saveFile.dataBonds[bondID] = dataBond

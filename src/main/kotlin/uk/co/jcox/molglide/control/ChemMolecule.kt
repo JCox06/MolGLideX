@@ -221,14 +221,12 @@ class ChemMolecule (
     }
 
     private fun initDefaultAtomProperties(atom: IAtom) {
-        atom.id = UUID.randomUUID().toString()
         atom.setProperty(VISIBLE, true)
         atom.setProperty(TRAILING_POS, TrailingGroupPosition.RIGHT)
         atom.setProperty(IGNORE_ERRORS, false)
     }
 
     private fun initDefaultBondProperties(cdkBond: IBond) {
-        cdkBond.id = UUID.randomUUID().toString()
         cdkBond.setProperty(FLIP_BOND, false)
     }
 

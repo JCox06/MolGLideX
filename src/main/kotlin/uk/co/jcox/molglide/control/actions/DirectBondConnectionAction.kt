@@ -20,7 +20,7 @@ class DirectBondConnectionAction (
         bond.setStereo(dataBond.stereoDisplay)
         molecule.updateBondOrder(bond, dataBond.order)
         bond.bond.setIsAromatic(dataBond.aromatic)
-        bond.bond.id = dataBond.editorID
+
     }
 
     override fun undo(data: EditorStateData) {

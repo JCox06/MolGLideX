@@ -59,7 +59,6 @@ class UIBuilder (private val data: EditorStateData, private val selectionManager
             calculateTrailGroup(chemAtom.atom),
             chemAtom.getTrailPos(),
             chemAtom.isVisible(),
-            chemAtom.atom.id,
             selectionManager.isSelected(chemAtom),
             checkForAtomErrors(chemAtom),
             chemAtom.shouldIgnoreErrors(),
