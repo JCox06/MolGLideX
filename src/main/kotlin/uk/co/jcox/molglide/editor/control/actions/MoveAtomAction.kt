@@ -1,11 +1,12 @@
 package uk.co.jcox.molglide.editor.control.actions
 
+import uk.co.jcox.molglide.editor.model.ChemAtom
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import javax.vecmath.Point2d
 
 class MoveAtomAction (
-    private val chemAtom: ChemMolecule.ChemAtom,
+    private val chemAtom: ChemAtom,
     private val newPos: Point2d,
     private val oldPos: Point2d,
 ) : IDataAction {

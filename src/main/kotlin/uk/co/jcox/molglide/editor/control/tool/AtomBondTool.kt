@@ -12,6 +12,8 @@ import uk.co.jcox.molglide.editor.control.actions.IncrementBondOrderAction
 import uk.co.jcox.molglide.editor.control.actions.ReplaceAtomAction
 import uk.co.jcox.molglide.editor.control.actions.RingCyclisationAction
 import uk.co.jcox.molglide.IMainAppData
+import uk.co.jcox.molglide.editor.model.ChemAtom
+import uk.co.jcox.molglide.editor.model.ChemBond
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
@@ -63,7 +65,7 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
      * either left or right of the master atom.
      * This method tests both positions to see which has the longest distance away
      */
-    private fun autoMoveGroup(checkAgainst: ChemMolecule.ChemAtom, applier: ChemMolecule.ChemAtom) {
+    private fun autoMoveGroup(checkAgainst: ChemAtom, applier: ChemAtom) {
         val leftTest = ChemMolecule.TrailingGroupPosition.LEFT.vec + applier.getPos()
         val rightTest = ChemMolecule.TrailingGroupPosition.RIGHT.vec + applier.getPos()
 
@@ -133,7 +135,7 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
         }
     }
 
-    private fun handleRingCyclisationAction(anchorAtom: ChemMolecule.ChemAtom, overlap: ChemMolecule.ChemAtom) {
+    private fun handleRingCyclisationAction(anchorAtom: ChemAtom, overlap: ChemAtom) {
             val action = RingCyclisationAction(anchorAtom, overlap)
             actionManager.executeAction(action)
     }
@@ -230,19 +232,19 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
     sealed class Mode {
         object None: Mode()
         class MolCreation(val xPos: Int, val yPos: Int) : Mode()
-        class AtomReplacement(val replace: ChemMolecule.ChemAtom) : Mode()
+        class AtomReplacement(val replace: ChemAtom) : Mode()
 
         //This mode is strictly used only in the sudden move method
         //it is swithced on after a replacement action, to check if the user actually
         //intended to add a bond
-        class PostReplacement(val insertTo: ChemMolecule.ChemAtom) : Mode()
+        class PostReplacement(val insertTo: ChemAtom) : Mode()
 
 
         //This mode is strictly used only in the drag method after the
         //insertion has taken place. This allows the user to drag around and decide
         //on the new bond angle
         //The atom that was just added becomes dragging, and this was inserted into the already existing atom
-        class AtomInsertionDragging(val draggingAtom: ChemMolecule.ChemAtom, val insertedTo: ChemMolecule.ChemAtom, var allowBondChanges: Boolean, val newBond: ChemMolecule.ChemBond) : Mode()
+        class AtomInsertionDragging(val draggingAtom: ChemAtom, val insertedTo: ChemAtom, var allowBondChanges: Boolean, val newBond: ChemBond) : Mode()
     }
 
     companion object {

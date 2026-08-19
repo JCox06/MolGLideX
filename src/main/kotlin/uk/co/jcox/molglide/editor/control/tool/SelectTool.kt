@@ -7,6 +7,7 @@ import uk.co.jcox.molglide.editor.model.SelectionManager
 import uk.co.jcox.molglide.editor.control.actions.CompoundAction
 import uk.co.jcox.molglide.editor.control.actions.IDataAction
 import uk.co.jcox.molglide.editor.control.actions.MoveAtomAction
+import uk.co.jcox.molglide.editor.model.ChemAtom
 import javax.vecmath.Point2d
 
 /**
@@ -118,6 +119,6 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
 
     sealed class ToolMode {
         object None: ToolMode()
-        class Dragging(val firstClickX: Int, val firstClickY: Int, val posMap: MutableMap<ChemMolecule.ChemAtom, Point2d> = mutableMapOf()) : ToolMode()
+        class Dragging(val firstClickX: Int, val firstClickY: Int, val posMap: MutableMap<ChemAtom, Point2d> = mutableMapOf()) : ToolMode()
     }
 }

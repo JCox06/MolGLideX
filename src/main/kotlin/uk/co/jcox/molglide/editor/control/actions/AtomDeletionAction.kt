@@ -1,14 +1,16 @@
 package uk.co.jcox.molglide.editor.control.actions
 
+import uk.co.jcox.molglide.editor.model.ChemAtom
+import uk.co.jcox.molglide.editor.model.ChemBond
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 
-class AtomDeletionAction (val toDelete: ChemMolecule.ChemAtom) : IDataAction {
+class AtomDeletionAction (val toDelete: ChemAtom) : IDataAction {
 
     private val chemMolecule = toDelete.molecule
 
     //Stuff to restore if the action is to be undone
-    private var memberBonds = listOf<ChemMolecule.ChemBond>()
+    private var memberBonds = listOf<ChemBond>()
 
 
     override fun execute(data: EditorStateData) {

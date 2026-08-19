@@ -2,6 +2,8 @@ package uk.co.jcox.molglide.editor.io
 
 import kotlinx.serialization.Serializable
 import uk.co.jcox.molglide.StereoChem
+import uk.co.jcox.molglide.editor.model.ChemAtom
+import uk.co.jcox.molglide.editor.model.ChemBond
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 
 
@@ -50,7 +52,7 @@ data class MolGLideMetaData (
 
 data class DataObjectIDMap (
     val chemMolecules: MutableMap<ChemMolecule, Int> = mutableMapOf(),
-    val chemAtoms: MutableMap<ChemMolecule.ChemAtom, Int> = mutableMapOf(),
-    val chemBonds: MutableMap<ChemMolecule.ChemBond, Int> = mutableMapOf(),
+    val chemAtoms: MutableMap<ChemAtom, Int> = mutableMapOf(),
+    val chemBonds: MutableMap<ChemBond, Int> = mutableMapOf(),
 )
 

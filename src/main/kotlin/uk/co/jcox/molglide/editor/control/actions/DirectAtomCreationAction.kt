@@ -5,6 +5,7 @@ import org.openscience.cdk.interfaces.IAtom
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.io.AtomDataObject
+import uk.co.jcox.molglide.editor.model.ChemAtom
 import javax.vecmath.Point2d
 
 class DirectAtomCreationAction (
@@ -12,17 +13,18 @@ class DirectAtomCreationAction (
     private val dataAtom: AtomDataObject,
 ) : IDataAction {
 
-    lateinit var newChemAtom: ChemMolecule.ChemAtom
+    lateinit var newChemAtom: ChemAtom
 
     override fun execute(data: EditorStateData) {
         val atom: IAtom = Atom(dataAtom.symbol)
         atom.point2d = Point2d(dataAtom.worldX, dataAtom.worldY)
 
 
-        newChemAtom = ChemMolecule.ChemAtom(atom, molecule)
+        newChemAtom = ChemAtom(atom, molecule)
         newChemAtom.setVisible(dataAtom.isVisible)
         newChemAtom.setTrailPos(dataAtom.hydrogenPos)
         newChemAtom.setIgnoreErrors(dataAtom.ignoreErrors)
+        newChemAtom.setTransient(false)
 
         molecule.directlyAddAtom(atom)
     }

@@ -1,11 +1,13 @@
 package uk.co.jcox.molglide.editor.control.actions
 
+import uk.co.jcox.molglide.editor.model.ChemAtom
+import uk.co.jcox.molglide.editor.model.ChemBond
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 
 class AtomInsertionAction (
     private val atomInsert: String,
-    private val insertTo: ChemMolecule.ChemAtom,
+    private val insertTo: ChemAtom,
     private var clickX: Int,
     private var clickY: Int,
 ) : IDataAction {
@@ -16,8 +18,8 @@ class AtomInsertionAction (
     private var wasVisible = insertTo.isVisible()
 
     //Keep track of newly added objects
-    var newAtom: ChemMolecule.ChemAtom? = null
-    var newBond: ChemMolecule.ChemBond? = null
+    var newAtom: ChemAtom? = null
+    var newBond: ChemBond? = null
 
 
     override fun execute(data: EditorStateData) {

@@ -1,10 +1,11 @@
 package uk.co.jcox.molglide.editor.control.actions
 
 import org.openscience.cdk.interfaces.IBond
+import uk.co.jcox.molglide.editor.model.ChemBond
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 
-class IncrementBondOrderAction (val chemBond: ChemMolecule.ChemBond) : IDataAction {
+class IncrementBondOrderAction (val chemBond: ChemBond) : IDataAction {
 
     val molecule = chemBond.molecule
 

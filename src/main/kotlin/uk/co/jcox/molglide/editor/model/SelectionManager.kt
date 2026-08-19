@@ -2,6 +2,7 @@ package uk.co.jcox.molglide.editor.model
 
 import org.joml.Vector2d
 import javax.vecmath.Point2d
+import kotlin.collections.map
 
 class SelectionManager (
 ) {
@@ -37,8 +38,8 @@ class SelectionManager (
 
 
     fun updateSelectionBoundingBox(levelData: EditorStateData, x1: Int, y1: Int, x2: Int, y2: Int) {
-        val atoms = mutableListOf<ChemMolecule.ChemAtom>()
-        val bonds = mutableListOf<ChemMolecule.ChemBond>()
+        val atoms = mutableListOf<ChemAtom>()
+        val bonds = mutableListOf<ChemBond>()
 
         levelData.getMolecules().forEach { chemMolecule ->
             chemMolecule.atoms().forEach { chemAtom ->
@@ -65,8 +66,8 @@ class SelectionManager (
 
     fun clearAndAddSelection(molecules: List<ChemMolecule>) {
 
-        val selectedBonds = mutableListOf<ChemMolecule.ChemBond>()
-        val selectedAtoms = mutableListOf<ChemMolecule.ChemAtom>()
+        val selectedBonds = mutableListOf<ChemBond>()
+        val selectedAtoms = mutableListOf<ChemAtom>()
 
         molecules.forEach { chemMolecule ->
             selectedAtoms.addAll(chemMolecule.atoms())
@@ -95,7 +96,7 @@ class SelectionManager (
         return false
     }
 
-    private fun getClosestAtom(levelData: EditorStateData, worldX: Int, worldY: Int) : Pair<ChemMolecule.ChemAtom, Double>?{
+    private fun getClosestAtom(levelData: EditorStateData, worldX: Int, worldY: Int) : Pair<ChemAtom, Double>?{
         val atoms = levelData.getAtoms()
         val x = worldX.toDouble()
         val y = worldY.toDouble()
@@ -104,7 +105,7 @@ class SelectionManager (
         return result
     }
 
-    private fun getClosestBond(levelData: EditorStateData, worldX: Int, worldY: Int): Pair<ChemMolecule.ChemBond, Double>? {
+    private fun getClosestBond(levelData: EditorStateData, worldX: Int, worldY: Int): Pair<ChemBond, Double>? {
         val bonds = levelData.getBonds()
         val x = worldX.toDouble()
         val y = worldY.toDouble()
@@ -118,7 +119,7 @@ class SelectionManager (
      * This method is for discrete selections only
      * @return the currently selected bond or null if no bond is selected
      */
-    fun getBond(): ChemMolecule.ChemBond? {
+    fun getBond(): ChemBond? {
         val selection = primarySelection
         if (selection is Type.ActiveBond) {
             return selection.chemBond
@@ -130,7 +131,7 @@ class SelectionManager (
      * This method is for discrete selections only
      * @return the currently selected atom or null if no bond is selected
      */
-    fun getAtom(): ChemMolecule.ChemAtom? {
+    fun getAtom(): ChemAtom? {
         val selection = primarySelection
         if (selection is Type.ActiveAtom) {
             return selection.chemAtom
@@ -158,7 +159,7 @@ class SelectionManager (
      * in the primary selection (discrete) or if it is active
      * in the batch selection
      */
-    fun isSelected(bond: ChemMolecule.ChemBond): Boolean {
+    fun isSelected(bond: ChemBond): Boolean {
         val p = primarySelection
         if (p is Type.ActiveBond && p.chemBond == bond) {
             return true
@@ -174,7 +175,7 @@ class SelectionManager (
      * in the primary selection (discrete) or if it is active
      * in the batch selection
      */
-    fun isSelected(atom: ChemMolecule.ChemAtom): Boolean {
+    fun isSelected(atom: ChemAtom): Boolean {
         val p = primarySelection
         if (p is Type.ActiveAtom && p.chemAtom == atom) {
             return true
@@ -206,13 +207,13 @@ class SelectionManager (
             }
         }
 
-        data class ActiveAtom(val chemAtom: ChemMolecule.ChemAtom): Type() {
+        data class ActiveAtom(val chemAtom: ChemAtom): Type() {
             override fun inPrimarySelection(batchSelection: BatchSelection): Boolean {
                 return batchSelection.atoms.contains(chemAtom)
             }
         }
 
-        data class ActiveBond(val chemBond: ChemMolecule.ChemBond): Type() {
+        data class ActiveBond(val chemBond: ChemBond): Type() {
             override fun inPrimarySelection(batchSelection: BatchSelection): Boolean {
                 return batchSelection.bonds.contains(chemBond)
             }
@@ -220,8 +221,8 @@ class SelectionManager (
     }
 
     data class BatchSelection (
-        val atoms: List<ChemMolecule.ChemAtom>,
-        val bonds: List<ChemMolecule.ChemBond>
+        val atoms: List<ChemAtom>,
+        val bonds: List<ChemBond>
     )
 
     companion object {

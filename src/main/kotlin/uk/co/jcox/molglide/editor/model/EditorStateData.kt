@@ -52,16 +52,16 @@ class EditorStateData (
         molecules.removeAll(remove)
     }
 
-    fun getAtoms() : List<ChemMolecule.ChemAtom> {
-        val atoms = mutableListOf<ChemMolecule.ChemAtom>()
+    fun getAtoms() : List<ChemAtom> {
+        val atoms = mutableListOf<ChemAtom>()
         molecules.forEach {mol ->
             atoms.addAll(mol.atoms())
         }
         return atoms
     }
 
-    fun getBonds() : List<ChemMolecule.ChemBond> {
-        val bonds = mutableListOf<ChemMolecule.ChemBond>()
+    fun getBonds() : List<ChemBond> {
+        val bonds = mutableListOf<ChemBond>()
         molecules.forEach {mol ->
             bonds.addAll(mol.bonds())
         }

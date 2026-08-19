@@ -32,9 +32,10 @@ import javax.vecmath.Point2d
 class ChemMolecule (
     private val container: IAtomContainer = AtomContainer(),
     initDefaults: Boolean = true
-) {
+) : MolGLideChemData(container) {
 
     init {
+        container.setProperty(TRANSIENT, false)
         if (initDefaults) {
             container.atoms().forEach { atom ->
                 if (atom != null) {
@@ -233,112 +234,6 @@ class ChemMolecule (
     }
 
 
-    class ChemAtom (
-        val atom: IAtom,
-        val molecule: ChemMolecule,
-    ) : MolGLideChemData(atom) {
-        fun isVisible(): Boolean {
-            return atom.getProperty<Boolean>(VISIBLE)
-        }
-        fun setVisible(visible: Boolean) {
-            atom.setProperty(VISIBLE, visible)
-        }
-        fun shouldIgnoreErrors(): Boolean {
-            return atom.getProperty(IGNORE_ERRORS)
-        }
-        fun setIgnoreErrors(ignore: Boolean) {
-            atom.setProperty(IGNORE_ERRORS, ignore)
-        }
-        fun isCarbon(): Boolean {
-            return atom.symbol == "C"
-        }
-        fun setTrailPos(trail: TrailingGroupPosition) {
-            atom.setProperty(TRAILING_POS, trail)
-        }
-        fun getTrailPos() : TrailingGroupPosition {
-            return atom.getProperty<TrailingGroupPosition>(TRAILING_POS)
-        }
-        fun getPos() : Vector2d {
-            val p2d = atom.point2d
-            return Vector2d(p2d.x, p2d.y)
-        }
-
-
-
-        override fun hashCode(): Int {
-            return atom.hashCode()
-        }
-
-        override fun equals(other: Any?): Boolean {
-            return other is ChemAtom && this.atom == other.atom
-        }
-    }
-
-    class ChemBond (
-        val bond: IBond,
-        val molecule: ChemMolecule,
-    ) : MolGLideChemData(bond) {
-        override fun equals(other: Any?): Boolean {
-            return other is ChemBond && this.bond == other.bond
-        }
-
-        override fun hashCode(): Int {
-            return bond.hashCode()
-        }
-
-        fun isTerminal(): Boolean {
-            val atomA = bond.begin
-            val atomB = bond.end
-
-            if (atomA.bondCount > 1 || atomB.bondCount > 1) {
-                return false
-            }
-            return true
-        }
-
-        fun midPoint(): Vector2d {
-            val atomA = bond.begin.point2d
-            val atomB = bond.end.point2d
-            return Vector2d((atomA.x + atomB.x) / 2, (atomA.y + atomB.y) /2)
-        }
-
-        fun stereo(): StereoChem {
-            return StereoChem.getType(bond.display)
-        }
-        fun setStereo(s: StereoChem) {
-            val cdkType = s.cdk
-            bond.display = cdkType
-        }
-        fun shouldFlip(): Boolean {
-            return bond.getProperty<Boolean>(FLIP_BOND)
-        }
-        fun setFlip(flip: Boolean) {
-            bond.setProperty(FLIP_BOND, flip)
-        }
-        fun getStart(): ChemAtom {
-            return ChemAtom(bond.begin, molecule)
-        }
-        fun getEnd(): ChemAtom {
-            return ChemAtom(bond.end, molecule)
-        }
-    }
-
-
-    //For stuff that does not need to be stored with CDK
-    open class MolGLideChemData(
-        /**
-         * Indicates to the renderer that this atom/bond/ may update every frame
-         */
-        private val cdkObject: IChemObject,
-
-    ) {
-        fun isTransient(): Boolean {
-            return cdkObject.getProperty(TRANSIENT)
-        }
-        fun setTransient(value: Boolean) {
-            cdkObject.setProperty(TRANSIENT, value)
-        }
-    }
 
 
     enum class TrailingGroupPosition (val vec: Vector2d) {

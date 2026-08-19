@@ -8,14 +8,14 @@ import org.openscience.cdk.interfaces.IAtom
 import org.openscience.cdk.interfaces.IAtomContainer
 import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.StereoChem
-import uk.co.jcox.molglide.editor.model.ChemMolecule.ChemAtom
+
 import uk.co.jcox.molglide.editor.control.tool.AtomBondTool
 import kotlin.math.roundToInt
 
 class UIDataBuilder (private val data: EditorStateData, private val selectionManager: SelectionManager) {
 
 
-    private val uiComponents: MutableMap<ChemMolecule.MolGLideChemData, AbstractUIComponent> = mutableMapOf()
+    private val uiComponents: MutableMap<MolGLideChemData, AbstractUIComponent> = mutableMapOf()
 
     fun getUIData(): Collection<AbstractUIComponent> {
         return uiComponents.values
@@ -117,7 +117,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
     }
 
 
-    private fun handleSingleStereo(absoluteBond: UILine, chemBond: ChemMolecule.ChemBond, bondComponents: MutableList<AbstractUIComponent>) {
+    private fun handleSingleStereo(absoluteBond: UILine, chemBond: ChemBond, bondComponents: MutableList<AbstractUIComponent>) {
         //If the stereochem is just normal, then just add the absolute bond
         val s = chemBond.stereo()
         if (s == StereoChem.NORMAL) {
@@ -135,7 +135,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         }
     }
 
-    private fun addWedgedBonds(absoluteBond: UILine, chemBond: ChemMolecule.ChemBond, bondComponents: MutableList<AbstractUIComponent>) {
+    private fun addWedgedBonds(absoluteBond: UILine, chemBond: ChemBond, bondComponents: MutableList<AbstractUIComponent>) {
         val perp = calculatePerpendicularVector(absoluteBond)
 
         val startX = absoluteBond.startX
@@ -156,7 +156,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         bondComponents.add(UITriangle(v3, v2, v1))
     }
 
-    private fun addDashedWedgeLines(absoluteBond: UILine, chemBond: ChemMolecule.ChemBond, bondComponents: MutableList<AbstractUIComponent>) {
+    private fun addDashedWedgeLines(absoluteBond: UILine, chemBond: ChemBond, bondComponents: MutableList<AbstractUIComponent>) {
         val vec = calculateVector(absoluteBond)
         val perp = calculatePerpendicularVector(absoluteBond)
         val currentPos = Vector2d(absoluteBond.startX, absoluteBond.startY)
@@ -199,7 +199,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
      * @param chemBond the bond to calculate basic UI properties for
      * @return UI information to show where a bond really starts and really ends
      */
-    private fun getAbsoluteBond(chemBond: ChemMolecule.ChemBond) : UILine {
+    private fun getAbsoluteBond(chemBond: ChemBond) : UILine {
         val atomA = ChemAtom(chemBond.bond.begin, chemBond.molecule)
         val atomB = ChemAtom(chemBond.bond.end, chemBond.molecule)
         val aPos = atomA.getPos()
@@ -228,7 +228,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
      *
      * @return The list of new UI bonds which can be added to the final UI
      */
-    private fun calculatePositionForTripleBond(uiLine: UILine, chemBond: ChemMolecule.ChemBond): List<UILine> {
+    private fun calculatePositionForTripleBond(uiLine: UILine, chemBond: ChemBond): List<UILine> {
         val bondList = mutableListOf<UILine>()
         val perp = calculatePerpendicularVector(uiLine)
         val bondA = applyBondTranslation(uiLine, perp * INTER_BOND_DISTANCE)
@@ -251,7 +251,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
      *  @param uiLine The main bond metrics after clipping where the element label is
      *  @return A list of bonds to add to the UIBonds list
      */
-    private fun calculatePositionForDoubleBond(uiLine: UILine, chemBond: ChemMolecule.ChemBond) : List<UILine> {
+    private fun calculatePositionForDoubleBond(uiLine: UILine, chemBond: ChemBond) : List<UILine> {
         val bondList = mutableListOf<UILine>()
 
         //Create the double bond, and correctly choose the side
@@ -282,7 +282,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
     }
 
 
-    private fun calculateDoubleBondSide(uiLine: UILine, chemBond: ChemMolecule.ChemBond): Pair<UILine, Vector2d> {
+    private fun calculateDoubleBondSide(uiLine: UILine, chemBond: ChemBond): Pair<UILine, Vector2d> {
         val perp = calculatePerpendicularVector(uiLine)
         val aVec = perp * INTER_BOND_DISTANCE
         val bVec = perp * -INTER_BOND_DISTANCE
@@ -318,7 +318,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         return Pair(testSideA, aVec)
     }
 
-    private fun findFragment(chemBond: ChemMolecule.ChemBond, containers: List<IAtomContainer>) : IAtomContainer? {
+    private fun findFragment(chemBond: ChemBond, containers: List<IAtomContainer>) : IAtomContainer? {
         return containers.find { it.contains(chemBond.bond) }
     }
 
@@ -350,7 +350,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
      *
      * For now, just check to see if one of the atoms is either C (carbonyl) or nitrogen (Immine)
      */
-    private fun shouldCentreDoubleBond(chemBond: ChemMolecule.ChemBond) : Boolean {
+    private fun shouldCentreDoubleBond(chemBond: ChemBond) : Boolean {
 
         if (chemBond.molecule.checkBondInRing(chemBond)) {
             return false
@@ -369,7 +369,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
      * This might not be what professional editors use, but it works for now, and also looks nice
      * which is the main thing
      */
-    private fun getBaselineShortening(doubleUILine: UILine, chemBond: ChemMolecule.ChemBond) : UILine {
+    private fun getBaselineShortening(doubleUILine: UILine, chemBond: ChemBond) : UILine {
         if (chemBond.isTerminal()) {
             return doubleUILine
         }
@@ -426,7 +426,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
     }
 
 
-    private fun buildUIBond(chemBond: ChemMolecule.ChemBond, bondComponents: MutableList<AbstractUIComponent>): UIBond {
+    private fun buildUIBond(chemBond: ChemBond, bondComponents: MutableList<AbstractUIComponent>): UIBond {
         val ui = UIBond(chemBond.bond.order.numeric(), chemBond.midPoint(), chemBond.bond.isAromatic, chemBond.stereo(), bondComponents, selectionManager.isSelected(chemBond))
         return ui
     }

@@ -7,12 +7,13 @@ import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.control.actions.DirectAtomCreationAction
 import uk.co.jcox.molglide.editor.control.actions.DirectBondConnectionAction
 import uk.co.jcox.molglide.editor.control.actions.DirectMoleculeCreationAction
+import uk.co.jcox.molglide.editor.model.ChemAtom
 import java.io.File
 import java.io.IOException
 
 class LevelLoader {
 
-    private val idChemAtomMap: MutableMap<Int, ChemMolecule.ChemAtom> = mutableMapOf()
+    private val idChemAtomMap: MutableMap<Int, ChemAtom> = mutableMapOf()
     var metaData: MolGLideMetaData = MolGLideMetaData()
     private set
 
