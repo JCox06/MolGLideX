@@ -2,16 +2,21 @@ package uk.co.jcox.molglide
 
 import com.formdev.flatlaf.util.SystemFileChooser
 import java.awt.Color
+import java.awt.Component
 import java.awt.Image
 import java.awt.image.ImageFilter
 import java.io.File
 import java.time.LocalTime
+import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.UIManager
 
 object MolGLideUtils {
 
     const val VERSION = "ALPHA-0.0.1"
+    const val WEBSITE = "https://molglide.com/"
+    const val REPO = "https://github.com/JCox06/MolGLideX"
+    const val BUG_TRACKER = "https://github.com/JCox06/MolGLideX/issues"
 
     private val mgxFilter = SystemFileChooser.FileNameExtensionFilter("MolGLide projects (.mgx)", "mgx")
 
@@ -42,7 +47,7 @@ object MolGLideUtils {
      * Presents the user with a dialogue to choose where to the file to
      * @return the file that the state should be saved to
      */
-    fun showSaveDialogue(parent: JPanel): File? {
+    fun showSaveDialogue(parent: Component): File? {
         val fileChooser = SystemFileChooser()
         fileChooser.addChoosableFileFilter(mgxFilter)
         fileChooser.showSaveDialog(parent)
