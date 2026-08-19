@@ -2,16 +2,21 @@ package uk.co.jcox.molglide
 
 import io.github.andrewauclair.moderndocking.app.DockableMenuItem
 import io.github.andrewauclair.moderndocking.app.Docking
+import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.editor.control.EditorStateController
+import uk.co.jcox.molglide.editor.io.ClipboardMoleculePayload
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.io.LevelLoader
 import uk.co.jcox.molglide.editor.io.LevelSerializer
+import uk.co.jcox.molglide.editor.io.MolGLideMetaData
 import uk.co.jcox.molglide.editor.ui.EditorPanel
+import java.awt.Toolkit
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionListener
 import java.awt.event.WindowEvent
 import java.io.File
 import java.util.UUID
+import javax.swing.JCheckBoxMenuItem
 import javax.swing.JComponent
 import javax.swing.event.MenuEvent
 import javax.swing.event.MenuListener
@@ -20,7 +25,6 @@ class MainController (
     private val mainFrame: MolGlideFrame,
     private val mainData: MainData,
 ) : IEditorSessionOrganiser {
-
     private val newProjectAction = NewProjectAction(this)
     private val loadFileAction = LoadFileAction(this, mainFrame)
     private val saveFileAction = SaveFileAction(this)
@@ -36,10 +40,30 @@ class MainController (
     private val visitAboutMenuAction = ShowAboutMenuAction(mainFrame)
 
 
+    val getControllerFunc: () -> EditorStateController? = {mainData.activeSession?.editorController}
+    private val editLabelAction = EditLabelMenuAction(mainFrame, getControllerFunc)
+    private val deleteAtomMenuAction = DeleteAtomMenuAction(getControllerFunc)
+    private val toggleAtomVisibility = ToggleAtomVisibilityMenuAction(getControllerFunc)
+    private val ignoreErrors = IgnoreErrorAction(getControllerFunc)
+    private val flipSelectedBond = FlipBondMenuAction(getControllerFunc)
+    private val setSingleBondAction = SetPlainBondMenuAction(getControllerFunc)
+    private val setHashedBondAction = SetDashedBondMenuAction(getControllerFunc)
+    private val setWedgedBondMenuAction = SetWedgedBondMenuAction(getControllerFunc)
+    private val flipStereoChemMenuAction = FlipStereoChemMenuAction(getControllerFunc)
+    private val setDoubleBondMenuAction = SetDoubleBondMenuAction(getControllerFunc)
+    private val setAromaticDoubleBondMenuAction = SetAromaticDoubleBondMenuAction(getControllerFunc)
+    private val setTripleBondMenuAction = SetTripleBondMenuAction(getControllerFunc)
+    private val deleteBondMenuAction = DeleteBondMenuAction(getControllerFunc)
+    private val copySelectionAction = CopySelectionAction(this)
+    private val pasteSelectionAction = PasteSelectionAction(this)
+    private val cutSelectionAction = CutSelectionAction(this)
+    private val deleteSelectionAction = DeleteSelectionAction(getControllerFunc)
+
     init {
 
         buildFileMenu()
         buildEditMenu()
+        buildObjectMenu()
         buildAboutMenu()
 
         mainFrame.windowMenu.addMenuListener(object : MenuListener {
@@ -95,6 +119,43 @@ class MainController (
         saveActiveProject()
     }
 
+
+    fun copySelectedMolecules() {
+        val activeSession = mainData.activeSession ?: return
+
+        val svgGen = SVGExporter()
+        val mgxExporter = LevelSerializer()
+
+        val svgPayload = svgGen.quickExport(activeSession.editorPanel)
+        val mgxPayload = mgxExporter.getJSONEncoding(activeSession.editorData, MolGLideMetaData(), activeSession.editorData.selectionManager.batchSelection)
+        val filePayload = listOf(MolGLideUtils.writeTempFile(svgPayload))
+        val payload = ClipboardMoleculePayload(mgxPayload, svgPayload, filePayload)
+        val clipboard = Toolkit.getDefaultToolkit().systemClipboard
+        clipboard.setContents(payload, null)
+    }
+
+    fun pasteSelectedMolecules() {
+
+        val clipboard = Toolkit.getDefaultToolkit().systemClipboard
+        if (! clipboard.isDataFlavorAvailable(ClipboardMoleculePayload.JSON_FLAVOUR)) {
+            return
+        }
+        val mgxData = clipboard.getData(ClipboardMoleculePayload.JSON_FLAVOUR)
+        if (mgxData !is String) {
+            return
+        }
+        val levelLoader = LevelLoader()
+        val tempLevel = levelLoader.loadLevel(mgxData)
+
+        val session = mainData.activeSession ?: return
+
+        val mx = session.editorData.getLastMouseX()
+        val my = session.editorData.getLastMouseY()
+
+        val md = levelLoader.metaData
+        session.editorController.importLevel(tempLevel, mx, my, md.copyAtScreenX, md.copyAtScreenY)
+    }
+
     private fun createSession(data: EditorStateData, file: File? = null) {
         val editorPanel = EditorPanel(data)
         val editorController = EditorStateController(mainData, data, editorPanel, this)
@@ -135,8 +196,7 @@ class MainController (
                 mainData.activeSession = editorSession
 
                 //Also check if the current session can undo/redo
-                undoAction.isEnabled = editorSession.editorController.actionManager.canUndo()
-                redoAction.isEnabled = editorSession.editorController.actionManager.canRedo()
+                updateActionsEnabledStatus(editorSession)
 
                 mainFrame.updateStatusBar()
             }
@@ -168,7 +228,6 @@ class MainController (
         Docking.updateTabInfo(sessionID)
     }
 
-
     private fun buildFileMenu() {
         mainFrame.fileMenu.add(newProjectAction)
         mainFrame.fileMenu.add(loadFileAction)
@@ -182,10 +241,75 @@ class MainController (
         mainFrame.editMenu.add(redoAction)
     }
 
+    private fun buildObjectMenu() {
+        mainFrame.objectMenu.add(editLabelAction)
+        mainFrame.objectMenu.add(JCheckBoxMenuItem(toggleAtomVisibility))
+        mainFrame.objectMenu.add(deleteAtomMenuAction)
+        mainFrame.objectMenu.add(ignoreErrors)
+        mainFrame.objectMenu.addSeparator()
+        mainFrame.objectMenu.add(flipSelectedBond)
+        mainFrame.objectMenu.add(JCheckBoxMenuItem(setSingleBondAction))
+        mainFrame.objectMenu.add(JCheckBoxMenuItem(setWedgedBondMenuAction))
+        mainFrame.objectMenu.add(JCheckBoxMenuItem(setHashedBondAction))
+        mainFrame.objectMenu.add(flipStereoChemMenuAction)
+        mainFrame.objectMenu.add(JCheckBoxMenuItem(setDoubleBondMenuAction))
+        mainFrame.objectMenu.add(JCheckBoxMenuItem(setAromaticDoubleBondMenuAction))
+        mainFrame.objectMenu.add(JCheckBoxMenuItem(setTripleBondMenuAction))
+        mainFrame.objectMenu.add(deleteBondMenuAction)
+        mainFrame.objectMenu.addSeparator()
+        mainFrame.objectMenu.add(copySelectionAction)
+        mainFrame.objectMenu.add(pasteSelectionAction)
+        mainFrame.objectMenu.add(cutSelectionAction)
+        mainFrame.objectMenu.add(deleteSelectionAction)
+    }
+
     private fun buildAboutMenu() {
         mainFrame.helpMenu.add(visitWebsiteAction)
         mainFrame.helpMenu.add(visitRepoAction)
         mainFrame.helpMenu.add(visitBugTrackerAction)
         mainFrame.helpMenu.add(visitAboutMenuAction)
+    }
+
+
+    //todo make an SwingAction Manager to manage all of these actions
+    //make it so this is done automatically on the object
+    //just to test for now
+    private fun updateActionsEnabledStatus(currentSession: EditorSession) {
+        val editorController = currentSession.editorController
+        val editorData = currentSession.editorData
+        val currentAtom = editorData.selectionManager.getAtom()
+        val currentBond = editorData.selectionManager.getBond()
+        val hasBatch = editorData.selectionManager.hasBatchSelection()
+
+        undoAction.isEnabled = editorController.actionManager.canUndo()
+        redoAction.isEnabled = editorController.actionManager.canRedo()
+
+        editLabelAction.isEnabled = currentAtom != null
+        deleteAtomMenuAction.isEnabled = currentAtom != null
+        toggleAtomVisibility.isEnabled = currentAtom != null
+        toggleAtomVisibility.setSelected(currentAtom?.isVisible() ?: true)
+        ignoreErrors.isEnabled = currentAtom != null
+        ignoreErrors.setSelected(currentAtom?.shouldIgnoreErrors() ?: false)
+
+        flipSelectedBond.isEnabled = currentBond != null
+        setSingleBondAction.isEnabled = currentBond != null
+        setWedgedBondMenuAction.isEnabled = currentBond != null
+        setHashedBondAction.isEnabled = currentBond != null
+        setSingleBondAction.setSelected(currentBond?.bond?.order == IBond.Order.SINGLE && currentBond?.stereo() == StereoChem.NORMAL)
+        setHashedBondAction.setSelected(currentBond?.bond?.order == IBond.Order.SINGLE && currentBond?.stereo() == StereoChem.DASHED)
+        setWedgedBondMenuAction.setSelected(currentBond?.bond?.order == IBond.Order.SINGLE && currentBond?.stereo() == StereoChem.WEDGED)
+
+        flipStereoChemMenuAction.isEnabled = currentBond != null
+        setDoubleBondMenuAction.isEnabled = currentBond != null
+        setAromaticDoubleBondMenuAction.isEnabled = currentBond != null
+        setTripleBondMenuAction.isEnabled = currentBond != null
+        deleteBondMenuAction.isEnabled = currentBond != null
+        setDoubleBondMenuAction.setSelected(currentBond?.bond?.order == IBond.Order.DOUBLE)
+        setAromaticDoubleBondMenuAction.setSelected(currentBond?.bond?.isAromatic ?: false)
+        setTripleBondMenuAction.setSelected(currentBond?.bond?.order == IBond.Order.TRIPLE)
+
+        copySelectionAction.isEnabled = hasBatch
+        cutSelectionAction.isEnabled = hasBatch
+        deleteSelectionAction.isEnabled = hasBatch
     }
 }

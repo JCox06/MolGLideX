@@ -1,6 +1,8 @@
 package uk.co.jcox.molglide.editor.control
 
 import com.github.jsonldjava.shaded.com.google.common.math.IntMath.pow
+import org.apache.jena.vocabulary.AS.rel
+import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.IEditorSessionOrganiser
 import uk.co.jcox.molglide.editor.control.tool.AtomBondTool
@@ -9,7 +11,24 @@ import uk.co.jcox.molglide.editor.control.tool.SelectTool
 import uk.co.jcox.molglide.editor.control.tool.TemplateRingTool
 import uk.co.jcox.molglide.editor.control.tool.Tool
 import uk.co.jcox.molglide.IMainAppData
+import uk.co.jcox.molglide.StereoChem
+import uk.co.jcox.molglide.editor.control.actions.AtomDeletionAction
+import uk.co.jcox.molglide.editor.control.actions.BondDeletionAction
+import uk.co.jcox.molglide.editor.control.actions.ChangeStereoChemAction
+import uk.co.jcox.molglide.editor.control.actions.CompoundAction
+import uk.co.jcox.molglide.editor.control.actions.FlipBondAction
+import uk.co.jcox.molglide.editor.control.actions.IDataAction
+import uk.co.jcox.molglide.editor.control.actions.ImportMoleculesAction
+import uk.co.jcox.molglide.editor.control.actions.PartitionFragmentsAction
+import uk.co.jcox.molglide.editor.control.actions.ReplaceAtomAction
+import uk.co.jcox.molglide.editor.control.actions.SetIgnoreErrorsOnAtom
+import uk.co.jcox.molglide.editor.control.actions.ToggleAtomVisibilityAction
+import uk.co.jcox.molglide.editor.control.actions.TranslateAtomAction
+import uk.co.jcox.molglide.editor.control.actions.UpdateBondAromaticityAction
+import uk.co.jcox.molglide.editor.control.actions.UpdateBondOrderAction
+import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
+import uk.co.jcox.molglide.editor.model.SelectionManager
 import uk.co.jcox.molglide.editor.ui.EditorPanel
 import uk.co.jcox.molglide.editor.ui.EditorPanel.Companion.MOUSE_SENSE
 import uk.co.jcox.molglide.editor.ui.EditorPanel.Companion.MOUSE_SENSE_ZOOM
@@ -20,6 +39,7 @@ import java.awt.event.MouseEvent
 import java.awt.event.MouseWheelEvent
 import javax.swing.SwingUtilities
 import javax.swing.Timer
+import kotlin.collections.toTypedArray
 import kotlin.math.sqrt
 
 class EditorStateController (
@@ -123,6 +143,157 @@ class EditorStateController (
     private fun rebuildEntireUI() {
         stateData.uiDataBuilder.rebuild(true)
     }
+
+    fun updateAtomLabel(newSymbol: String) {
+        val atom = stateData.selectionManager.getAtom() ?: return
+        val replaceAtomAction = ReplaceAtomAction(atom, newSymbol)
+        actionManager.executeAction(replaceAtomAction)
+    }
+
+    fun deleteSelectedAtom() {
+        val atom = stateData.selectionManager.getAtom() ?: return
+        val deleteAtom = AtomDeletionAction(atom)
+        val frag = PartitionFragmentsAction(atom.molecule)
+        actionManager.executeAction(CompoundAction(deleteAtom, frag))
+    }
+
+    fun toggleSelectedAtomVisibility() {
+        val atom = stateData.selectionManager.getAtom() ?: return
+        val action = ToggleAtomVisibilityAction(atom)
+        actionManager.executeAction(action)
+
+    }
+    fun flipSelectedBond() {
+        val bond = stateData.selectionManager.getBond() ?: return
+        val action = FlipBondAction(bond)
+        actionManager.executeAction(action)
+    }
+
+    fun updateSingleSelectedBond(bondOptions: StereoChem) {
+        val bond = stateData.selectionManager.getBond() ?: return
+
+        //Again as explained below, I am only allowing single bonds to have stereochem
+        val changeOrder = UpdateBondOrderAction(bond, IBond.Order.SINGLE)
+        val changeStereo = ChangeStereoChemAction(bond, bondOptions)
+        val compoundAction = CompoundAction(changeOrder, changeStereo)
+        actionManager.executeAction(compoundAction)
+    }
+
+    fun invertStereoChemSelectedBond() {
+        TODO()
+    }
+
+    fun updateDoubleSelectedBond() {
+        val bond = stateData.selectionManager.getBond() ?: return
+        //Although double bonds do have stereochemistry
+        //it is not really depicted in chemical sketchers
+        //So I think for a simple molecular editor, its okay for the moment to assume
+        //double bonds should NOT have stereochemistry information associated with them
+        val removeStereoAction = ChangeStereoChemAction(bond, StereoChem.NORMAL)
+        val updateBondOrderAction = UpdateBondOrderAction(bond, IBond.Order.DOUBLE)
+        val compoundAction = CompoundAction(removeStereoAction, updateBondOrderAction)
+        actionManager.executeAction(compoundAction)
+    }
+
+    //Like the methods above, it might look first strange to see that this is not a compound action
+    //that affects the double bond option too.
+    //However in the case of benzene, the CDK recommends to have all the bonds (including formally single bonds)
+    //to be set as aromatic
+    fun updateAromaticSelectedBond() {
+        val bond = stateData.selectionManager.getBond() ?: return
+        val action = UpdateBondAromaticityAction(bond)
+        actionManager.executeAction(action)
+    }
+
+    fun setTripleSelectedBond() {
+        val bond = stateData.selectionManager.getBond() ?: return
+        val action = UpdateBondOrderAction(bond, IBond.Order.TRIPLE)
+        actionManager.executeAction(action)
+    }
+
+
+    fun deleteSelectedBond() {
+        val selection = stateData.selectionManager.primarySelection
+        if (selection is SelectionManager.Type.ActiveBond) {
+            val bondDelete = BondDeletionAction(selection.chemBond)
+            val fragment = PartitionFragmentsAction(selection.chemBond.molecule)
+            actionManager.executeAction(CompoundAction(bondDelete, fragment))
+        }
+    }
+
+    fun ignoreErrors() {
+        val chemAtom = stateData.selectionManager.getAtom() ?: return
+        val action = SetIgnoreErrorsOnAtom(chemAtom, !chemAtom.shouldIgnoreErrors())
+        actionManager.executeAction(action)
+    }
+
+    fun importLevel(importData: EditorStateData, newMouseX: Int, newMouseY: Int, oldMouseX: Int, oldMouseY: Int) {
+
+        //The meta data contains the mouse click on copy
+        //Compare this with the current screen x, and y, to get dy, and dx, for the copy
+
+        val mouseWorld = screenToWorld(newMouseX.toDouble(), newMouseY.toDouble())
+
+        val importActionManager = ActionManager(importData)
+        val rel = importData.getMolecules().first().atoms().first().getPos()
+        importData.getMolecules().forEach { chemMolecule ->
+            chemMolecule.atoms().forEach { chemAtom ->
+                //First we need to move the atom to a new position based on where the mouse clicked
+                //A simple move action would move all the atoms to the same position
+                //So we have to calculate the dx, dy for each individual atom as to
+                //preserve the original structure
+                val dx = mouseWorld.x - rel.x
+                val dy = mouseWorld.y - rel.y
+                val moveAtom = TranslateAtomAction(chemAtom, dx, dy)
+                importActionManager.executeAction(moveAtom)
+            }
+            //Then validate the data in the level and ensure it is all properly
+            //fragmented
+            val partitionAction = PartitionFragmentsAction(chemMolecule)
+            importActionManager.executeAction(partitionAction)
+        }
+        //Now import the data
+        val importAction = ImportMoleculesAction(importData)
+        this.actionManager.executeAction(importAction)
+
+        //Now remove the old selection, and highlight the newly selected data
+        this.stateData.selectionManager.clearAndAddSelection(importData.getMolecules())
+    }
+
+    fun deleteSelectedComponents() {
+
+        val molsToCheck = mutableSetOf<ChemMolecule>()
+
+        val actions: MutableList<IDataAction> = mutableListOf()
+        val bs = stateData.selectionManager.batchSelection
+
+        //Note: Remove bonds first, and then atoms
+        //On the reverse when the user wants to undo the action, CompoundAction reverses
+        //the order of the actionArray, so the atoms must be present first
+        bs.bonds.forEach { chemBond ->
+            val deleteBondAction = BondDeletionAction(chemBond)
+            actions.add(deleteBondAction)
+            molsToCheck.add(chemBond.molecule)
+        }
+        bs.atoms.forEach { chemAtom ->
+            val deleteAtomAction = AtomDeletionAction(chemAtom)
+            actions.add(deleteAtomAction)
+            molsToCheck.add(chemAtom.molecule)
+        }
+
+        molsToCheck.forEach { molecule ->
+            val partition = PartitionFragmentsAction(molecule)
+            actions.add(partition)
+        }
+
+        val actionArray = actions.toTypedArray()
+
+        val compoundAction = CompoundAction(*actionArray)
+        actionManager.executeAction(compoundAction)
+
+        stateData.selectionManager.clearSelectionBoundingBox()
+    }
+
 
     inner class PanelMouseEvents: MouseAdapter() {
 

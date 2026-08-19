@@ -187,6 +187,10 @@ class SelectionManager (
     }
 
 
+    fun hasBatchSelection(): Boolean {
+        return batchSelection.bonds.isNotEmpty() || batchSelection.atoms.isNotEmpty()
+    }
+
 
     sealed class Type {
 

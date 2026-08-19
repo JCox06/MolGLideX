@@ -1,9 +1,6 @@
 package uk.co.jcox.molglide
 
 import uk.co.jcox.molglide.editor.control.EditorStateController
-import uk.co.jcox.molglide.editor.io.ClipboardMoleculePayload
-import uk.co.jcox.molglide.editor.io.LevelLoader
-import uk.co.jcox.molglide.editor.ui.EditorPanel
 import java.awt.Desktop
 import java.awt.Toolkit
 import java.awt.event.ActionEvent
@@ -11,8 +8,8 @@ import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
 import java.net.URI
 import javax.swing.AbstractAction
+import javax.swing.JFrame
 import javax.swing.JOptionPane
-import javax.swing.JPanel
 import javax.swing.KeyStroke
 
 class UndoAction (val mainController: MainController) : AbstractAction("Undo") {
@@ -74,145 +71,190 @@ class NewProjectAction (val mainController: MainController) : AbstractAction("Ne
 }
 
 
-class EditLabelMenuAction (val panel: JPanel, val controller: EditorStateController) : AbstractAction("Edit Label") {
+abstract class AbstractEditorControllerAction(name: String, protected val getController: () -> EditorStateController?) : AbstractAction(name)
+
+
+
+class EditLabelMenuAction (val panel: JFrame, getController: () -> EditorStateController?)
+    : AbstractEditorControllerAction("Edit Label", getController) {
     init {
         putValue(SHORT_DESCRIPTION, "Edits the atom label")
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0))
     }
-    //todo I'm going to have a think about how to do this
-    //I want it to work exactly like ChemDraws Inline edit label feature
-    //Where all the atoms you write (for instance -OCH2CH(OMe)CH3) are all inteligent, and can be selected exactly like any other
-    //atom
 
-    //The only thing I am happy doing differently is having the dialogue for the text, I personally think writing text (with the cursor)
-    //directly in the editor is too hard to get it to work nicely!
+    //todo see https://github.com/JCox06/MolGLideX/issues/2
     override fun actionPerformed(e: ActionEvent?) {
-        val label = JOptionPane.showInputDialog(panel, "THIS TOOL IS IN PROGRESS. ONLY TYPE ATOMS FOR NOW!", "Edit Label", JOptionPane.QUESTION_MESSAGE)
-        if (label == null) {
-            return
-        }
+        //For now
+        val label = JOptionPane.showInputDialog(panel, "Type an element", "Edit Label", JOptionPane.QUESTION_MESSAGE)
         label.trim()
-//        controller.updateSelectedSymbol(label)
+        getController()?.updateAtomLabel(label)
     }
 }
 
-class DeleteAtomMenuAction (val controller: EditorStateController) : AbstractAction("Delete Atom") {
+class DeleteAtomMenuAction (getController: () -> EditorStateController?)
+    : AbstractEditorControllerAction("Delete Atom", getController) {
     init {
         putValue(SHORT_DESCRIPTION, "Deletes the atom")
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0))
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-//        controller.deleteSelectedAtom()
+        getController()?.deleteSelectedAtom()
     }
 }
 
-class ToggleAtomVisibilityMenuAction (val controller: EditorStateController, isVisible: Boolean) : AbstractAction("Atom Visible") {
+class ToggleAtomVisibilityMenuAction (getController: () -> EditorStateController?
+) : AbstractEditorControllerAction("Atom Visible", getController) {
     init {
         putValue(SHORT_DESCRIPTION, "Select whether this atom should be visible")
-        putValue(SELECTED_KEY, isVisible)
+//        putValue(SELECTED_KEY, isVisible)
+    }
+
+    fun setSelected(isSelected: Boolean) {
+        putValue(SELECTED_KEY, isSelected)
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-//        controller.toggleSelectedAtomVisiblity()
+        getController()?.toggleSelectedAtomVisibility()
     }
 }
 
-class FlipBondMenuAction (val controller: EditorStateController) : AbstractAction("Flip Double Bond") {
+class FlipBondMenuAction (getController: () -> EditorStateController?
+) : AbstractEditorControllerAction("Flip Double Bond", getController) {
     init {
         putValue(SHORT_DESCRIPTION, "Toggles the side of the double bond")
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-//        controller.flipSelectedBond()
+        getController()?.flipSelectedBond()
     }
 }
 
-class SetPlainBondMenuAction (val controller: EditorStateController, isPlain: Boolean) : AbstractAction("Plain") {
+class SetPlainBondMenuAction (getController: () -> EditorStateController?)
+    : AbstractEditorControllerAction("Plain Bond", getController
+) {
     init {
         putValue(SHORT_DESCRIPTION, "Select single bond")
-        putValue(SELECTED_KEY, isPlain)
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_1, 0))
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-//        controller.updateSingleSelectedBond(StereoChem.NORMAL)
+        getController()?.updateSingleSelectedBond(StereoChem.NORMAL)
+    }
+
+    fun setSelected(isPlainBond: Boolean) {
+        putValue(SELECTED_KEY, isPlainBond)
     }
 }
 
-class SetWedgedBondMenuAction (val controller: EditorStateController, isWedged: Boolean) : AbstractAction("Wedged") {
+class SetWedgedBondMenuAction (getController: () -> EditorStateController?) : AbstractEditorControllerAction("Wedged Bond", getController) {
     init {
         putValue(SHORT_DESCRIPTION, "Select wedged bond")
-        putValue(SELECTED_KEY, isWedged)
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_W, 0))
+
+
+//        putValue(SELECTED_KEY, isWedged)
+    }
+
+    fun setSelected(isPlainBond: Boolean) {
+        putValue(SELECTED_KEY, isPlainBond)
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-//        controller.updateSingleSelectedBond(StereoChem.WEDGED)
+        getController()?.updateSingleSelectedBond(StereoChem.WEDGED)
     }
 }
 
-class SetDashedBondMenuAction (val controller: EditorStateController, isDashed: Boolean) : AbstractAction("Hashed") {
+class SetDashedBondMenuAction (getController: () -> EditorStateController?)
+    : AbstractEditorControllerAction("Hashed Bond", getController) {
     init {
         putValue(SHORT_DESCRIPTION, "Select dashed bond")
-        putValue(SELECTED_KEY, isDashed)
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_H, 0))
+
+//        putValue(SELECTED_KEY, isDashed)
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-//        controller.updateSingleSelectedBond(StereoChem.DASHED)
+        getController()?.updateSingleSelectedBond(StereoChem.DASHED)
+    }
+
+    fun setSelected(isPlainBond: Boolean) {
+        putValue(SELECTED_KEY, isPlainBond)
     }
 }
 
-class FlipStereoChemMenuAction (val controller: EditorStateController) : AbstractAction("Flip Stereo Chem") {
+class FlipStereoChemMenuAction (getController: () -> EditorStateController?)
+    : AbstractEditorControllerAction("Flip Stereo Chem", getController) {
     init {
         putValue(SHORT_DESCRIPTION, "Flip the direction of stereo chem")
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-//        controller.invertStereoChemSelectedBond()
+        getController()?.invertStereoChemSelectedBond()
     }
 }
 
 
-class SetDoubleBondMenuAction (val controller: EditorStateController, isDouble: Boolean) : AbstractAction("Plain") {
+class SetDoubleBondMenuAction (getController: () -> EditorStateController?) : AbstractEditorControllerAction("Plain Double", getController) {
     init {
         putValue(SHORT_DESCRIPTION, "Select double bond")
-        putValue(SELECTED_KEY, isDouble)
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_2, 0))
+
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-//        controller.updateDoubleSelectedBond()
+        getController()?.updateDoubleSelectedBond()
+    }
+    fun setSelected(isPlainBond: Boolean) {
+        putValue(SELECTED_KEY, isPlainBond)
     }
 }
 
-class SetAromaticDoubleBondMenuAction (val controller: EditorStateController, isAromatic: Boolean) : AbstractAction("Aromatic") {
+class SetAromaticDoubleBondMenuAction (getController: () -> EditorStateController?) : AbstractEditorControllerAction("Aromatic Bond",
+    getController
+) {
     init {
         putValue(SHORT_DESCRIPTION, "Select aromatic bond")
-        putValue(SELECTED_KEY, isAromatic)
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-//        controller.updateAromaticSelectedBond()
+        getController()?.updateAromaticSelectedBond()
+    }
+
+    fun setSelected(isPlainBond: Boolean) {
+        putValue(SELECTED_KEY, isPlainBond)
     }
 }
 
-class SetTripleBondMenuAction (val controller: EditorStateController, isTriple: Boolean) : AbstractAction("Triple Bond") {
+class SetTripleBondMenuAction (getController: () -> EditorStateController?) : AbstractEditorControllerAction("Triple Bond",
+    getController
+) {
     init {
         putValue(SHORT_DESCRIPTION, "Select Triple bond")
-        putValue(SELECTED_KEY, isTriple)
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_3, 0))
+
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-//        controller.setTripleSelectedBond()
+        getController()?.setTripleSelectedBond()
+    }
+
+    fun setSelected(isPlainBond: Boolean) {
+        putValue(SELECTED_KEY, isPlainBond)
     }
 }
 
-class DeleteBondMenuAction (val controller: EditorStateController) : AbstractAction("Delete Bond") {
+class DeleteBondMenuAction (getController: () -> EditorStateController?) : AbstractEditorControllerAction("Delete Bond",
+    getController
+) {
     init {
         putValue(SHORT_DESCRIPTION, "Select Triple bond")
-        putValue(SELECTED_KEY, true)
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0))
+
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-//        controller.deleteSelectedBond()
+        getController()?.deleteSelectedBond()
     }
 }
 
@@ -263,89 +305,78 @@ class LoadFileAction (val mainController: MainController, val mainFrame: MolGlid
 }
 
 
-class CopySelection(val controller: EditorStateController, val editorPanel: EditorPanel) : AbstractAction("Copy Selection") {
+class CopySelectionAction(val mainController: MainController) : AbstractAction("Copy Selection") {
 
     init {
         putValue(SHORT_DESCRIPTION, "Copy selected components to the clipboard")
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK))
     }
 
     //The copy selection needs to do two things
     //1) Copy the selected components in SVG format to the clipboard to use in external applications
     //2) Copy the selected components in MGX format to the clipboard to use in MolGLide applications
     override fun actionPerformed(e: ActionEvent?) {
-//        val svgGen = SVGExporter()
-//        val svgPayload = svgGen.quickExport(editorPanel)
-//        val mgxPayload = controller.serializeSelectedMolecules(MolGLideMetaData(editorPanel.lastMousePos.x, editorPanel.lastMousePos.y))
-//        val filePayload = listOf(MolGLideUtils.writeTempFile(svgPayload))
-//        val payload = ClipboardMoleculePayload(mgxPayload, svgPayload, filePayload)
-//        val clipboard = Toolkit.getDefaultToolkit().systemClipboard
-//        clipboard.setContents(payload, null)
+        mainController.copySelectedMolecules()
     }
 }
 
-class PasteSelection(val controller: EditorStateController, val panel: EditorPanel) : AbstractAction("Paste Selection") {
+class PasteSelectionAction(val mainController: MainController) : AbstractAction("Paste Selection") {
 
     private val clipboard = Toolkit.getDefaultToolkit().systemClipboard
 
     init {
         putValue(SHORT_DESCRIPTION, "Paste selected components from the clipboard")
-        isEnabled = clipboard.isDataFlavorAvailable(ClipboardMoleculePayload.JSON_FLAVOUR)
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK))
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        if (! clipboard.isDataFlavorAvailable(ClipboardMoleculePayload.JSON_FLAVOUR)) {
-            return
-        }
-        val mgxData = clipboard.getData(ClipboardMoleculePayload.JSON_FLAVOUR)
-        if (mgxData !is String) {
-            return
-        }
-        val levelLoader = LevelLoader()
-        val tempLevel = levelLoader.loadLevel(mgxData)
-//
-//        val p = panel.lastMousePos
-//        val w = panel.screenToWorld(p)
-//        val md = levelLoader.metaData
-//        val lastS = Point(md.copyAtScreenX, md.copyAtScreenY)
-//        val lastW = panel.screenToWorld(lastS)
-//        controller.importLevel(tempLevel, w.x, w.y, lastW.x, lastW.y)
-
+        mainController.pasteSelectedMolecules()
     }
 }
 
-class CutSelection(val controller: EditorStateController, val editorPanel: EditorPanel) : AbstractAction("Cut Selection") {
+class CutSelectionAction(val mainController: MainController) : AbstractAction("Cut Selection") {
 
     init {
         putValue(SHORT_DESCRIPTION, "Delete and copy selected components")
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_DOWN_MASK))
+
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        val copy = CopySelection(controller, editorPanel)
+        val copy = CopySelectionAction(mainController)
         copy.actionPerformed(e)
-        val delete = DeleteSelection(controller)
+        val delete = DeleteSelectionAction(mainController.getControllerFunc)
         delete.actionPerformed(e)
     }
 }
 
-class DeleteSelection(val controller: EditorStateController) : AbstractAction("Delete Selection") {
+class DeleteSelectionAction(getController: () -> EditorStateController?) : AbstractEditorControllerAction("Delete Selection",
+    getController
+) {
     init {
         putValue(SHORT_DESCRIPTION, "Delete the selected components")
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0))
+
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-//        controller.deleteSelectedComponents()
+        getController()?.deleteSelectedComponents()
     }
 }
 
 
-class IgnoreErrorAction(val controller: EditorStateController, val currentValue: Boolean) : AbstractAction("Ignore Valency Errors") {
+class IgnoreErrorAction(getController: () -> EditorStateController?
+) : AbstractEditorControllerAction("Ignore Valency Errors", getController) {
     init {
         putValue(SHORT_DESCRIPTION, "Enable/Disable valency checking for this atom")
-        putValue(SELECTED_KEY, currentValue)
+
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-//        controller.ignoreErrors(!currentValue)
+        getController()?.ignoreErrors()
+    }
+    fun setSelected(isPlainBond: Boolean) {
+        putValue(SELECTED_KEY, isPlainBond)
     }
 }
 
