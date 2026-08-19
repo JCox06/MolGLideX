@@ -28,9 +28,14 @@ class TemplateRingTool(val globalContext: IMainAppData, actionManager: ActionMan
         actionManager.executeAction(action)
         val c = action.getRingCentre()
         toolMode = Mode.Rotate(action.placedRing, c.x, c.y, 0)
+        action.placedRing.setTransient(true)
     }
 
     override fun onRelease(clickX: Int, clickY: Int) {
+        val m = toolMode
+        if (m is Mode.Rotate) {
+            m.inserted.setTransient(false)
+        }
         toolMode = Mode.None
     }
 

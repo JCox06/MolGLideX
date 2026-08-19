@@ -46,8 +46,9 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
     private fun buildAtomUI(fullBuild: Boolean) {
         data.getMolecules().forEach { chemMolecule ->
             chemMolecule.atoms().forEach { chemAtom ->
-                uiComponents[chemAtom]?.selected = selectionManager.isSelected(chemAtom)
-                if (!fullBuild && !chemAtom.isTransient()) {
+                val isSelected = selectionManager.isSelected(chemAtom)
+                uiComponents[chemAtom]?.selected = isSelected
+                if (!fullBuild && !(chemAtom.isTransient() || isSelected)) {
                     return@forEach
                 }
                 val ui = buildUIAtom(chemAtom)
@@ -95,10 +96,10 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
     fun buildBondUI(fullBuild: Boolean) {
         data.getMolecules().forEach { chemMolecule ->
             chemMolecule.bonds().forEach { chemBond ->
+                val isSelected = selectionManager.isSelected(chemBond)
+                uiComponents[chemBond]?.selected = isSelected
 
-                uiComponents[chemBond]?.selected = selectionManager.isSelected(chemBond)
-
-                if (!chemBond.isTransient() && !fullBuild) {
+                if (!(chemBond.isTransient() || isSelected) && !fullBuild) {
                     return@forEach
                 }
 

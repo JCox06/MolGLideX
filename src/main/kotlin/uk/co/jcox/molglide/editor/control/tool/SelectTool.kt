@@ -100,7 +100,6 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
 
     }
 
-
     private fun getToolMode(clickX: Int, clickY: Int) : ToolMode {
         //Check if the selected atom was covered in the AABB
         val batchSelection = selectionManager.batchSelection
