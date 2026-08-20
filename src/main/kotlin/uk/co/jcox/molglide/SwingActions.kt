@@ -10,10 +10,6 @@ import java.awt.event.ActionEvent
 import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
 import java.net.URI
-import javax.swing.AbstractAction
-import javax.swing.Action.ACCELERATOR_KEY
-import javax.swing.Action.SELECTED_KEY
-import javax.swing.Action.SHORT_DESCRIPTION
 import javax.swing.JFrame
 import javax.swing.JOptionPane
 import javax.swing.KeyStroke
@@ -446,3 +442,37 @@ class ShowAboutMenuAction(val mainFrame: MolGlideFrame) : MolGLideSwingAction("A
         dialogue.isVisible = true
     }
 }
+
+class CDKCopyCanonicalSmilesAction (val mainController: MainController) : MolGLideSwingAction("Copy canonical SMILES") {
+
+    init {
+        putValue(SHORT_DESCRIPTION, "Copy the canonical SMILES of the selected molecule to the clipboard")
+    }
+
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?
+    ) {
+        isEnabled = activeSession.editorData.selectionManager.getMolecule() != null
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        mainController.copyAsSmiles()
+    }
+}
+
+class CDKCleanupStructure (val getController: () -> EditorStateController?) : MolGLideSwingAction("Clean Structure") {
+
+    init {
+        putValue(SHORT_DESCRIPTION, "Invoke CDK to clean the structure of the molecule")
+    }
+
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?
+    ) {
+        isEnabled = activeSession.editorData.selectionManager.getMolecule() != null
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        getController()?.cleanUpSelectedMolecule()
+    }
+}
+
+

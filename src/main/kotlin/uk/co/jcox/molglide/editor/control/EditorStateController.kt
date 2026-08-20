@@ -1,7 +1,9 @@
 package uk.co.jcox.molglide.editor.control
 
 import com.github.jsonldjava.shaded.com.google.common.math.IntMath.pow
+import org.checkerframework.checker.units.qual.mol
 import org.openscience.cdk.interfaces.IBond
+import org.openscience.cdk.layout.StructureDiagramGenerator
 import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.IEditorSessionOrganiser
 import uk.co.jcox.molglide.editor.control.tool.AtomBondTool
@@ -14,6 +16,7 @@ import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.editor.control.actions.AtomDeletionAction
 import uk.co.jcox.molglide.editor.control.actions.BondDeletionAction
 import uk.co.jcox.molglide.editor.control.actions.ChangeStereoChemAction
+import uk.co.jcox.molglide.editor.control.actions.CleanupStructure
 import uk.co.jcox.molglide.editor.control.actions.CompoundAction
 import uk.co.jcox.molglide.editor.control.actions.FlipBondAction
 import uk.co.jcox.molglide.editor.control.actions.IDataAction
@@ -295,6 +298,13 @@ class EditorStateController (
         actionManager.executeAction(compoundAction)
 
         stateData.selectionManager.clearSelectionBoundingBox()
+    }
+
+
+    fun cleanUpSelectedMolecule() {
+        val molecule = stateData.selectionManager.getMolecule() ?: return
+        val action = CleanupStructure(molecule)
+        actionManager.executeAction(action)
     }
 
 

@@ -35,6 +35,14 @@ class EditorPanel(private val uiData: IDataModelUI) : JPanel() {
     }
 
     fun buildContextMenus(actionRegistry: SwingActionRegistry, popupListener: PopupMenuListener) {
+        fun buildCDKCommon(m: JPopupMenu) {
+            val cdkMenu = JMenu("CDK Tools")
+            cdkMenu.add(actionRegistry[MainController.CDK_COPY_CANONICAL_SMILES_ACTION])
+            cdkMenu.add(actionRegistry[MainController.CDK_CLEANUP_STRUCTURE])
+            m.add(cdkMenu)
+        }
+
+
         val bondContextMenu = JPopupMenu()
 
         val menuSingle = JMenu("Single")
@@ -52,6 +60,8 @@ class EditorPanel(private val uiData: IDataModelUI) : JPanel() {
 
         bondContextMenu.add(JCheckBoxMenuItem(actionRegistry[MainController.SET_TRIPLE_BOND_ACTION]))
         bondContextMenu.add(actionRegistry[MainController.DELETE_BOND_ACTION])
+        bondContextMenu.addSeparator()
+        buildCDKCommon(bondContextMenu)
 
         bondContextMenu.addPopupMenuListener(popupListener)
 
@@ -74,6 +84,8 @@ class EditorPanel(private val uiData: IDataModelUI) : JPanel() {
         atomContextMenu.addSeparator()
         atomContextMenu.add(actionRegistry[MainController.DELETE_ATOM_MENU_ACTION])
         atomContextMenu.addPopupMenuListener(popupListener)
+        atomContextMenu.addSeparator()
+        buildCDKCommon(atomContextMenu)
 
         atomMenu = atomContextMenu
         bondMenu = bondContextMenu

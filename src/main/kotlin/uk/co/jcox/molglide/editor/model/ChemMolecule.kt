@@ -1,22 +1,29 @@
 package uk.co.jcox.molglide.editor.model
 
 
+import org.apache.jena.sparql.pfunction.library.container
+import org.joml.GeometryUtils
 import org.joml.Vector2d
 import org.openscience.cdk.Atom
 import org.openscience.cdk.AtomContainer
 import org.openscience.cdk.atomtype.CDKAtomTypeMatcher
 import org.openscience.cdk.exception.CDKException
+import org.openscience.cdk.geometry.GeometryUtil
 import org.openscience.cdk.graph.ConnectivityChecker
 import org.openscience.cdk.interfaces.IAtom
 import org.openscience.cdk.interfaces.IAtomContainer
 import org.openscience.cdk.interfaces.IBond
-import org.openscience.cdk.interfaces.IChemObject
+import org.openscience.cdk.layout.StructureDiagramGenerator
 import org.openscience.cdk.ringsearch.RingSearch
+import org.openscience.cdk.smiles.SmiFlavor
+import org.openscience.cdk.smiles.SmilesGenerator
 import org.openscience.cdk.tools.CDKHydrogenAdder
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator
 import org.openscience.cdk.tools.manipulator.AtomTypeManipulator
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator
-import uk.co.jcox.molglide.StereoChem
+import uk.co.jcox.molglide.editor.control.EditorStateController
+import uk.co.jcox.molglide.editor.control.tool.AtomBondTool
+import uk.co.jcox.molglide.editor.ui.EditorPanel
 import java.util.UUID
 import javax.vecmath.Point2d
 
@@ -105,7 +112,26 @@ class ChemMolecule (
         calculateAtomProperties()
     }
 
+    fun getCanonicalString(): String {
+        val generator = SmilesGenerator(SmiFlavor.Canonical)
+        return generator.create(container)
+    }
 
+    fun cleanMolecule() : ChemMolecule {
+        val gen = StructureDiagramGenerator()
+        gen.molecule = container
+        gen.generateCoordinates()
+        val newMolecule = gen.molecule
+
+        val targetBondLength = AtomBondTool.CONNECTION_DISTANCE
+        val currentBondLength = GeometryUtil.getBondLengthMedian(newMolecule)
+        val factor: Double = targetBondLength / currentBondLength
+        GeometryUtil.scaleMolecule(newMolecule, factor)
+        val transPoint = this.atoms().first().getPos()
+        GeometryUtil.translate2D(newMolecule, transPoint.x, transPoint.y)
+
+        return ChemMolecule(newMolecule, false)
+    }
 
     fun updateBondOrder(chemBond: ChemBond, newOrder: Int) {
         val order = when (newOrder) {

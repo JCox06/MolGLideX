@@ -4,6 +4,7 @@ import io.github.andrewauclair.moderndocking.app.DockableMenuItem
 import io.github.andrewauclair.moderndocking.app.Docking
 import jdk.internal.org.jline.terminal.Terminal
 import org.openscience.cdk.interfaces.IBond
+import org.openscience.cdk.smiles.smarts.parser.SMARTSParserConstants.a
 import uk.co.jcox.molglide.editor.control.EditorStateController
 import uk.co.jcox.molglide.editor.io.ClipboardMoleculePayload
 import uk.co.jcox.molglide.editor.model.EditorStateData
@@ -12,6 +13,7 @@ import uk.co.jcox.molglide.editor.io.LevelSerializer
 import uk.co.jcox.molglide.editor.io.MolGLideMetaData
 import uk.co.jcox.molglide.editor.ui.EditorPanel
 import java.awt.Toolkit
+import java.awt.datatransfer.StringSelection
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionListener
 import java.awt.event.WindowEvent
@@ -105,6 +107,15 @@ class MainController (
         val payload = ClipboardMoleculePayload(mgxPayload, svgPayload, filePayload)
         val clipboard = Toolkit.getDefaultToolkit().systemClipboard
         clipboard.setContents(payload, null)
+    }
+
+    fun copyAsSmiles() {
+        val activeSession = mainData.activeSession ?: return
+        val s = activeSession.editorData.selectionManager
+        val molecule = s.getMolecule() ?: return
+        val smiles = molecule.getCanonicalString()
+        val clipboard = Toolkit.getDefaultToolkit().systemClipboard
+        clipboard.setContents(StringSelection(smiles), null)
     }
 
     fun pasteSelectedMolecules() {
@@ -235,6 +246,9 @@ class MainController (
         actionRegistry.registerAction(PASTE_SELECTION_ACTION, PasteSelectionAction(this))
         actionRegistry.registerAction(CUT_SELECTION_ACTION, CutSelectionAction(this))
         actionRegistry.registerAction(DELETE_SELECTION_ACTION, DeleteSelectionAction(getControllerFunc))
+
+        actionRegistry.registerAction(CDK_CLEANUP_STRUCTURE, CDKCleanupStructure(getControllerFunc))
+        actionRegistry.registerAction(CDK_COPY_CANONICAL_SMILES_ACTION, CDKCopyCanonicalSmilesAction(this))
     }
 
     private fun buildFileMenu() {
@@ -270,6 +284,9 @@ class MainController (
         mainFrame.objectMenu.add(actionRegistry[PASTE_SELECTION_ACTION])
         mainFrame.objectMenu.add(actionRegistry[CUT_SELECTION_ACTION])
         mainFrame.objectMenu.add(actionRegistry[DELETE_SELECTION_ACTION])
+        mainFrame.objectMenu.addSeparator()
+        mainFrame.objectMenu.add(actionRegistry[CDK_COPY_CANONICAL_SMILES_ACTION])
+        mainFrame.objectMenu.add(actionRegistry[CDK_CLEANUP_STRUCTURE])
     }
 
     private fun buildAboutMenu() {
@@ -313,5 +330,8 @@ class MainController (
         const val PASTE_SELECTION_ACTION = "PASTE_SELECTION"
         const val CUT_SELECTION_ACTION = "CUT_SELECTION"
         const val DELETE_SELECTION_ACTION = "DELETE_SELECTION"
+
+        const val CDK_COPY_CANONICAL_SMILES_ACTION = "COPY_CANONICAL"
+        const val CDK_CLEANUP_STRUCTURE = "CDK_CLEANUP"
     }
 }
