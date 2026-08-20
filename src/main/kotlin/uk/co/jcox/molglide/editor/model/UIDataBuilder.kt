@@ -442,6 +442,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         return s?.atom?.atomTypeName ?: ""
     }
 
+
     companion object {
         private const val INTER_BOND_DISTANCE = 6.0
         private const val INTER_DASH_DISTANCE = AtomBondTool.CONNECTION_DISTANCE / 10.0

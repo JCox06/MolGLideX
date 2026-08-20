@@ -1,7 +1,6 @@
 package uk.co.jcox.molglide.editor.control
 
 import com.github.jsonldjava.shaded.com.google.common.math.IntMath.pow
-import org.apache.jena.vocabulary.AS.rel
 import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.IEditorSessionOrganiser
@@ -39,6 +38,8 @@ import java.awt.event.MouseEvent
 import java.awt.event.MouseWheelEvent
 import javax.swing.SwingUtilities
 import javax.swing.Timer
+import javax.swing.event.PopupMenuEvent
+import javax.swing.event.PopupMenuListener
 import kotlin.collections.toTypedArray
 import kotlin.math.sqrt
 
@@ -68,6 +69,8 @@ class EditorStateController (
 
         //First time run immediately do a full UI rebuild
         stateData.uiDataBuilder.rebuild(true)
+
+        editorPanel.buildContextMenus(sessionOrganiser.getActionRegistry(), MenuPopupListener())
     }
 
     private fun handleMouseClick(clickX: Int, clickY: Int) {
@@ -295,6 +298,21 @@ class EditorStateController (
     }
 
 
+    inner class MenuPopupListener: PopupMenuListener {
+        override fun popupMenuWillBecomeVisible(e: PopupMenuEvent?) {
+            stateData.pauseEvents = true
+        }
+
+        override fun popupMenuWillBecomeInvisible(e: PopupMenuEvent?) {
+            stateData.pauseEvents = false
+        }
+
+        override fun popupMenuCanceled(e: PopupMenuEvent?) {
+            stateData.pauseEvents = false
+        }
+
+    }
+
     inner class PanelMouseEvents: MouseAdapter() {
 
         private var offsetX: Int = 0
@@ -310,6 +328,8 @@ class EditorStateController (
             }
             stateData.transientBoxSelectStartX = world.x
             stateData.transientBoxSelectStartY = world.y
+
+            maybeShowPopup(e)
         }
 
         override fun mouseReleased(e: MouseEvent?) {
@@ -323,6 +343,8 @@ class EditorStateController (
             stateData.transientBoxSelectStartY = 0
             stateData.transientBoxSelectAdvY = 0
             stateData.transientBoxSelectAdvX = 0
+
+            maybeShowPopup(e)
         }
 
         override fun mouseWheelMoved(e: MouseWheelEvent?) {
@@ -377,6 +399,28 @@ class EditorStateController (
             if (sqrt((pow(offsetX, 2) + pow(offsetY, 2)).toDouble()) >= SIG_MOUSE_DELTA) {
                 handleSuddenMouseMove()
             }
+        }
+
+        private fun maybeShowPopup(e: MouseEvent) {
+            if (!e.isPopupTrigger || !SwingUtilities.isRightMouseButton(e)) {
+                return
+            }
+
+            if (stateData.selectionManager.hasBatchSelection()) {
+                editorPanel.selectionMenu?.show(e.component, e.x, e.y)
+                return
+            }
+
+            if (stateData.selectionManager.getAtom() != null) {
+                editorPanel.atomMenu?.show(e.component, e.x, e.y)
+                return
+            }
+
+            if (stateData.selectionManager.getBond() != null) {
+                editorPanel.bondMenu?.show(e.component, e.x, e.y)
+                return
+            }
+            editorPanel.normalMenu?.show(e.component, e.x, e.y)
         }
     }
 }

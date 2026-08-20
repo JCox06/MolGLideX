@@ -1,6 +1,9 @@
 package uk.co.jcox.molglide
 
+import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.editor.control.EditorStateController
+import uk.co.jcox.molglide.editor.model.ChemAtom
+import uk.co.jcox.molglide.editor.model.ChemBond
 import java.awt.Desktop
 import java.awt.Toolkit
 import java.awt.event.ActionEvent
@@ -8,11 +11,14 @@ import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
 import java.net.URI
 import javax.swing.AbstractAction
+import javax.swing.Action.ACCELERATOR_KEY
+import javax.swing.Action.SELECTED_KEY
+import javax.swing.Action.SHORT_DESCRIPTION
 import javax.swing.JFrame
 import javax.swing.JOptionPane
 import javax.swing.KeyStroke
 
-class UndoAction (val mainController: MainController) : AbstractAction("Undo") {
+class UndoAction (val mainController: MainController) : MolGLideSwingAction("Undo") {
 
     init {
         putValue(NAME, "Undo")
@@ -25,9 +31,13 @@ class UndoAction (val mainController: MainController) : AbstractAction("Undo") {
     override fun actionPerformed(e: ActionEvent?) {
         mainController.handleGlobalUndo()
     }
+
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+        isEnabled = activeSession.editorController.actionManager.canUndo()
+    }
 }
 
-class RedoAction (val mainController: MainController) : AbstractAction("Redo") {
+class RedoAction (val mainController: MainController) : MolGLideSwingAction("Redo") {
 
     init {
         putValue(NAME, "Redo")
@@ -41,9 +51,13 @@ class RedoAction (val mainController: MainController) : AbstractAction("Redo") {
         mainController.handleGlobalRedo()
     }
 
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+        isEnabled = activeSession.editorController.actionManager.canRedo()
+    }
+
 }
 
-class QuitAction (val mainController: MainController) : AbstractAction("Quit") {
+class QuitAction (val mainController: MainController) : MolGLideSwingAction("Quit") {
 
     init {
         putValue(SHORT_DESCRIPTION, "Quits the Application")
@@ -57,7 +71,7 @@ class QuitAction (val mainController: MainController) : AbstractAction("Quit") {
 }
 
 
-class NewProjectAction (val mainController: MainController) : AbstractAction("New MGF Project") {
+class NewProjectAction (val mainController: MainController) :  MolGLideSwingAction("New MGF Project") {
 
     init {
         putValue(SHORT_DESCRIPTION, "Create a new MolGLideX project")
@@ -67,16 +81,12 @@ class NewProjectAction (val mainController: MainController) : AbstractAction("Ne
     override fun actionPerformed(e: ActionEvent?) {
         mainController.newProject()
     }
-
 }
 
 
-abstract class AbstractEditorControllerAction(name: String, protected val getController: () -> EditorStateController?) : AbstractAction(name)
 
-
-
-class EditLabelMenuAction (val panel: JFrame, getController: () -> EditorStateController?)
-    : AbstractEditorControllerAction("Edit Label", getController) {
+class EditLabelMenuAction (val panel: JFrame, val getController: () -> EditorStateController?)
+    : MolGLideSwingAtomAction("Edit Label") {
     init {
         putValue(SHORT_DESCRIPTION, "Edits the atom label")
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0))
@@ -91,8 +101,8 @@ class EditLabelMenuAction (val panel: JFrame, getController: () -> EditorStateCo
     }
 }
 
-class DeleteAtomMenuAction (getController: () -> EditorStateController?)
-    : AbstractEditorControllerAction("Delete Atom", getController) {
+class DeleteAtomMenuAction (val getController: () -> EditorStateController?)
+    : MolGLideSwingAtomAction("Delete Atom") {
     init {
         putValue(SHORT_DESCRIPTION, "Deletes the atom")
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0))
@@ -103,24 +113,28 @@ class DeleteAtomMenuAction (getController: () -> EditorStateController?)
     }
 }
 
-class ToggleAtomVisibilityMenuAction (getController: () -> EditorStateController?
-) : AbstractEditorControllerAction("Atom Visible", getController) {
+class ToggleAtomVisibilityMenuAction (val getController: () -> EditorStateController?
+) : MolGLideSwingAtomAction("Atom Visible") {
     init {
         putValue(SHORT_DESCRIPTION, "Select whether this atom should be visible")
-//        putValue(SELECTED_KEY, isVisible)
-    }
-
-    fun setSelected(isSelected: Boolean) {
-        putValue(SELECTED_KEY, isSelected)
     }
 
     override fun actionPerformed(e: ActionEvent?) {
         getController()?.toggleSelectedAtomVisibility()
     }
+
+    override fun chemDataChanged(
+        activeSession: EditorSession,
+        currentBond: ChemBond?,
+        currentAtom: ChemAtom?
+    ) {
+        super.chemDataChanged(activeSession, currentBond, currentAtom)
+        putValue(SELECTED_KEY, currentAtom?.isVisible())
+    }
 }
 
-class FlipBondMenuAction (getController: () -> EditorStateController?
-) : AbstractEditorControllerAction("Flip Double Bond", getController) {
+class FlipBondMenuAction (val getController: () -> EditorStateController?
+) : MolGLideSwingBondAction("Flip Double Bond") {
     init {
         putValue(SHORT_DESCRIPTION, "Toggles the side of the double bond")
     }
@@ -130,8 +144,8 @@ class FlipBondMenuAction (getController: () -> EditorStateController?
     }
 }
 
-class SetPlainBondMenuAction (getController: () -> EditorStateController?)
-    : AbstractEditorControllerAction("Plain Bond", getController
+class SetPlainBondMenuAction (val getController: () -> EditorStateController?)
+    : MolGLideSwingBondAction("Plain Bond"
 ) {
     init {
         putValue(SHORT_DESCRIPTION, "Select single bond")
@@ -142,22 +156,25 @@ class SetPlainBondMenuAction (getController: () -> EditorStateController?)
         getController()?.updateSingleSelectedBond(StereoChem.NORMAL)
     }
 
-    fun setSelected(isPlainBond: Boolean) {
-        putValue(SELECTED_KEY, isPlainBond)
+    override fun chemDataChanged(
+        activeSession: EditorSession,
+        currentBond: ChemBond?,
+        currentAtom: ChemAtom?
+    ) {
+        super.chemDataChanged(activeSession, currentBond, currentAtom)
+        putValue(SELECTED_KEY, currentBond?.bond?.order == IBond.Order.SINGLE && currentBond.stereo() == StereoChem.NORMAL)
     }
 }
 
-class SetWedgedBondMenuAction (getController: () -> EditorStateController?) : AbstractEditorControllerAction("Wedged Bond", getController) {
+class SetWedgedBondMenuAction (val getController: () -> EditorStateController?) : MolGLideSwingBondAction("Wedged Bond") {
     init {
         putValue(SHORT_DESCRIPTION, "Select wedged bond")
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_W, 0))
-
-
-//        putValue(SELECTED_KEY, isWedged)
     }
 
-    fun setSelected(isPlainBond: Boolean) {
-        putValue(SELECTED_KEY, isPlainBond)
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+        super.chemDataChanged(activeSession, currentBond, currentAtom)
+        putValue(SELECTED_KEY, currentBond?.bond?.order == IBond.Order.SINGLE && currentBond.stereo() == StereoChem.WEDGED)
     }
 
     override fun actionPerformed(e: ActionEvent?) {
@@ -165,8 +182,8 @@ class SetWedgedBondMenuAction (getController: () -> EditorStateController?) : Ab
     }
 }
 
-class SetDashedBondMenuAction (getController: () -> EditorStateController?)
-    : AbstractEditorControllerAction("Hashed Bond", getController) {
+class SetDashedBondMenuAction (val getController: () -> EditorStateController?)
+    : MolGLideSwingBondAction("Hashed Bond") {
     init {
         putValue(SHORT_DESCRIPTION, "Select dashed bond")
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_H, 0))
@@ -177,14 +194,15 @@ class SetDashedBondMenuAction (getController: () -> EditorStateController?)
     override fun actionPerformed(e: ActionEvent?) {
         getController()?.updateSingleSelectedBond(StereoChem.DASHED)
     }
-
-    fun setSelected(isPlainBond: Boolean) {
-        putValue(SELECTED_KEY, isPlainBond)
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+        super.chemDataChanged(activeSession, currentBond, currentAtom)
+        putValue(SELECTED_KEY, currentBond?.bond?.order == IBond.Order.SINGLE && currentBond.stereo() == StereoChem.DASHED)
     }
+
 }
 
-class FlipStereoChemMenuAction (getController: () -> EditorStateController?)
-    : AbstractEditorControllerAction("Flip Stereo Chem", getController) {
+class FlipStereoChemMenuAction (val getController: () -> EditorStateController?)
+    : MolGLideSwingBondAction("Flip Stereo Chem") {
     init {
         putValue(SHORT_DESCRIPTION, "Flip the direction of stereo chem")
     }
@@ -195,7 +213,7 @@ class FlipStereoChemMenuAction (getController: () -> EditorStateController?)
 }
 
 
-class SetDoubleBondMenuAction (getController: () -> EditorStateController?) : AbstractEditorControllerAction("Plain Double", getController) {
+class SetDoubleBondMenuAction (val getController: () -> EditorStateController?) : MolGLideSwingBondAction("Plain Double") {
     init {
         putValue(SHORT_DESCRIPTION, "Select double bond")
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_2, 0))
@@ -205,13 +223,15 @@ class SetDoubleBondMenuAction (getController: () -> EditorStateController?) : Ab
     override fun actionPerformed(e: ActionEvent?) {
         getController()?.updateDoubleSelectedBond()
     }
-    fun setSelected(isPlainBond: Boolean) {
-        putValue(SELECTED_KEY, isPlainBond)
+
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+        super.chemDataChanged(activeSession, currentBond, currentAtom)
+        putValue(SELECTED_KEY, currentBond?.bond?.order == IBond.Order.DOUBLE)
     }
+
 }
 
-class SetAromaticDoubleBondMenuAction (getController: () -> EditorStateController?) : AbstractEditorControllerAction("Aromatic Bond",
-    getController
+class SetAromaticDoubleBondMenuAction (val getController: () -> EditorStateController?) : MolGLideSwingBondAction("Aromatic Bond"
 ) {
     init {
         putValue(SHORT_DESCRIPTION, "Select aromatic bond")
@@ -221,13 +241,13 @@ class SetAromaticDoubleBondMenuAction (getController: () -> EditorStateControlle
         getController()?.updateAromaticSelectedBond()
     }
 
-    fun setSelected(isPlainBond: Boolean) {
-        putValue(SELECTED_KEY, isPlainBond)
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+        super.chemDataChanged(activeSession, currentBond, currentAtom)
+        putValue(SELECTED_KEY, currentBond?.bond?.order == IBond.Order.DOUBLE)
     }
 }
 
-class SetTripleBondMenuAction (getController: () -> EditorStateController?) : AbstractEditorControllerAction("Triple Bond",
-    getController
+class SetTripleBondMenuAction (val getController: () -> EditorStateController?) : MolGLideSwingBondAction("Triple Bond"
 ) {
     init {
         putValue(SHORT_DESCRIPTION, "Select Triple bond")
@@ -239,13 +259,13 @@ class SetTripleBondMenuAction (getController: () -> EditorStateController?) : Ab
         getController()?.setTripleSelectedBond()
     }
 
-    fun setSelected(isPlainBond: Boolean) {
-        putValue(SELECTED_KEY, isPlainBond)
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+        super.chemDataChanged(activeSession, currentBond, currentAtom)
+        putValue(SELECTED_KEY, currentBond?.bond?.order == IBond.Order.TRIPLE)
     }
 }
 
-class DeleteBondMenuAction (getController: () -> EditorStateController?) : AbstractEditorControllerAction("Delete Bond",
-    getController
+class DeleteBondMenuAction (val getController: () -> EditorStateController?) : MolGLideSwingBondAction("Delete Bond",
 ) {
     init {
         putValue(SHORT_DESCRIPTION, "Select Triple bond")
@@ -259,7 +279,7 @@ class DeleteBondMenuAction (getController: () -> EditorStateController?) : Abstr
 }
 
 
-class SaveFileAction (val mainController: MainController) : AbstractAction("Save file") {
+class SaveFileAction (val mainController: MainController) : MolGLideSwingAction("Save file") {
     init {
         putValue(SHORT_DESCRIPTION, "Saves current progress as .mgx file")
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK))
@@ -273,7 +293,7 @@ class SaveFileAction (val mainController: MainController) : AbstractAction("Save
 }
 
 
-class SaveAsFileAction (val mainController: MainController, val mainFrame: MolGlideFrame) : AbstractAction("Save as") {
+class SaveAsFileAction (val mainController: MainController, val mainFrame: MolGlideFrame) : MolGLideSwingAction("Save as") {
     init {
         putValue(SHORT_DESCRIPTION, "Saves current progress as a new .mgx file")
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK or InputEvent.SHIFT_DOWN_MASK))
@@ -289,7 +309,7 @@ class SaveAsFileAction (val mainController: MainController, val mainFrame: MolGl
 }
 
 
-class LoadFileAction (val mainController: MainController, val mainFrame: MolGlideFrame) : AbstractAction("Load file") {
+class LoadFileAction (val mainController: MainController, val mainFrame: MolGlideFrame) : MolGLideSwingAction("Load file") {
 
     init {
         putValue(SHORT_DESCRIPTION, "Load a MolGLide project (.mgx file)")
@@ -305,7 +325,7 @@ class LoadFileAction (val mainController: MainController, val mainFrame: MolGlid
 }
 
 
-class CopySelectionAction(val mainController: MainController) : AbstractAction("Copy Selection") {
+class CopySelectionAction(val mainController: MainController) : MolGLideSwingAction("Copy Selection") {
 
     init {
         putValue(SHORT_DESCRIPTION, "Copy selected components to the clipboard")
@@ -318,9 +338,13 @@ class CopySelectionAction(val mainController: MainController) : AbstractAction("
     override fun actionPerformed(e: ActionEvent?) {
         mainController.copySelectedMolecules()
     }
+
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+        isEnabled = activeSession.editorData.selectionManager.hasBatchSelection()
+    }
 }
 
-class PasteSelectionAction(val mainController: MainController) : AbstractAction("Paste Selection") {
+class PasteSelectionAction(val mainController: MainController) : MolGLideSwingAction("Paste Selection") {
 
     private val clipboard = Toolkit.getDefaultToolkit().systemClipboard
 
@@ -334,7 +358,7 @@ class PasteSelectionAction(val mainController: MainController) : AbstractAction(
     }
 }
 
-class CutSelectionAction(val mainController: MainController) : AbstractAction("Cut Selection") {
+class CutSelectionAction(val mainController: MainController) : MolGLideSwingAction("Cut Selection") {
 
     init {
         putValue(SHORT_DESCRIPTION, "Delete and copy selected components")
@@ -348,10 +372,13 @@ class CutSelectionAction(val mainController: MainController) : AbstractAction("C
         val delete = DeleteSelectionAction(mainController.getControllerFunc)
         delete.actionPerformed(e)
     }
+
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+        isEnabled = activeSession.editorData.selectionManager.hasBatchSelection()
+    }
 }
 
-class DeleteSelectionAction(getController: () -> EditorStateController?) : AbstractEditorControllerAction("Delete Selection",
-    getController
+class DeleteSelectionAction(val getController: () -> EditorStateController?) : MolGLideSwingAction("Delete Selection",
 ) {
     init {
         putValue(SHORT_DESCRIPTION, "Delete the selected components")
@@ -362,11 +389,15 @@ class DeleteSelectionAction(getController: () -> EditorStateController?) : Abstr
     override fun actionPerformed(e: ActionEvent?) {
         getController()?.deleteSelectedComponents()
     }
+
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+        isEnabled = activeSession.editorData.selectionManager.hasBatchSelection()
+    }
 }
 
 
-class IgnoreErrorAction(getController: () -> EditorStateController?
-) : AbstractEditorControllerAction("Ignore Valency Errors", getController) {
+class IgnoreErrorAction(val getController: () -> EditorStateController?
+) : MolGLideSwingAtomAction("Ignore Valency Errors") {
     init {
         putValue(SHORT_DESCRIPTION, "Enable/Disable valency checking for this atom")
 
@@ -375,13 +406,11 @@ class IgnoreErrorAction(getController: () -> EditorStateController?
     override fun actionPerformed(e: ActionEvent?) {
         getController()?.ignoreErrors()
     }
-    fun setSelected(isPlainBond: Boolean) {
-        putValue(SELECTED_KEY, isPlainBond)
-    }
+
 }
 
 
-class VisitWebsite(): AbstractAction("Visit Website") {
+class VisitWebsite(): MolGLideSwingAction("Visit Website") {
     init {
         putValue(SHORT_DESCRIPTION, "Visit the MolGLide website")
     }
@@ -390,7 +419,7 @@ class VisitWebsite(): AbstractAction("Visit Website") {
     }
 }
 
-class VisitRepoAction(): AbstractAction("Visit Repository") {
+class VisitRepoAction(): MolGLideSwingAction("Visit Repository") {
     init {
         putValue(SHORT_DESCRIPTION, "Visit GitHub Repository")
     }
@@ -399,7 +428,7 @@ class VisitRepoAction(): AbstractAction("Visit Repository") {
     }
 }
 
-class VisitBugTrackerAction(): AbstractAction("Report Bugs") {
+class VisitBugTrackerAction(): MolGLideSwingAction("Report Bugs") {
     init {
         putValue(SHORT_DESCRIPTION, "Visit the MolGLide issue tracker")
     }
@@ -408,7 +437,7 @@ class VisitBugTrackerAction(): AbstractAction("Report Bugs") {
     }
 }
 
-class ShowAboutMenuAction(val mainFrame: MolGlideFrame) : AbstractAction("About MolGLide") {
+class ShowAboutMenuAction(val mainFrame: MolGlideFrame) : MolGLideSwingAction("About MolGLide") {
     init {
         putValue(SHORT_DESCRIPTION, "About MolGLide")
     }

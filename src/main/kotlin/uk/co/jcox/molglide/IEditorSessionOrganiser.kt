@@ -13,6 +13,7 @@ package uk.co.jcox.molglide
 interface IEditorSessionOrganiser {
 
     fun onDocumentDirty(sessionID: String)
+    fun getActionRegistry(): SwingActionRegistry
 
 
 }

@@ -2,6 +2,7 @@ package uk.co.jcox.molglide
 
 import io.github.andrewauclair.moderndocking.app.DockableMenuItem
 import io.github.andrewauclair.moderndocking.app.Docking
+import jdk.internal.org.jline.terminal.Terminal
 import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.editor.control.EditorStateController
 import uk.co.jcox.molglide.editor.io.ClipboardMoleculePayload
@@ -25,42 +26,14 @@ class MainController (
     private val mainFrame: MolGlideFrame,
     private val mainData: MainData,
 ) : IEditorSessionOrganiser {
-    private val newProjectAction = NewProjectAction(this)
-    private val loadFileAction = LoadFileAction(this, mainFrame)
-    private val saveFileAction = SaveFileAction(this)
-    private val saveAsFileAction = SaveAsFileAction(this, mainFrame)
-    private val quitAction = QuitAction(this)
 
-    private val undoAction = UndoAction(this)
-    private val redoAction = RedoAction(this)
-
-    private val visitWebsiteAction = VisitWebsite()
-    private val visitRepoAction = VisitRepoAction()
-    private val visitBugTrackerAction = VisitBugTrackerAction()
-    private val visitAboutMenuAction = ShowAboutMenuAction(mainFrame)
-
-
+    private val actionRegistry: SwingActionRegistry = SwingActionRegistry()
     val getControllerFunc: () -> EditorStateController? = {mainData.activeSession?.editorController}
-    private val editLabelAction = EditLabelMenuAction(mainFrame, getControllerFunc)
-    private val deleteAtomMenuAction = DeleteAtomMenuAction(getControllerFunc)
-    private val toggleAtomVisibility = ToggleAtomVisibilityMenuAction(getControllerFunc)
-    private val ignoreErrors = IgnoreErrorAction(getControllerFunc)
-    private val flipSelectedBond = FlipBondMenuAction(getControllerFunc)
-    private val setSingleBondAction = SetPlainBondMenuAction(getControllerFunc)
-    private val setHashedBondAction = SetDashedBondMenuAction(getControllerFunc)
-    private val setWedgedBondMenuAction = SetWedgedBondMenuAction(getControllerFunc)
-    private val flipStereoChemMenuAction = FlipStereoChemMenuAction(getControllerFunc)
-    private val setDoubleBondMenuAction = SetDoubleBondMenuAction(getControllerFunc)
-    private val setAromaticDoubleBondMenuAction = SetAromaticDoubleBondMenuAction(getControllerFunc)
-    private val setTripleBondMenuAction = SetTripleBondMenuAction(getControllerFunc)
-    private val deleteBondMenuAction = DeleteBondMenuAction(getControllerFunc)
-    private val copySelectionAction = CopySelectionAction(this)
-    private val pasteSelectionAction = PasteSelectionAction(this)
-    private val cutSelectionAction = CutSelectionAction(this)
-    private val deleteSelectionAction = DeleteSelectionAction(getControllerFunc)
+
 
     init {
 
+        registerGlobalActions()
         buildFileMenu()
         buildEditMenu()
         buildObjectMenu()
@@ -195,8 +168,9 @@ class MainController (
             fun alert() {
                 mainData.activeSession = editorSession
 
-                //Also check if the current session can undo/redo
-                updateActionsEnabledStatus(editorSession)
+                //Also check what actions the current session can do
+                val sm = editorSession.editorData.selectionManager
+                actionRegistry.stateHasChanged(editorSession, sm.getBond(), sm.getAtom())
 
                 mainFrame.updateStatusBar()
             }
@@ -228,88 +202,116 @@ class MainController (
         Docking.updateTabInfo(sessionID)
     }
 
+
+    private fun registerGlobalActions() {
+        actionRegistry.registerAction(NEW_PROJECT_ACTION, NewProjectAction(this))
+        actionRegistry.registerAction(LOAD_PROJECT_ACTION, LoadFileAction(this, mainFrame))
+        actionRegistry.registerAction(SAVE_PROJECT_ACTION, SaveFileAction(this))
+        actionRegistry.registerAction(SAVE_PROJECT_AS_ACTION, SaveAsFileAction(this, mainFrame))
+        actionRegistry.registerAction(QUIT_APPLICATION_ACTION, QuitAction(this))
+
+        actionRegistry.registerAction(UNDO_ACTION, UndoAction(this))
+        actionRegistry.registerAction(REDO_ACTION, RedoAction(this))
+
+        actionRegistry.registerAction(VISIT_WEBSITE_ACTION, VisitWebsite())
+        actionRegistry.registerAction(VISIT_REPO_ACTION, VisitRepoAction())
+        actionRegistry.registerAction(VISIT_ISSUE_TRACKER_ACTION, VisitBugTrackerAction())
+        actionRegistry.registerAction(VISIT_ABOUT_ACTION, ShowAboutMenuAction(mainFrame))
+
+        actionRegistry.registerAction(EDIT_LABEL_ACTION, EditLabelMenuAction(mainFrame, getControllerFunc))
+        actionRegistry.registerAction(DELETE_ATOM_MENU_ACTION, DeleteAtomMenuAction(getControllerFunc))
+        actionRegistry.registerAction(TOGGLE_ATOM_VISIBILITY_ACTION, ToggleAtomVisibilityMenuAction(getControllerFunc))
+        actionRegistry.registerAction(IGNORE_VALENCY_ERRORS_ACTION, IgnoreErrorAction(getControllerFunc))
+        actionRegistry.registerAction(FLIP_SELECTED_ACTION, FlipBondMenuAction(getControllerFunc))
+        actionRegistry.registerAction(SET_SINGLE_BOND_ACTION, SetPlainBondMenuAction(getControllerFunc))
+        actionRegistry.registerAction(SET_WEDGED_ACTION, SetWedgedBondMenuAction(getControllerFunc))
+        actionRegistry.registerAction(SET_HASHED_ACTION, SetDashedBondMenuAction(getControllerFunc))
+        actionRegistry.registerAction(FLIP_STEREO_CHEM_ACTION, FlipStereoChemMenuAction(getControllerFunc))
+        actionRegistry.registerAction(SET_DOUBLE_BOND_ACTION, SetDoubleBondMenuAction(getControllerFunc))
+        actionRegistry.registerAction(SET_AROMATIC_ACTION, SetAromaticDoubleBondMenuAction(getControllerFunc))
+        actionRegistry.registerAction(SET_TRIPLE_BOND_ACTION, SetTripleBondMenuAction(getControllerFunc))
+        actionRegistry.registerAction(DELETE_BOND_ACTION, DeleteBondMenuAction(getControllerFunc))
+        actionRegistry.registerAction(COPY_SELECTION_ACTION, CopySelectionAction(this))
+        actionRegistry.registerAction(PASTE_SELECTION_ACTION, PasteSelectionAction(this))
+        actionRegistry.registerAction(CUT_SELECTION_ACTION, CutSelectionAction(this))
+        actionRegistry.registerAction(DELETE_SELECTION_ACTION, DeleteSelectionAction(getControllerFunc))
+    }
+
     private fun buildFileMenu() {
-        mainFrame.fileMenu.add(newProjectAction)
-        mainFrame.fileMenu.add(loadFileAction)
-        mainFrame.fileMenu.add(saveFileAction)
-        mainFrame.fileMenu.add(saveAsFileAction)
-        mainFrame.fileMenu.add(quitAction)
+        mainFrame.fileMenu.add(actionRegistry[NEW_PROJECT_ACTION])
+        mainFrame.fileMenu.add(actionRegistry[LOAD_PROJECT_ACTION])
+        mainFrame.fileMenu.add(actionRegistry[SAVE_PROJECT_ACTION])
+        mainFrame.fileMenu.add(actionRegistry[SAVE_PROJECT_AS_ACTION])
+        mainFrame.fileMenu.add(actionRegistry[QUIT_APPLICATION_ACTION])
     }
 
     private fun buildEditMenu() {
-        mainFrame.editMenu.add(undoAction)
-        mainFrame.editMenu.add(redoAction)
+        mainFrame.editMenu.add(actionRegistry[UNDO_ACTION])
+        mainFrame.editMenu.add(actionRegistry[REDO_ACTION])
     }
 
     private fun buildObjectMenu() {
-        mainFrame.objectMenu.add(editLabelAction)
-        mainFrame.objectMenu.add(JCheckBoxMenuItem(toggleAtomVisibility))
-        mainFrame.objectMenu.add(deleteAtomMenuAction)
-        mainFrame.objectMenu.add(ignoreErrors)
+        mainFrame.objectMenu.add(actionRegistry[EDIT_LABEL_ACTION])
+        mainFrame.objectMenu.add(JCheckBoxMenuItem(actionRegistry[TOGGLE_ATOM_VISIBILITY_ACTION]))
+        mainFrame.objectMenu.add(actionRegistry[DELETE_ATOM_MENU_ACTION])
+        mainFrame.objectMenu.add(JCheckBoxMenuItem(actionRegistry[IGNORE_VALENCY_ERRORS_ACTION]))
         mainFrame.objectMenu.addSeparator()
-        mainFrame.objectMenu.add(flipSelectedBond)
-        mainFrame.objectMenu.add(JCheckBoxMenuItem(setSingleBondAction))
-        mainFrame.objectMenu.add(JCheckBoxMenuItem(setWedgedBondMenuAction))
-        mainFrame.objectMenu.add(JCheckBoxMenuItem(setHashedBondAction))
-        mainFrame.objectMenu.add(flipStereoChemMenuAction)
-        mainFrame.objectMenu.add(JCheckBoxMenuItem(setDoubleBondMenuAction))
-        mainFrame.objectMenu.add(JCheckBoxMenuItem(setAromaticDoubleBondMenuAction))
-        mainFrame.objectMenu.add(JCheckBoxMenuItem(setTripleBondMenuAction))
-        mainFrame.objectMenu.add(deleteBondMenuAction)
+        mainFrame.objectMenu.add(actionRegistry[FLIP_SELECTED_ACTION])
+        mainFrame.objectMenu.add(JCheckBoxMenuItem(actionRegistry[SET_SINGLE_BOND_ACTION]))
+        mainFrame.objectMenu.add(JCheckBoxMenuItem(actionRegistry[SET_WEDGED_ACTION]))
+        mainFrame.objectMenu.add(JCheckBoxMenuItem(actionRegistry[SET_HASHED_ACTION]))
+        mainFrame.objectMenu.add(actionRegistry[FLIP_STEREO_CHEM_ACTION])
+        mainFrame.objectMenu.add(JCheckBoxMenuItem(actionRegistry[SET_DOUBLE_BOND_ACTION]))
+        mainFrame.objectMenu.add(JCheckBoxMenuItem(actionRegistry[SET_AROMATIC_ACTION]))
+        mainFrame.objectMenu.add(JCheckBoxMenuItem(actionRegistry[SET_TRIPLE_BOND_ACTION]))
+        mainFrame.objectMenu.add(actionRegistry[DELETE_BOND_ACTION])
         mainFrame.objectMenu.addSeparator()
-        mainFrame.objectMenu.add(copySelectionAction)
-        mainFrame.objectMenu.add(pasteSelectionAction)
-        mainFrame.objectMenu.add(cutSelectionAction)
-        mainFrame.objectMenu.add(deleteSelectionAction)
+        mainFrame.objectMenu.add(actionRegistry[COPY_SELECTION_ACTION])
+        mainFrame.objectMenu.add(actionRegistry[PASTE_SELECTION_ACTION])
+        mainFrame.objectMenu.add(actionRegistry[CUT_SELECTION_ACTION])
+        mainFrame.objectMenu.add(actionRegistry[DELETE_SELECTION_ACTION])
     }
 
     private fun buildAboutMenu() {
-        mainFrame.helpMenu.add(visitWebsiteAction)
-        mainFrame.helpMenu.add(visitRepoAction)
-        mainFrame.helpMenu.add(visitBugTrackerAction)
-        mainFrame.helpMenu.add(visitAboutMenuAction)
+        mainFrame.helpMenu.add(actionRegistry[VISIT_WEBSITE_ACTION])
+        mainFrame.helpMenu.add(actionRegistry[VISIT_REPO_ACTION])
+        mainFrame.helpMenu.add(actionRegistry[VISIT_ISSUE_TRACKER_ACTION])
+        mainFrame.helpMenu.add(actionRegistry[VISIT_ABOUT_ACTION])
     }
 
+    override fun getActionRegistry(): SwingActionRegistry {
+        return actionRegistry
+    }
 
-    //todo make an SwingAction Manager to manage all of these actions
-    //make it so this is done automatically on the object
-    //just to test for now
-    private fun updateActionsEnabledStatus(currentSession: EditorSession) {
-        val editorController = currentSession.editorController
-        val editorData = currentSession.editorData
-        val currentAtom = editorData.selectionManager.getAtom()
-        val currentBond = editorData.selectionManager.getBond()
-        val hasBatch = editorData.selectionManager.hasBatchSelection()
+    companion object {
+        const val NEW_PROJECT_ACTION = "NEW_PROJECT"
+        const val LOAD_PROJECT_ACTION = "LOAD_PROJECT"
+        const val SAVE_PROJECT_ACTION = "SAVE_PROJECT"
+        const val SAVE_PROJECT_AS_ACTION = "SAVE_PROJECT_AS"
+        const val QUIT_APPLICATION_ACTION = "QUIT_APP"
+        const val UNDO_ACTION = "UNDO"
+        const val REDO_ACTION = "REDO"
+        const val VISIT_WEBSITE_ACTION = "VISIT_WEBSITE"
+        const val VISIT_REPO_ACTION = "VISIT_REPO"
+        const val VISIT_ISSUE_TRACKER_ACTION = "VISIT_ISSUE_TRACKER"
+        const val VISIT_ABOUT_ACTION = "VISIT_ABOUT"
 
-        undoAction.isEnabled = editorController.actionManager.canUndo()
-        redoAction.isEnabled = editorController.actionManager.canRedo()
-
-        editLabelAction.isEnabled = currentAtom != null
-        deleteAtomMenuAction.isEnabled = currentAtom != null
-        toggleAtomVisibility.isEnabled = currentAtom != null
-        toggleAtomVisibility.setSelected(currentAtom?.isVisible() ?: true)
-        ignoreErrors.isEnabled = currentAtom != null
-        ignoreErrors.setSelected(currentAtom?.shouldIgnoreErrors() ?: false)
-
-        flipSelectedBond.isEnabled = currentBond != null
-        setSingleBondAction.isEnabled = currentBond != null
-        setWedgedBondMenuAction.isEnabled = currentBond != null
-        setHashedBondAction.isEnabled = currentBond != null
-        setSingleBondAction.setSelected(currentBond?.bond?.order == IBond.Order.SINGLE && currentBond?.stereo() == StereoChem.NORMAL)
-        setHashedBondAction.setSelected(currentBond?.bond?.order == IBond.Order.SINGLE && currentBond?.stereo() == StereoChem.DASHED)
-        setWedgedBondMenuAction.setSelected(currentBond?.bond?.order == IBond.Order.SINGLE && currentBond?.stereo() == StereoChem.WEDGED)
-
-        flipStereoChemMenuAction.isEnabled = currentBond != null
-        setDoubleBondMenuAction.isEnabled = currentBond != null
-        setAromaticDoubleBondMenuAction.isEnabled = currentBond != null
-        setTripleBondMenuAction.isEnabled = currentBond != null
-        deleteBondMenuAction.isEnabled = currentBond != null
-        setDoubleBondMenuAction.setSelected(currentBond?.bond?.order == IBond.Order.DOUBLE)
-        setAromaticDoubleBondMenuAction.setSelected(currentBond?.bond?.isAromatic ?: false)
-        setTripleBondMenuAction.setSelected(currentBond?.bond?.order == IBond.Order.TRIPLE)
-
-        copySelectionAction.isEnabled = hasBatch
-        cutSelectionAction.isEnabled = hasBatch
-        deleteSelectionAction.isEnabled = hasBatch
+        const val EDIT_LABEL_ACTION = "EDIT_LABEL_ACTION"
+        const val DELETE_ATOM_MENU_ACTION = "DELETE_ATOM"
+        const val TOGGLE_ATOM_VISIBILITY_ACTION = "TOGGLE_ATOM_VISIBILITY"
+        const val IGNORE_VALENCY_ERRORS_ACTION = "IGNORE_VALENCY_ERRORS"
+        const val FLIP_SELECTED_ACTION = "FLIP_SELECTED"
+        const val SET_SINGLE_BOND_ACTION = "SET_SINGLE"
+        const val SET_HASHED_ACTION = "SET_HASHED"
+        const val SET_WEDGED_ACTION = "SET_WEDGED"
+        const val FLIP_STEREO_CHEM_ACTION = "FLIP_STEREO"
+        const val SET_DOUBLE_BOND_ACTION = "SET_DOUBLE"
+        const val SET_AROMATIC_ACTION = "SET_AROMATIC"
+        const val SET_TRIPLE_BOND_ACTION = "SET_TRIPLE"
+        const val DELETE_BOND_ACTION = "DELETE_BOND"
+        const val COPY_SELECTION_ACTION = "COPY_SELECTION"
+        const val PASTE_SELECTION_ACTION = "PASTE_SELECTION"
+        const val CUT_SELECTION_ACTION = "CUT_SELECTION"
+        const val DELETE_SELECTION_ACTION = "DELETE_SELECTION"
     }
 }
