@@ -222,6 +222,10 @@ class ChemMolecule (
         return !ConnectivityChecker.isConnected(container)
     }
 
+    fun rotate(x: Double, y: Double, angle: Double) {
+        GeometryUtil.rotate(container, Point2d(x, y), angle)
+    }
+
     fun splitIntoFragments() : List<ChemMolecule> {
         if (!isFragmented()) {
             return emptyList()
