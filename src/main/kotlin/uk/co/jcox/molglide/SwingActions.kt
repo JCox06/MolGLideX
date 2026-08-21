@@ -475,4 +475,21 @@ class CDKCleanupStructure (val getController: () -> EditorStateController?) : Mo
     }
 }
 
+class CDKCopyInChi (val mainController: MainController): MolGLideSwingAction("Copy InChi") {
+
+    init {
+        putValue(SHORT_DESCRIPTION, "Invoke CDK to generate the InChi for this molecule")
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        mainController.copyInChi()
+    }
+
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?
+    ) {
+        isEnabled = activeSession.editorData.selectionManager.getMolecule() != null
+    }
+
+}
+
 

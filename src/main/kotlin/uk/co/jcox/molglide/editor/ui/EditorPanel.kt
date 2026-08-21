@@ -39,6 +39,7 @@ class EditorPanel(private val uiData: IDataModelUI) : JPanel() {
             val cdkMenu = JMenu("CDK Tools")
             cdkMenu.add(actionRegistry[MainController.CDK_COPY_CANONICAL_SMILES_ACTION])
             cdkMenu.add(actionRegistry[MainController.CDK_CLEANUP_STRUCTURE])
+            cdkMenu.add(actionRegistry[MainController.CDK_INCHI])
             m.add(cdkMenu)
         }
 

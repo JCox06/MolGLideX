@@ -1,6 +1,9 @@
 package uk.co.jcox.molglide.editor.model
 
 
+import io.github.dan2097.jnainchi.InchiStatus
+import net.sf.jniinchi.INCHI_OPTION
+import net.sf.jniinchi.INCHI_RET
 import org.apache.jena.sparql.pfunction.library.container
 import org.joml.GeometryUtils
 import org.joml.Vector2d
@@ -10,6 +13,8 @@ import org.openscience.cdk.atomtype.CDKAtomTypeMatcher
 import org.openscience.cdk.exception.CDKException
 import org.openscience.cdk.geometry.GeometryUtil
 import org.openscience.cdk.graph.ConnectivityChecker
+import org.openscience.cdk.inchi.InChIGenerator
+import org.openscience.cdk.inchi.InChIGeneratorFactory
 import org.openscience.cdk.interfaces.IAtom
 import org.openscience.cdk.interfaces.IAtomContainer
 import org.openscience.cdk.interfaces.IBond
@@ -126,6 +131,20 @@ class ChemMolecule (
     fun getCanonicalString(): String {
         val generator = SmilesGenerator(SmiFlavor.Canonical)
         return generator.create(container)
+    }
+
+    fun getInChi(): InchiReturn {
+        val inchiFactory = InChIGeneratorFactory.getInstance()
+        val generator = inchiFactory.getInChIGenerator(container)
+        val returnStatus = generator.status
+        val status = when (returnStatus) {
+            InchiStatus.SUCCESS -> InchiStats.SUCCESS
+            InchiStatus.WARNING -> InchiStats.WARNING
+            InchiStatus.ERROR -> InchiStats.ERROR
+        }
+        val inchi = generator.inchi ?: "ERROR"
+
+        return InchiReturn(inchi, status, generator.message)
     }
 
     fun cleanMolecule() : ChemMolecule {

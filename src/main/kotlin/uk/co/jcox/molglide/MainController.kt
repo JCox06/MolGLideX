@@ -6,13 +6,16 @@ import jdk.internal.org.jline.terminal.Terminal
 import org.openscience.cdk.interfaces.IBond
 import org.openscience.cdk.smiles.smarts.parser.SMARTSParserConstants.a
 import uk.co.jcox.molglide.editor.control.EditorStateController
+import uk.co.jcox.molglide.editor.control.tool.Tool
 import uk.co.jcox.molglide.editor.io.ClipboardMoleculePayload
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.io.LevelLoader
 import uk.co.jcox.molglide.editor.io.LevelSerializer
 import uk.co.jcox.molglide.editor.io.MolGLideMetaData
+import uk.co.jcox.molglide.editor.model.InchiStats
 import uk.co.jcox.molglide.editor.ui.EditorPanel
 import java.awt.Toolkit
+import java.awt.TrayIcon.MessageType
 import java.awt.datatransfer.StringSelection
 import java.awt.event.MouseEvent
 import java.awt.event.MouseMotionListener
@@ -21,6 +24,7 @@ import java.io.File
 import java.util.UUID
 import javax.swing.JCheckBoxMenuItem
 import javax.swing.JComponent
+import javax.swing.JOptionPane
 import javax.swing.event.MenuEvent
 import javax.swing.event.MenuListener
 
@@ -116,6 +120,22 @@ class MainController (
         val smiles = molecule.getCanonicalString()
         val clipboard = Toolkit.getDefaultToolkit().systemClipboard
         clipboard.setContents(StringSelection(smiles), null)
+    }
+
+    fun copyInChi() {
+        val activeSession = mainData.activeSession ?: return
+        val s = activeSession.editorData.selectionManager
+        val molecule = s.getMolecule() ?: return
+        val inChi = molecule.getInChi()
+        val clipboard = Toolkit.getDefaultToolkit().systemClipboard
+        clipboard.setContents(StringSelection(inChi.inchiString), null)
+        val errorMessage = inChi.log
+        if (inChi.inchiStats == InchiStats.WARNING) {
+            JOptionPane.showMessageDialog(mainFrame, errorMessage, "Inchi Warning", JOptionPane.WARNING_MESSAGE)
+        }
+        if (inChi.inchiStats == InchiStats.ERROR) {
+            JOptionPane.showMessageDialog(mainFrame, errorMessage, "InChi Failure", JOptionPane.ERROR_MESSAGE)
+        }
     }
 
     fun pasteSelectedMolecules() {
@@ -249,6 +269,7 @@ class MainController (
 
         actionRegistry.registerAction(CDK_CLEANUP_STRUCTURE, CDKCleanupStructure(getControllerFunc))
         actionRegistry.registerAction(CDK_COPY_CANONICAL_SMILES_ACTION, CDKCopyCanonicalSmilesAction(this))
+        actionRegistry.registerAction(CDK_INCHI, CDKCopyInChi(this))
     }
 
     private fun buildFileMenu() {
@@ -287,6 +308,7 @@ class MainController (
         mainFrame.objectMenu.addSeparator()
         mainFrame.objectMenu.add(actionRegistry[CDK_COPY_CANONICAL_SMILES_ACTION])
         mainFrame.objectMenu.add(actionRegistry[CDK_CLEANUP_STRUCTURE])
+        mainFrame.objectMenu.add(actionRegistry[CDK_INCHI])
     }
 
     private fun buildAboutMenu() {
@@ -331,7 +353,8 @@ class MainController (
         const val CUT_SELECTION_ACTION = "CUT_SELECTION"
         const val DELETE_SELECTION_ACTION = "DELETE_SELECTION"
 
-        const val CDK_COPY_CANONICAL_SMILES_ACTION = "COPY_CANONICAL"
+        const val CDK_COPY_CANONICAL_SMILES_ACTION = "CDK_COPY_CANONICAL"
         const val CDK_CLEANUP_STRUCTURE = "CDK_CLEANUP"
+        const val CDK_INCHI = "CDK_COPY_INCHI"
     }
 }
