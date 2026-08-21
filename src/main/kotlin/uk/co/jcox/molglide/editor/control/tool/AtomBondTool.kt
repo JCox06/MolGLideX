@@ -3,6 +3,7 @@ package uk.co.jcox.molglide.editor.control.tool
 import org.joml.Vector2f
 import org.joml.minus
 import org.joml.plus
+import org.openscience.cdk.smiles.smarts.parser.SMARTSParserConstants.r
 import uk.co.jcox.molglide.editor.control.ActionManager
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.SelectionManager
@@ -111,11 +112,14 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
 
         //If the overlap is null, but the mouse is now hovered over a different atom, allow that to become the overlap
         val currentSelection = selectionManager.getAtom()
-        if (overlap == null && currentSelection != draggingMode.insertedTo && currentSelection != draggingMode.draggingAtom) {
+        //If the user moves really fast, the data in the selection manager might not have updated in time
+        //So ensure that the current selection is actually valid
+        if (overlap == null && stateData.getAtoms().contains(currentSelection) && currentSelection != draggingMode.insertedTo && currentSelection != draggingMode.draggingAtom) {
             overlap = currentSelection
         }
 
         if (overlap != null && draggingMode.allowBondChanges) {
+            //Undo the atom insertion and instead change bond order
             actionManager.undoLastAction()
             draggingMode.allowBondChanges = false
             //Then we have found an overlapping atom
@@ -192,6 +196,7 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
         actionManager.executeAction(atomInsertionAction)
         val newAtom = atomInsertionAction.newAtom
         val newBond = atomInsertionAction.newBond
+
         if (newAtom != null && newBond != null) {
             toolMode = Mode.AtomInsertionDragging(newAtom, currentMode.insertTo, true, newBond)
             newAtom.setTransient(true)

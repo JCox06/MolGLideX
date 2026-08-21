@@ -61,7 +61,14 @@ class ChemMolecule (
         val atom: IAtom = Atom(element)
         atom.point2d = Point2d(positionX, positionY)
         initDefaultAtomProperties(atom)
-        return directlyAddAtom(atom)
+        val chemAtom = directlyAddAtom(atom)
+        return chemAtom
+    }
+
+    fun directlyAddAtom(atom: IAtom): ChemAtom {
+        container.addAtom(atom)
+        calculateAtomProperties()
+        return ChemAtom(atom, this)
     }
 
     /**
@@ -108,11 +115,7 @@ class ChemMolecule (
         return ChemBond(cdkBond, this)
     }
 
-    fun directlyAddAtom(atom: IAtom): ChemAtom {
-        container.addAtom(atom)
-        calculateAtomProperties()
-        return ChemAtom(atom, this)
-    }
+
 
     fun replaceAtom(chemAtom: ChemAtom, newElement: String) {
         val atom = chemAtom.atom
