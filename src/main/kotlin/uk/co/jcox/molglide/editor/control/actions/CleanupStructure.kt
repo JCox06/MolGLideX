@@ -1,34 +1,30 @@
 package uk.co.jcox.molglide.editor.control.actions
 
-import org.checkerframework.checker.units.qual.m
+import org.apache.jena.sparql.function.library.date
+import org.checkerframework.checker.units.qual.mol
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 
-class CleanupStructure (private val chemMolecule: ChemMolecule) : IDataAction {
+class CleanupStructure (private val originalMolecule: ChemMolecule) : IDataAction {
 
-    private val oldMolecule = chemMolecule
-    private var newMolecule: ChemMolecule? = null
+
+    private val moleculeToClean = originalMolecule.deepCopy()
+    private var cleanedMolecule: ChemMolecule? = null
 
     override fun execute(data: EditorStateData) {
-        val returned = chemMolecule.cleanMolecule()
-
-        data.removeMolecule(oldMolecule)
-        data.addMolecule(returned)
+        val returnedMolecule = moleculeToClean.cleanMolecule()
+        data.removeMolecule(originalMolecule)
+        data.addMolecule(returnedMolecule)
+        cleanedMolecule = returnedMolecule
     }
 
     override fun undo(data: EditorStateData) {
-        val m = newMolecule
-        if (m != null) {
-            data.removeMolecule(m)
-            data.addMolecule(oldMolecule)
-        }
+        cleanedMolecule?.let { data.removeMolecule(it) }
+        data.addMolecule(originalMolecule)
     }
 
     override fun redo(data: EditorStateData) {
-        val m = newMolecule
-        if (m != null) {
-            data.removeMolecule(oldMolecule)
-            data.addMolecule(m)
-        }
+        data.removeMolecule(originalMolecule)
+        cleanedMolecule?.let { data.addMolecule(it) }
     }
 }

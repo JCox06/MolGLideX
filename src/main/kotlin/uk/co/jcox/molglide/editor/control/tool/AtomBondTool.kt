@@ -15,6 +15,7 @@ import uk.co.jcox.molglide.IMainAppData
 import uk.co.jcox.molglide.editor.control.EventContext
 import uk.co.jcox.molglide.editor.model.ChemAtom
 import uk.co.jcox.molglide.editor.model.ChemBond
+import uk.co.jcox.molglide.editor.model.EditorStateData
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
@@ -102,7 +103,7 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
         val draggingPos = draggingMode.draggingAtom.getPos()
         val molecule = draggingMode.insertedTo.molecule
 
-        //Find an atom that is overlapping
+        //Find an atom that is overlapping, that could also be from a different atom
         val overlap = molecule.atoms().toList().find {
             draggingPos.equals(it.getPos(), 0.25) && it.atom != draggingMode.draggingAtom.atom && it.atom != draggingMode.insertedTo.atom
         }

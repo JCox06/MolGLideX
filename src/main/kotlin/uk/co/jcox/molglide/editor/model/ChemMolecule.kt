@@ -118,6 +118,8 @@ class ChemMolecule (
     }
 
     fun cleanMolecule() : ChemMolecule {
+        val middle = GeometryUtil.get2DCenter(this.container)
+
         val gen = StructureDiagramGenerator()
         gen.molecule = container
         gen.generateCoordinates()
@@ -127,8 +129,8 @@ class ChemMolecule (
         val currentBondLength = GeometryUtil.getBondLengthMedian(newMolecule)
         val factor: Double = targetBondLength / currentBondLength
         GeometryUtil.scaleMolecule(newMolecule, factor)
-        val transPoint = this.atoms().first().getPos()
-        GeometryUtil.translate2D(newMolecule, transPoint.x, transPoint.y)
+
+        GeometryUtil.translate2D(newMolecule, middle.x, middle.y)
 
         return ChemMolecule(newMolecule, false)
     }
@@ -253,6 +255,12 @@ class ChemMolecule (
     private fun initDefaultBondProperties(cdkBond: IBond) {
         cdkBond.setProperty(FLIP_BOND, false)
         cdkBond.setProperty(TRANSIENT, false)
+    }
+
+    fun deepCopy(): ChemMolecule {
+        val deepCopyCDK = container.clone()
+        val newChem = ChemMolecule(deepCopyCDK, false)
+        return newChem
     }
 
     override fun equals(other: Any?): Boolean {

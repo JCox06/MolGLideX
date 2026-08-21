@@ -29,6 +29,14 @@ class AtomPosSnapshot (
         return posMap
     }
 
+    fun restoreSnapshot(chemMolecule: ChemMolecule) {
+        chemMolecule.atoms().forEach { chemAtom ->
+            val originalPos = posMap[chemAtom] ?: return@forEach
+            chemAtom.atom.point2d.x = originalPos.x
+            chemAtom.atom.point2d.y = originalPos.y
+        }
+    }
+
     companion object {
         fun ofMolecule(chemMolecule: ChemMolecule): AtomPosSnapshot {
             return AtomPosSnapshot(chemMolecule.atoms())
