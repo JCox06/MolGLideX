@@ -7,9 +7,11 @@ import kotlin.collections.map
 class SelectionManager (
 ) {
 
+    //todo this was a mistake doing this
+    //Each object that can be placed in the editor, that can also be selected, should implement a new interface
     var primarySelection: Type = Type.None
 
-    var batchSelection: BatchSelection = BatchSelection(emptyList(), emptyList())
+    var batchSelection: BatchSelection = BatchSelection(mutableListOf(), mutableListOf())
 
     fun updatePrimarySelection(levelData: EditorStateData, worldX: Int, worldY: Int) {
         val closestAtom = getClosestAtom(levelData, worldX, worldY)
@@ -60,7 +62,7 @@ class SelectionManager (
     }
 
     fun clearSelectionBoundingBox() {
-        batchSelection = BatchSelection(emptyList(), emptyList())
+        batchSelection = BatchSelection(mutableListOf(), mutableListOf())
     }
 
 
@@ -225,8 +227,8 @@ class SelectionManager (
     }
 
     data class BatchSelection (
-        val atoms: List<ChemAtom>,
-        val bonds: List<ChemBond>
+        val atoms: MutableList<ChemAtom>,
+        val bonds: MutableList<ChemBond>
     )
 
     companion object {

@@ -96,7 +96,10 @@ class EditorPanel(private val uiData: IDataModelUI) : JPanel() {
 
     fun paintEditor(g2d: Graphics2D, drawTransients: Boolean = true, onlyDrawSelected: Boolean = false) {
         preparePainter(g2d)
-        paintGenericSelectionBox(g2d)
+
+        if (drawTransients) {
+            paintGenericSelectionBox(g2d)
+        }
         g2d.stroke = BasicStroke(getLineStroke(), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
 
         uiData.getUIComponents().forEach { uiComp ->
@@ -148,6 +151,7 @@ class EditorPanel(private val uiData: IDataModelUI) : JPanel() {
         g2d.drawRect(startX.toInt(), startY.toInt(), advX.toInt(), advY.toInt())
         g2d.color = oldColour
     }
+
 
     private fun getFontSize() : Float {
         return UNMODDED_TEXT_SIZE * uiData.cameraZoom().toFloat()

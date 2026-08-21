@@ -1,6 +1,9 @@
 package uk.co.jcox.molglide.editor.control.tool
 
+import com.sun.org.apache.xpath.internal.operations.Bool
+import org.apache.jena.sparql.function.library.evenInteger
 import uk.co.jcox.molglide.editor.control.ActionManager
+import uk.co.jcox.molglide.editor.control.EventContext
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.model.SelectionManager
@@ -8,7 +11,11 @@ import uk.co.jcox.molglide.editor.control.actions.CompoundAction
 import uk.co.jcox.molglide.editor.control.actions.IDataAction
 import uk.co.jcox.molglide.editor.control.actions.MoveAtomAction
 import uk.co.jcox.molglide.editor.model.ChemAtom
+import uk.co.jcox.molglide.editor.model.util.AtomPosSnapshot
+import java.util.Vector
+import javax.swing.SwingUtilities
 import javax.vecmath.Point2d
+import kotlin.math.PI
 
 /**
  * This tool works by interacting with the Selection Manager's axis aligned bounding selection box
@@ -36,8 +43,18 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
 
     private var toolMode: ToolMode = ToolMode.None
 
-    override fun onClick(clickX: Int, clickY: Int) {
-        toolMode = getToolMode(clickX, clickY)
+    override fun onClick(clickX: Int, clickY: Int, eventContext: EventContext) {
+        //First check if the atom should be selected in the batch selection
+        val primaryAtom = selectionManager.getAtom()
+        if ((eventContext.isShiftDown || eventContext.isCtrlDown) && primaryAtom != null) {
+            selectionManager.batchSelection.atoms.add(primaryAtom)
+        }
+        val primaryBond = selectionManager.getBond()
+        if ((eventContext.isShiftDown || eventContext.isCtrlDown) && primaryBond != null) {
+            selectionManager.batchSelection.bonds.add(primaryBond)
+        }
+
+        toolMode = getToolMode(clickX, clickY, eventContext)
 
         if (toolMode == ToolMode.None) {
             selectionManager.clearSelectionBoundingBox()
@@ -45,21 +62,24 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
         }
     }
 
-    override fun onRelease(clickX: Int, clickY: Int) {
+    override fun onRelease(clickX: Int, clickY: Int, eventContext: EventContext) {
         //On release we have to make the fake action
         val m = toolMode
         when (m) {
-            is ToolMode.Dragging -> submitActions(m)
+            is ToolMode.Dragging -> {
+                submitActions(m)
+                m.showManipulator = true
+            }
             is ToolMode.None -> {}
         }
-        toolMode = ToolMode.None
+//        toolMode = ToolMode.None
     }
 
     private fun submitActions(m: ToolMode.Dragging) {
         val actionList = mutableListOf<IDataAction>()
-        m.posMap.forEach { (chemAtom, originalPos) ->
+        m.posMap.map().forEach { (chemAtom, originalPos) ->
             val currentPos = chemAtom.atom.point2d
-            val pseudoAction = MoveAtomAction(chemAtom, currentPos, originalPos)
+            val pseudoAction = MoveAtomAction(chemAtom, currentPos, Point2d(originalPos.x, originalPos.y))
             actionList.add(pseudoAction)
         }
         val actions = actionList.toTypedArray()
@@ -67,7 +87,7 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
         actionManager.executeAction(compoundAction)
     }
 
-    override fun onDragMouse(clickX: Int, clickY: Int, dx: Double, dy: Double) {
+    override fun onDragMouse(clickX: Int, clickY: Int, dx: Double, dy: Double, eventContext: EventContext) {
         val m = toolMode
 
         when (m) {
@@ -76,21 +96,13 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
         }
 
     }
-
-
     private fun handleSelectionDrag(m: ToolMode.Dragging, clickX: Int, clickY: Int) {
         //The user is dragging on an already selected item
         //or a group of items.
-        selectionManager.batchSelection.atoms.forEach { chemAtom ->
-            if (!m.posMap.containsKey(chemAtom)) {
-                m.posMap[chemAtom] = Point2d(chemAtom.atom.point2d.x, chemAtom.atom.point2d.y)
-            }
-
+        m.posMap.map().keys.forEach{ chemAtom ->
             val originalPos = m.posMap[chemAtom] ?: return
-
             val newPosX = originalPos.x + (clickX.toDouble() - m.firstClickX)
             val newPosY = originalPos.y + (clickY.toDouble() - m.firstClickY)
-
             chemAtom.atom.point2d.x = newPosX
             chemAtom.atom.point2d.y = newPosY
         }
@@ -100,17 +112,28 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
 
     }
 
-    private fun getToolMode(clickX: Int, clickY: Int) : ToolMode {
+    private fun getToolMode(clickX: Int, clickY: Int, eventContext: EventContext) : ToolMode {
         //Check if the selected atom was covered in the AABB
         val batchSelection = selectionManager.batchSelection
         val mouseOverSelection = selectionManager.primarySelection.inPrimarySelection(batchSelection)
         if (mouseOverSelection) {
-            return ToolMode.Dragging(clickX, clickY)
+            val atomList = selectionManager.batchSelection.atoms
+            return ToolMode.Dragging(clickX, clickY, AtomPosSnapshot(atomList))
         }
+
+        //Check to see if the user has just selected one atom through the primary selection
+        //and control or shift is not down
+        val atom = selectionManager.getAtom()
+        if (atom != null && !(eventContext.isShiftDown || eventContext.isCtrlDown)) {
+            val atomList = listOf(atom)
+            return ToolMode.Dragging(clickX, clickY, AtomPosSnapshot(atomList))
+        }
+
+        selectionManager.clearSelectionBoundingBox()
         return ToolMode.None
     }
 
-    fun shouldShowAABB(): Boolean {
+    override fun shouldShowAABB(): Boolean {
         return toolMode == ToolMode.None
     }
 
@@ -118,6 +141,6 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
 
     sealed class ToolMode {
         object None: ToolMode()
-        class Dragging(val firstClickX: Int, val firstClickY: Int, val posMap: MutableMap<ChemAtom, Point2d> = mutableMapOf()) : ToolMode()
+        class Dragging(val firstClickX: Int, val firstClickY: Int, val posMap: AtomPosSnapshot, var showManipulator: Boolean = false) : ToolMode()
     }
 }

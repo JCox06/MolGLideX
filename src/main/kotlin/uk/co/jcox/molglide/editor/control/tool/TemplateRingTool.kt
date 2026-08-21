@@ -8,6 +8,7 @@ import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.SelectionManager
 import uk.co.jcox.molglide.editor.control.actions.RingCreatorAction
 import uk.co.jcox.molglide.IMainAppData
+import uk.co.jcox.molglide.editor.control.EventContext
 import uk.co.jcox.molglide.editor.model.util.AtomPosSnapshot
 import javax.vecmath.Point2d
 import kotlin.math.round
@@ -17,7 +18,7 @@ class TemplateRingTool(val globalContext: IMainAppData, actionManager: ActionMan
 
     private var toolMode: Mode = Mode.None
 
-    override fun onClick(clickX: Int, clickY: Int) {
+    override fun onClick(clickX: Int, clickY: Int, eventContext: EventContext) {
         val primary = selectionManager.primarySelection
 
         if (primary is SelectionManager.Type.None) {
@@ -30,11 +31,11 @@ class TemplateRingTool(val globalContext: IMainAppData, actionManager: ActionMan
         val action = RingCreatorAction(centreX, centreY, globalContext.getEditMode())
         actionManager.executeAction(action)
         val c = action.getRingCentre()
-        toolMode = Mode.Rotate(action.placedRing, c.x, c.y, AtomPosSnapshot(action.placedRing))
+        toolMode = Mode.Rotate(action.placedRing, c.x, c.y, AtomPosSnapshot.ofMolecule(action.placedRing))
         action.placedRing.setTransient(true)
     }
 
-    override fun onRelease(clickX: Int, clickY: Int) {
+    override fun onRelease(clickX: Int, clickY: Int, eventContext: EventContext) {
         val m = toolMode
         if (m is Mode.Rotate) {
             m.inserted.setTransient(false)
@@ -42,7 +43,7 @@ class TemplateRingTool(val globalContext: IMainAppData, actionManager: ActionMan
         toolMode = Mode.None
     }
 
-    override fun onDragMouse(clickX: Int, clickY: Int, dx: Double, dy: Double) {
+    override fun onDragMouse(clickX: Int, clickY: Int, dx: Double, dy: Double, eventContext: EventContext) {
         val currentMode = toolMode
         if (currentMode is Mode.Rotate) {
             rotateRingAngle(clickX, clickY, currentMode)

@@ -5,23 +5,33 @@ import uk.co.jcox.molglide.editor.model.ChemAtom
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 
 class AtomPosSnapshot (
-    molecule: ChemMolecule,
+    atomList: List<ChemAtom>
 ) {
 
     private val posMap: MutableMap<ChemAtom, Vector2d> = mutableMapOf()
 
     init {
-        takeSnapshot(molecule)
+        takeSnapshot(atomList)
     }
 
 
-    fun takeSnapshot(chemMolecule: ChemMolecule) {
-        chemMolecule.atoms().forEach { chemAtom ->
+    fun takeSnapshot(atomList: List<ChemAtom>) {
+        atomList.forEach { chemAtom ->
             posMap[chemAtom] = chemAtom.getPos()
         }
     }
 
     operator fun get(chemAtom: ChemAtom): Vector2d {
         return posMap[chemAtom] ?: throw NullPointerException("Cannot provide a position which was not supplied")
+    }
+
+    fun map(): Map<ChemAtom, Vector2d> {
+        return posMap
+    }
+
+    companion object {
+        fun ofMolecule(chemMolecule: ChemMolecule): AtomPosSnapshot {
+            return AtomPosSnapshot(chemMolecule.atoms())
+        }
     }
 }

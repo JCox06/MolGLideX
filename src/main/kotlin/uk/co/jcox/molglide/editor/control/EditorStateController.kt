@@ -2,6 +2,7 @@ package uk.co.jcox.molglide.editor.control
 
 import com.github.jsonldjava.shaded.com.google.common.math.IntMath.pow
 import org.checkerframework.checker.units.qual.mol
+import org.openscience.cdk.geometry.GeometryUtil
 import org.openscience.cdk.interfaces.IBond
 import org.openscience.cdk.layout.StructureDiagramGenerator
 import uk.co.jcox.molglide.EditMode
@@ -76,21 +77,21 @@ class EditorStateController (
         editorPanel.buildContextMenus(sessionOrganiser.getActionRegistry(), MenuPopupListener())
     }
 
-    private fun handleMouseClick(clickX: Int, clickY: Int) {
+    private fun handleMouseClick(clickX: Int, clickY: Int, eventContext: EventContext) {
         prepareTool()
-        currentTool.onClick(clickX, clickY)
+        currentTool.onClick(clickX, clickY, eventContext)
     }
 
-    private fun handleMouseRelease(clickX: Int, clickY: Int) {
-        currentTool.onRelease(clickX, clickY)
+    private fun handleMouseRelease(clickX: Int, clickY: Int, eventContext: EventContext) {
+        currentTool.onRelease(clickX, clickY, eventContext)
     }
 
     private fun handleSuddenMouseMove() {
         currentTool.onSuddenMove()
     }
 
-    private fun handleMouseDrag(mouseX: Int, mouseY: Int, dx: Double, dy: Double) {
-        currentTool.onDragMouse(mouseX, mouseY, dx, dy)
+    private fun handleMouseDrag(mouseX: Int, mouseY: Int, dx: Double, dy: Double, eventContext: EventContext) {
+        currentTool.onDragMouse(mouseX, mouseY, dx, dy, eventContext)
     }
 
     private fun translateCameraPos(x: Double, y: Double) {
@@ -112,7 +113,7 @@ class EditorStateController (
             currentTool = TemplateRingTool(globalContext, actionManager, stateData.selectionManager)
             stateData.selectionManager.clearSelectionBoundingBox()
         }
-        if (globalContext.getEditMode().type == EditMode.ToolType.SELECT_TOOL) {
+        if (globalContext.getEditMode().type == EditMode.ToolType.SELECT_TOOL && currentTool !is SelectTool) {
             currentTool = SelectTool(actionManager, stateData.selectionManager, stateData)
         }
 
@@ -334,7 +335,7 @@ class EditorStateController (
             }
             val world = screenToWorld(e.point)
             if (SwingUtilities.isLeftMouseButton(e)) {
-                handleMouseClick(world.x, world.y)
+                handleMouseClick(world.x, world.y, EventContext(e.isControlDown, e.isShiftDown))
             }
             stateData.transientBoxSelectStartX = world.x
             stateData.transientBoxSelectStartY = world.y
@@ -347,7 +348,7 @@ class EditorStateController (
                 return
             }
             val point = screenToWorld(e.point)
-            handleMouseRelease(point.x, point.y)
+            handleMouseRelease(point.x, point.y, EventContext(e.isControlDown, e.isShiftDown))
 
             stateData.transientBoxSelectStartX = 0
             stateData.transientBoxSelectStartY = 0
@@ -371,18 +372,19 @@ class EditorStateController (
             if (e == null || stateData.pauseEvents) {
                 return
             }
+
             updateMouse(e)
 
             val world = screenToWorld(e.point)
             val moveX = offsetX * MOUSE_SENSE
             val moveY = offsetY * MOUSE_SENSE
-            handleMouseDrag(world.x, world.y, moveX, moveY)
+            handleMouseDrag(world.x, world.y, moveX, moveY, EventContext(e.isShiftDown, e.isControlDown))
 
             if (SwingUtilities.isMiddleMouseButton(e)) {
                 translateCameraPos(moveX, moveY)
             }
 
-            if (stateData.canSelectBox && SwingUtilities.isLeftMouseButton(e) && currentTool is SelectTool && (currentTool as SelectTool).shouldShowAABB()) {
+            if (stateData.canSelectBox && SwingUtilities.isLeftMouseButton(e) && currentTool.shouldShowAABB()) {
                 stateData.transientBoxSelectAdvX = world.x - stateData.transientBoxSelectStartX
                 stateData.transientBoxSelectAdvY = world.y - stateData.transientBoxSelectStartY
                 stateData.selectionManager.updateSelectionBoundingBox(stateData, stateData.transientBoxSelectStartX, stateData.transientBoxSelectStartY, world.x, world.y)

@@ -114,4 +114,5 @@ class EditorStateData (
     override fun getTransientSelectionAdvY(): Int {
         return transientBoxSelectAdvY
     }
+
 }

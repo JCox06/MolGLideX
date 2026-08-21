@@ -12,6 +12,7 @@ import uk.co.jcox.molglide.editor.control.actions.IncrementBondOrderAction
 import uk.co.jcox.molglide.editor.control.actions.ReplaceAtomAction
 import uk.co.jcox.molglide.editor.control.actions.RingCyclisationAction
 import uk.co.jcox.molglide.IMainAppData
+import uk.co.jcox.molglide.editor.control.EventContext
 import uk.co.jcox.molglide.editor.model.ChemAtom
 import uk.co.jcox.molglide.editor.model.ChemBond
 import kotlin.math.abs
@@ -24,7 +25,7 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
     var toolMode: Mode = Mode.None
 
 
-    override fun onDragMouse(clickX: Int, clickY: Int, dx: Double, dy: Double) {
+    override fun onDragMouse(clickX: Int, clickY: Int, dx: Double, dy: Double, eventContext: EventContext) {
         val currentMode = toolMode
         if (currentMode is Mode.AtomInsertionDragging) {
             handleNewAtomDragging(currentMode, clickX, clickY)
@@ -178,7 +179,7 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
         }
     }
 
-    override fun onClick(clickX: Int, clickY: Int) {
+    override fun onClick(clickX: Int, clickY: Int, eventContext: EventContext) {
         toolMode = getToolMode(clickX, clickY)
 
         when (val mode = toolMode) {
@@ -202,7 +203,7 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
         toolMode = Mode.PostReplacement(atomInsertion.replace)
     }
 
-    override fun onRelease(clickX: Int, clickY: Int) {
+    override fun onRelease(clickX: Int, clickY: Int, eventContext: EventContext) {
         val m = toolMode
         if (m is Mode.AtomInsertionDragging) {
             m.draggingAtom.setTransient(false)
