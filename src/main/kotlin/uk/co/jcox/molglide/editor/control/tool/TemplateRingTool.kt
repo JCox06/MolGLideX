@@ -39,6 +39,7 @@ class TemplateRingTool(val globalContext: IMainAppData, actionManager: ActionMan
         val m = toolMode
         if (m is Mode.Rotate) {
             m.inserted.setTransient(false)
+            m.inserted.calculateAtomProperties()
         }
         toolMode = Mode.None
     }
