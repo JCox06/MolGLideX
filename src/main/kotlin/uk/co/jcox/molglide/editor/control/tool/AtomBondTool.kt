@@ -13,6 +13,7 @@ import uk.co.jcox.molglide.editor.control.actions.ReplaceAtomAction
 import uk.co.jcox.molglide.editor.control.actions.RingCyclisationAction
 import uk.co.jcox.molglide.IMainAppData
 import uk.co.jcox.molglide.editor.control.EventContext
+import uk.co.jcox.molglide.editor.control.actions.MergeAndConnectAction
 import uk.co.jcox.molglide.editor.model.ChemAtom
 import uk.co.jcox.molglide.editor.model.ChemBond
 import uk.co.jcox.molglide.editor.model.EditorStateData
@@ -21,7 +22,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager,
-                   selectionManager: SelectionManager) : Tool(actionManager, selectionManager) {
+                   selectionManager: SelectionManager, val stateData: EditorStateData) : Tool(actionManager, selectionManager) {
 
     var toolMode: Mode = Mode.None
 
@@ -103,11 +104,16 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
         val draggingPos = draggingMode.draggingAtom.getPos()
         val molecule = draggingMode.insertedTo.molecule
 
-        //Find an atom that is overlapping, that could also be from a different atom
-        val overlap = molecule.atoms().toList().find {
+        //Find an atom that is overlapping, that could also be from a different molecule now:
+        var overlap = stateData.getAtoms().toList().find {
             draggingPos.equals(it.getPos(), 0.25) && it.atom != draggingMode.draggingAtom.atom && it.atom != draggingMode.insertedTo.atom
         }
 
+        //If the overlap is null, but the mouse is now hovered over a different atom, allow that to become the overlap
+        val currentSelection = selectionManager.getAtom()
+        if (overlap == null && currentSelection != draggingMode.insertedTo && currentSelection != draggingMode.draggingAtom) {
+            overlap = currentSelection
+        }
 
         if (overlap != null && draggingMode.allowBondChanges) {
             actionManager.undoLastAction()
@@ -123,7 +129,8 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
                 return
             }
             //Otherwise, there was no common bond between the atoms, and we need to instead perform
-            //a cyclisation action
+            //a cyclisation action (in the case of the overlap coming from the same container)
+            //Or we need to merge two molecules together
             handleRingCyclisationAction(draggingMode.insertedTo, overlap)
             return
         }
@@ -137,9 +144,21 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
         }
     }
 
-    private fun handleRingCyclisationAction(anchorAtom: ChemAtom, overlap: ChemAtom) {
-            val action = RingCyclisationAction(anchorAtom, overlap)
+    private fun handleRingCyclisationAction(anchorAtom: ChemAtom, overlapAtom: ChemAtom) {
+        //As a precaution that the overlapping atom could be coming from a different container
+        //it is best to call a merge action first
+
+        if (anchorAtom.molecule == overlapAtom.molecule) {
+            //Cyclisation action
+            val action = RingCyclisationAction(anchorAtom, overlapAtom)
             actionManager.executeAction(action)
+            return
+        }
+
+        //Else we need to merge the two atoms in the same container, and form a connection that way
+        val merge = MergeAndConnectAction(anchorAtom, overlapAtom)
+        actionManager.executeAction(merge)
+        return
     }
 
 

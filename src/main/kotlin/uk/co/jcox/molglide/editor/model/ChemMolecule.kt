@@ -80,6 +80,14 @@ class ChemMolecule (
         return ChemBond(cdkBond, this)
     }
 
+    fun formBasicConnection(atomA: Int, atomB: Int): ChemBond {
+        val iAtomA = container.getAtom(atomA)
+        val iAtomB = container.getAtom(atomB)
+        val chemAtomA = ChemAtom(iAtomA, this)
+        val chemAtomB = ChemAtom(iAtomB, this)
+        return formBasicConnection(chemAtomA, chemAtomB)
+    }
+
     fun removeAtom(atom: ChemAtom) {
         container.removeAtom(atom.atom)
         calculateAtomProperties()
@@ -272,6 +280,14 @@ class ChemMolecule (
     }
 
 
+    fun createNewMergedContainer(merger: ChemMolecule): ChemMolecule {
+        val newContainer = this.container.clone()
+        val newMerger = merger.container.clone()
+
+        newContainer.add(newMerger)
+        val newChemMolecule = ChemMolecule(newContainer, false)
+        return newChemMolecule
+    }
 
 
     enum class TrailingGroupPosition (val vec: Vector2d) {

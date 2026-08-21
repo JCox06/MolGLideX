@@ -18,4 +18,8 @@ open class MolGLideChemData(
     fun setTransient(value: Boolean) {
         cdkObject.setProperty(TRANSIENT, value)
     }
+
+    companion object {
+        const val TEMP_MARKER_KEY: String = "MOLGLIDE_TEMP_MARKER"
+    }
 }

@@ -54,7 +54,7 @@ class EditorStateController (
     private val sessionOrganiser: IEditorSessionOrganiser,
 ) {
     val actionManager: ActionManager = ActionManager(stateData) { dataHasChanged() }
-    private var currentTool: Tool = AtomBondTool(globalContext, actionManager, stateData.selectionManager)
+    private var currentTool: Tool = AtomBondTool(globalContext, actionManager, stateData.selectionManager, stateData)
 
     init {
         val panelMouseEvents = PanelMouseEvents()
@@ -106,7 +106,7 @@ class EditorStateController (
 
     private fun prepareTool() {
         if (globalContext.getEditMode().type == EditMode.ToolType.ATOM_INSERT) {
-            currentTool = AtomBondTool(globalContext, actionManager, stateData.selectionManager)
+            currentTool = AtomBondTool(globalContext, actionManager, stateData.selectionManager, stateData)
             stateData.selectionManager.clearSelectionBoundingBox()
         }
         if (globalContext.getEditMode().type == EditMode.ToolType.RING_INSERT) {
