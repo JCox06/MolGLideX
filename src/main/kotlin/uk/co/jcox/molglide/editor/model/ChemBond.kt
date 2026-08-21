@@ -8,7 +8,7 @@ import uk.co.jcox.molglide.editor.model.ChemMolecule.Companion.FLIP_BOND
 class ChemBond (
     val bond: IBond,
     val molecule: ChemMolecule,
-) : MolGLideChemData(bond) {
+) : IEditorSelectable, MolGLideChemData(bond) {
     override fun equals(other: Any?): Boolean {
         return other is ChemBond && this.bond == other.bond
     }
@@ -52,8 +52,11 @@ class ChemBond (
     fun getEnd(): ChemAtom {
         return ChemAtom(bond.end, molecule)
     }
-
     override fun isTransient(): Boolean {
         return super.isTransient() || molecule.isTransient()
+    }
+
+    override fun getSelectionPosition(): Vector2d {
+        return midPoint()
     }
 }

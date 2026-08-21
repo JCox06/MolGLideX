@@ -29,6 +29,7 @@ import uk.co.jcox.molglide.editor.control.actions.ToggleAtomVisibilityAction
 import uk.co.jcox.molglide.editor.control.actions.TranslateAtomAction
 import uk.co.jcox.molglide.editor.control.actions.UpdateBondAromaticityAction
 import uk.co.jcox.molglide.editor.control.actions.UpdateBondOrderAction
+import uk.co.jcox.molglide.editor.model.ChemBond
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.model.SelectionManager
@@ -220,12 +221,11 @@ class EditorStateController (
 
 
     fun deleteSelectedBond() {
-        val selection = stateData.selectionManager.primarySelection
-        if (selection is SelectionManager.Type.ActiveBond) {
-            val bondDelete = BondDeletionAction(selection.chemBond)
-            val fragment = PartitionFragmentsAction(selection.chemBond.molecule)
-            actionManager.executeAction(CompoundAction(bondDelete, fragment))
-        }
+        val bond = stateData.selectionManager.getBond() ?: return
+        val bondDelete = BondDeletionAction(bond)
+        val fragment = PartitionFragmentsAction(bond.molecule)
+        actionManager.executeAction(CompoundAction(bondDelete, fragment))
+
     }
 
     fun ignoreErrors() {
@@ -272,17 +272,16 @@ class EditorStateController (
         val molsToCheck = mutableSetOf<ChemMolecule>()
 
         val actions: MutableList<IDataAction> = mutableListOf()
-        val bs = stateData.selectionManager.batchSelection
 
         //Note: Remove bonds first, and then atoms
         //On the reverse when the user wants to undo the action, CompoundAction reverses
         //the order of the actionArray, so the atoms must be present first
-        bs.bonds.forEach { chemBond ->
+        stateData.selectionManager.getBatchBonds().forEach { chemBond ->
             val deleteBondAction = BondDeletionAction(chemBond)
             actions.add(deleteBondAction)
             molsToCheck.add(chemBond.molecule)
         }
-        bs.atoms.forEach { chemAtom ->
+        stateData.selectionManager.getBatchAtoms().forEach { chemAtom ->
             val deleteAtomAction = AtomDeletionAction(chemAtom)
             actions.add(deleteAtomAction)
             molsToCheck.add(chemAtom.molecule)

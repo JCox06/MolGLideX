@@ -3,6 +3,7 @@ package uk.co.jcox.molglide.editor.io
 import kotlinx.serialization.json.Json
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
+import uk.co.jcox.molglide.editor.model.IEditorSelectable
 import uk.co.jcox.molglide.editor.model.SelectionManager
 import java.io.IOException
 
@@ -14,29 +15,29 @@ class LevelSerializer {
      * @param saveData The data to save
      * @param batchSelection If not null, acts as a filter
      */
-    fun getJSONEncoding(saveData: EditorStateData, metaData: MolGLideMetaData = MolGLideMetaData(), batchSelection: SelectionManager.BatchSelection? = null) : String {
-        val dataSaveFile = saveEditorState(saveData, metaData, batchSelection)
+    fun getJSONEncoding(saveData: EditorStateData, metaData: MolGLideMetaData = MolGLideMetaData(), selected: List<IEditorSelectable>? = null) : String {
+        val dataSaveFile = saveEditorState(saveData, metaData, selected)
         val result = Json.encodeToString(dataSaveFile)
         return result
     }
 
-    fun saveEditorState(stateData: EditorStateData, metaData: MolGLideMetaData, batchSelection: SelectionManager.BatchSelection? = null): DataSaveFile {
+    fun saveEditorState(stateData: EditorStateData, metaData: MolGLideMetaData, selected: List<IEditorSelectable>? = null): DataSaveFile {
         val saveFile = DataSaveFile(metaData)
         val idMappings = generateLevelIDs(stateData)
 
         stateData.getMolecules().forEach { molecule ->
-            serializeMolecule(saveFile, idMappings, molecule, batchSelection)
+            serializeMolecule(saveFile, idMappings, molecule, selected)
         }
         return saveFile
     }
 
 
-    private fun serializeMolecule(saveFile: DataSaveFile, idMappings: DataObjectIDMap, molecule: ChemMolecule, batchSelection: SelectionManager.BatchSelection?) {
+    private fun serializeMolecule(saveFile: DataSaveFile, idMappings: DataObjectIDMap, molecule: ChemMolecule, selected: List<IEditorSelectable>? = null) {
         val dataMolecule = MoleculeDataObject()
         var addMolecule = false
 
         molecule.atoms().forEach { chemAtom ->
-            if (batchSelection != null && !batchSelection.atoms.contains(chemAtom)) {
+            if (selected != null && !selected.contains(chemAtom)) {
                 return@forEach
             }
             val id = idMappings.chemAtoms[chemAtom] ?: throw IOException("Level Data ID for atom is missing upon molecule serialization")
@@ -48,7 +49,7 @@ class LevelSerializer {
         }
 
         molecule.bonds().forEach { chemBond ->
-            if (batchSelection != null && !batchSelection.bonds.contains(chemBond)) {
+            if (selected != null && !selected.contains(chemBond)) {
                 return@forEach
             }
             val bondID = idMappings.chemBonds[chemBond] ?: throw IOException("Level Data ID for bond is missing upon molecule serialization")

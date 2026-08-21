@@ -147,6 +147,7 @@ class ChemMolecule (
         return InchiReturn(inchi, status, generator.message)
     }
 
+
     fun cleanMolecule() : ChemMolecule {
         val middle = GeometryUtil.get2DCenter(this.container)
 
@@ -230,6 +231,13 @@ class ChemMolecule (
             bonds.add(ChemBond(iBond, this))
         }
         return bonds
+    }
+
+    fun selectables(): List<IEditorSelectable> {
+        val items = mutableListOf<IEditorSelectable>()
+        items.addAll(bonds())
+        items.addAll(atoms())
+        return items
     }
 
     fun findBond(chemAtom1: ChemAtom, chemAtom2: ChemAtom): ChemBond? {

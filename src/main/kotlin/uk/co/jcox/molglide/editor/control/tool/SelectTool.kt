@@ -47,11 +47,11 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
         //First check if the atom should be selected in the batch selection
         val primaryAtom = selectionManager.getAtom()
         if ((eventContext.isShiftDown || eventContext.isCtrlDown) && primaryAtom != null) {
-            selectionManager.batchSelection.atoms.add(primaryAtom)
+            selectionManager.batchSelection.add(primaryAtom)
         }
         val primaryBond = selectionManager.getBond()
         if ((eventContext.isShiftDown || eventContext.isCtrlDown) && primaryBond != null) {
-            selectionManager.batchSelection.bonds.add(primaryBond)
+            selectionManager.batchSelection.add(primaryBond)
         }
 
         toolMode = getToolMode(clickX, clickY, eventContext)
@@ -115,9 +115,10 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
     private fun getToolMode(clickX: Int, clickY: Int, eventContext: EventContext) : ToolMode {
         //Check if the selected atom was covered in the AABB
         val batchSelection = selectionManager.batchSelection
-        val mouseOverSelection = selectionManager.primarySelection.inPrimarySelection(batchSelection)
+        val primary = selectionManager.primarySelection
+        val mouseOverSelection = selectionManager.isAABBSelected(selectionManager.primarySelection)
         if (mouseOverSelection) {
-            val atomList = selectionManager.batchSelection.atoms
+            val atomList = selectionManager.getBatchAtoms()
             return ToolMode.Dragging(clickX, clickY, AtomPosSnapshot(atomList))
         }
 

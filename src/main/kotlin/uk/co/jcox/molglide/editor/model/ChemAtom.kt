@@ -10,7 +10,7 @@ import uk.co.jcox.molglide.editor.model.ChemMolecule.TrailingGroupPosition
 class ChemAtom (
     val atom: IAtom,
     val molecule: ChemMolecule,
-) : MolGLideChemData(atom) {
+) : IEditorSelectable, MolGLideChemData(atom) {
     fun isVisible(): Boolean {
         return atom.getProperty<Boolean>(VISIBLE)
     }
@@ -46,5 +46,9 @@ class ChemAtom (
 
     override fun isTransient(): Boolean {
         return super.isTransient() || molecule.isTransient()
+    }
+
+    override fun getSelectionPosition(): Vector2d {
+        return getPos()
     }
 }

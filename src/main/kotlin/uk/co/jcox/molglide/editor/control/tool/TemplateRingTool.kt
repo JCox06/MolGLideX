@@ -21,7 +21,7 @@ class TemplateRingTool(val globalContext: IMainAppData, actionManager: ActionMan
     override fun onClick(clickX: Int, clickY: Int, eventContext: EventContext) {
         val primary = selectionManager.primarySelection
 
-        if (primary is SelectionManager.Type.None) {
+        if (primary == null) {
             addIsolatedRing(clickX, clickY)
         }
     }

@@ -1,82 +1,56 @@
 package uk.co.jcox.molglide.editor.model
 
+import org.checkerframework.checker.units.qual.mol
 import org.joml.Vector2d
-import javax.vecmath.Point2d
 import kotlin.collections.map
 
 class SelectionManager (
 ) {
 
-    //todo this was a mistake doing this
-    //Each object that can be placed in the editor, that can also be selected, should implement a new interface
-    var primarySelection: Type = Type.None
 
-    var batchSelection: BatchSelection = BatchSelection(mutableListOf(), mutableListOf())
+    var primarySelection: IEditorSelectable? = null
+
+    var batchSelection = mutableListOf<IEditorSelectable>()
 
     fun updatePrimarySelection(levelData: EditorStateData, worldX: Int, worldY: Int) {
-        val closestAtom = getClosestAtom(levelData, worldX, worldY)
-        val closestBond = getClosestBond(levelData, worldX, worldY)
+        val closestSelectable = getClosestSelectable(levelData, worldX, worldY)
+        if (closestSelectable == null) {
+            primarySelection = null
+            return
+        }
+        if (closestSelectable.second < MIN_DIST) {
+            primarySelection = closestSelectable.first
+            return
+        }
 
-        if (closestAtom == null && closestBond != null && closestBond.second < MIN_DIST) {
-            primarySelection = Type.ActiveBond(closestBond.first)
-            return
-        }
-        if (closestBond == null && closestAtom != null && closestAtom.second < MIN_DIST) {
-            primarySelection = Type.ActiveAtom(closestAtom.first)
-            return
-        }
-        if (closestAtom != null && closestBond != null) {
-            if (closestAtom.second < closestBond.second && closestAtom.second < MIN_DIST) {
-                primarySelection = Type.ActiveAtom(closestAtom.first)
-                return
-            }
-            if (closestBond.second < MIN_DIST) {
-                primarySelection = Type.ActiveBond(closestBond.first)
-                return
-            }
-        }
-        primarySelection = Type.None
+        primarySelection = null
+        return
     }
 
 
     fun updateSelectionBoundingBox(levelData: EditorStateData, x1: Int, y1: Int, x2: Int, y2: Int) {
-        val atoms = mutableListOf<ChemAtom>()
-        val bonds = mutableListOf<ChemBond>()
+        val items = mutableListOf<IEditorSelectable>()
 
-        levelData.getMolecules().forEach { chemMolecule ->
-            chemMolecule.atoms().forEach { chemAtom ->
-                val pos = chemAtom.getPos()
-                if (checkInside(x1, y1, x2, y2, pos)) {
-                    atoms.add(chemAtom)
-                }
-            }
-            chemMolecule.bonds().forEach { chemBond ->
-                val pos = chemBond.midPoint()
-                if (checkInside(x1, y1, x2, y2, pos)) {
-                    bonds.add(chemBond)
-                }
+        levelData.getSelectables().forEach { selectable ->
+            val pos = selectable.getSelectionPosition()
+            if (checkInside(x1, y1, x2, y2, pos)) {
+                items.add(selectable)
             }
         }
-
-        batchSelection = BatchSelection(atoms, bonds)
+        batchSelection.clear()
+        batchSelection.addAll(items)
     }
 
     fun clearSelectionBoundingBox() {
-        batchSelection = BatchSelection(mutableListOf(), mutableListOf())
+        batchSelection.clear()
     }
 
 
     fun clearAndAddSelection(molecules: List<ChemMolecule>) {
-
-        val selectedBonds = mutableListOf<ChemBond>()
-        val selectedAtoms = mutableListOf<ChemAtom>()
-
-        molecules.forEach { chemMolecule ->
-            selectedAtoms.addAll(chemMolecule.atoms())
-            selectedBonds.addAll(chemMolecule.bonds())
+        batchSelection.clear()
+        molecules.forEach { molecule ->
+            batchSelection.addAll(molecule.selectables())
         }
-
-        batchSelection = BatchSelection(selectedAtoms, selectedBonds)
     }
 
     private fun checkInside(boxX1: Int, boxY1: Int, boxX2: Int, boxY2: Int, checkAgainst: Vector2d) : Boolean {
@@ -98,24 +72,15 @@ class SelectionManager (
         return false
     }
 
-    private fun getClosestAtom(levelData: EditorStateData, worldX: Int, worldY: Int) : Pair<ChemAtom, Double>?{
-        val atoms = levelData.getAtoms()
+    private fun getClosestSelectable(levelData: EditorStateData, worldX: Int, worldY: Int) : Pair<IEditorSelectable, Double>? {
+        val selectables = levelData.getSelectables()
         val x = worldX.toDouble()
         val y = worldY.toDouble()
-        val lengthFromMouse = atoms.map {it to it.atom.point2d.distance(Point2d(x, y)) }
+
+        val lengthFromMouse = selectables.map {it to it.getSelectionPosition().distance(x, y) }
         val result = lengthFromMouse.minByOrNull {it.second}
         return result
     }
-
-    private fun getClosestBond(levelData: EditorStateData, worldX: Int, worldY: Int): Pair<ChemBond, Double>? {
-        val bonds = levelData.getBonds()
-        val x = worldX.toDouble()
-        val y = worldY.toDouble()
-        val lengthFromMouse = bonds.map { it to it.midPoint().distance(Vector2d(x, y)) }
-        val result = lengthFromMouse.minByOrNull {it.second}
-        return result
-    }
-
 
     /**
      * This method is for discrete selections only
@@ -123,8 +88,8 @@ class SelectionManager (
      */
     fun getBond(): ChemBond? {
         val selection = primarySelection
-        if (selection is Type.ActiveBond) {
-            return selection.chemBond
+        if (selection is ChemBond) {
+            return selection
         }
         return null
     }
@@ -135,8 +100,8 @@ class SelectionManager (
      */
     fun getAtom(): ChemAtom? {
         val selection = primarySelection
-        if (selection is Type.ActiveAtom) {
-            return selection.chemAtom
+        if (selection is ChemAtom) {
+            return selection
         }
         return null
     }
@@ -147,89 +112,58 @@ class SelectionManager (
      */
     fun getMolecule() : ChemMolecule? {
         val selection = primarySelection
-        if (selection is Type.ActiveBond) {
-            return selection.chemBond.molecule
+        if (selection is ChemAtom) {
+            return selection.molecule
         }
-        if (selection is Type.ActiveAtom) {
-            return selection.chemAtom.molecule
+        if (selection is ChemBond) {
+            return selection.molecule
         }
         return null
     }
 
-    /**
-     * This method checks if the object is active either
-     * in the primary selection (discrete) or if it is active
-     * in the batch selection
-     */
-    fun isSelected(bond: ChemBond): Boolean {
-        val p = primarySelection
-        if (p is Type.ActiveBond && p.chemBond == bond) {
-            return true
-        }
-        if (batchSelection.bonds.contains(bond)) {
-            return true
-        }
-        return false
-    }
+
 
     /**
      * This method checks if the object is active either
      * in the primary selection (discrete) or if it is active
      * in the batch selection
      */
-    fun isSelected(atom: ChemAtom): Boolean {
+    fun isSelected(item: IEditorSelectable): Boolean {
         val p = primarySelection
-        if (p is Type.ActiveAtom && p.chemAtom == atom) {
+        if (p == item) {
             return true
         }
-        if (batchSelection.atoms.contains(atom)) {
+        if (batchSelection.contains(item)) {
             return true
         }
         return false
+    }
+
+    /**
+     * Check to see if the following IEditorSelectable is selected by the
+     * AABB
+     */
+    fun isAABBSelected(item: IEditorSelectable?): Boolean {
+        if (item == null) return false
+        if (batchSelection.contains(item)) {
+            return true
+        }
+        return false
+    }
+
+    fun getBatchBonds(): List<ChemBond> {
+        return batchSelection.filterIsInstance<ChemBond>()
+    }
+
+    fun getBatchAtoms(): List<ChemAtom> {
+        return batchSelection.filterIsInstance<ChemAtom>()
     }
 
 
     fun hasBatchSelection(): Boolean {
-        return batchSelection.bonds.isNotEmpty() || batchSelection.atoms.isNotEmpty()
+        return batchSelection.isNotEmpty()
     }
 
-
-    sealed class Type {
-
-
-        /**
-         * This checks to see if the mouse is hovered over an element
-         * that was also selected in the AABB
-         *
-         * In other words if the user is hovering over something selected
-         *
-         * @return true if mouse is hovering on a selected object
-         */
-        abstract fun inPrimarySelection(batchSelection: BatchSelection): Boolean
-
-        object None: Type() {
-            override fun inPrimarySelection(batchSelection: BatchSelection): Boolean {
-                return false
-            }
-        }
-
-        data class ActiveAtom(val chemAtom: ChemAtom): Type() {
-            override fun inPrimarySelection(batchSelection: BatchSelection): Boolean {
-                return batchSelection.atoms.contains(chemAtom)
-            }
-        }
-
-        data class ActiveBond(val chemBond: ChemBond): Type() {
-            override fun inPrimarySelection(batchSelection: BatchSelection): Boolean {
-                return batchSelection.bonds.contains(chemBond)
-            }
-        }
-    }
-
-    data class BatchSelection (
-        val atoms: MutableList<ChemAtom>,
-        val bonds: MutableList<ChemBond>
-    )
 
     companion object {
         const val MIN_DIST: Int = 50

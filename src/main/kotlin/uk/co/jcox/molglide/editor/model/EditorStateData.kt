@@ -69,6 +69,14 @@ class EditorStateData (
         return bonds
     }
 
+    fun getSelectables(): List<IEditorSelectable> {
+        val selectables = mutableListOf<IEditorSelectable>()
+        molecules.forEach { chemMolecule ->
+            selectables.addAll(chemMolecule.selectables())
+        }
+        return selectables
+    }
+
     fun getMolecules() : List<ChemMolecule> = molecules
 
     override fun cameraX(): Double {
