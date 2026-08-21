@@ -2,6 +2,11 @@ package uk.co.jcox.molglide.editor.control.tool
 
 import com.sun.org.apache.xpath.internal.operations.Bool
 import org.apache.jena.sparql.function.library.evenInteger
+import org.checkerframework.checker.units.qual.m
+import org.checkerframework.checker.units.qual.mol
+import org.joml.GeometryUtils
+import org.joml.Vector2d
+import org.joml.minus
 import uk.co.jcox.molglide.editor.control.ActionManager
 import uk.co.jcox.molglide.editor.control.EventContext
 import uk.co.jcox.molglide.editor.model.ChemMolecule
@@ -68,7 +73,6 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
         when (m) {
             is ToolMode.Dragging -> {
                 submitActions(m)
-                m.showManipulator = true
             }
             is ToolMode.None -> {}
         }
@@ -91,20 +95,47 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
         val m = toolMode
 
         when (m) {
-            is ToolMode.Dragging -> handleSelectionDrag(m, clickX, clickY)
+            is ToolMode.Dragging -> handleSelectionDrag(m, clickX, clickY, eventContext)
             is ToolMode.None -> {}
         }
 
     }
-    private fun handleSelectionDrag(m: ToolMode.Dragging, clickX: Int, clickY: Int) {
+    private fun handleSelectionDrag(m: ToolMode.Dragging, clickX: Int, clickY: Int, eventContext: EventContext) {
         //The user is dragging on an already selected item
         //or a group of items.
+        if (!eventContext.isShiftDown) {
+            translateSelection(m, clickX, clickY)
+        }
+        if (eventContext.isShiftDown) {
+            rotateSelection(m, clickX, clickY)
+        }
+    }
+
+
+    private fun translateSelection(m: ToolMode.Dragging, clickX: Int, clickY: Int) {
         m.posMap.map().keys.forEach{ chemAtom ->
             val originalPos = m.posMap[chemAtom] ?: return
             val newPosX = originalPos.x + (clickX.toDouble() - m.firstClickX)
             val newPosY = originalPos.y + (clickY.toDouble() - m.firstClickY)
             chemAtom.atom.point2d.x = newPosX
             chemAtom.atom.point2d.y = newPosY
+        }
+    }
+
+
+    private fun rotateSelection(m: ToolMode.Dragging, clickX: Int, clickY: Int) {
+        val currentMouse = Vector2d(clickX.toDouble(), clickY.toDouble())
+        val moleculeCentre = m.centre
+
+        val vecToMouse = (currentMouse - moleculeCentre).normalize()
+        val randomUpVector = Vector2d(0.0, 1.0)
+        val angle = randomUpVector.angle(vecToMouse)
+
+        m.posMap.map().keys.forEach { chemAtom ->
+            val originalPos = m.posMap[chemAtom] ?: return
+            val newPos = originalPos.rotateAround(angle,  moleculeCentre, Vector2d())
+            chemAtom.atom.point2d.x = newPos.x
+            chemAtom.atom.point2d.y = newPos.y
         }
     }
 
@@ -119,7 +150,7 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
         val mouseOverSelection = selectionManager.isAABBSelected(selectionManager.primarySelection)
         if (mouseOverSelection) {
             val atomList = selectionManager.getBatchAtoms()
-            return ToolMode.Dragging(clickX, clickY, AtomPosSnapshot(atomList))
+            return ToolMode.Dragging(clickX, clickY, AtomPosSnapshot(atomList), calcMoleculeCentre(atomList))
         }
 
         //Check to see if the user has just selected one atom through the primary selection
@@ -127,11 +158,25 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
         val atom = selectionManager.getAtom()
         if (atom != null && !(eventContext.isShiftDown || eventContext.isCtrlDown)) {
             val atomList = listOf(atom)
-            return ToolMode.Dragging(clickX, clickY, AtomPosSnapshot(atomList))
+            return ToolMode.Dragging(clickX, clickY, AtomPosSnapshot(atomList), calcMoleculeCentre(atomList))
         }
 
         selectionManager.clearSelectionBoundingBox()
         return ToolMode.None
+    }
+
+    private fun calcMoleculeCentre(chemAtomList: List<ChemAtom>): Vector2d {
+        var x = 0.0
+        var y = 0.0
+        val total = chemAtomList.size
+        chemAtomList.forEach { chemAtom ->
+            val p = chemAtom.getPos()
+            x += p.x
+            y += p.y
+        }
+        x /= total
+        y /= total
+        return Vector2d(x, y)
     }
 
     override fun shouldShowAABB(): Boolean {
@@ -142,6 +187,6 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
 
     sealed class ToolMode {
         object None: ToolMode()
-        class Dragging(val firstClickX: Int, val firstClickY: Int, val posMap: AtomPosSnapshot, var showManipulator: Boolean = false) : ToolMode()
+        class Dragging(val firstClickX: Int, val firstClickY: Int, val posMap: AtomPosSnapshot, val centre: Vector2d) : ToolMode()
     }
 }

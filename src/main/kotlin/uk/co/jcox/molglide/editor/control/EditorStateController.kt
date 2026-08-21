@@ -377,11 +377,14 @@ class EditorStateController (
             val world = screenToWorld(e.point)
             val moveX = offsetX * MOUSE_SENSE
             val moveY = offsetY * MOUSE_SENSE
-            handleMouseDrag(world.x, world.y, moveX, moveY, EventContext(e.isShiftDown, e.isControlDown))
 
             if (SwingUtilities.isMiddleMouseButton(e)) {
                 translateCameraPos(moveX, moveY)
+                return
             }
+
+            handleMouseDrag(world.x, world.y, moveX, moveY, EventContext(e.isShiftDown, e.isControlDown))
+
 
             if (stateData.canSelectBox && SwingUtilities.isLeftMouseButton(e) && currentTool.shouldShowAABB()) {
                 stateData.transientBoxSelectAdvX = world.x - stateData.transientBoxSelectStartX
