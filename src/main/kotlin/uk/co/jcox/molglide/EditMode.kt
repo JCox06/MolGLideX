@@ -32,6 +32,9 @@ enum class EditMode (val symbol: String, val ringSize: Int, val type: ToolType, 
     CHARGE_PLUS("+", 0,ToolType.FORMAL_CHARGE),
     CHARGE_NEGATIVE("-", 0,ToolType.FORMAL_CHARGE),
 
+
+    ARROW_REACTION("Reaction Arrow", 0, ToolType.ARROW_CREATOR, FlatSVGIcon("uk/co/jcox/molglide/arrow.svg", javaClass.classLoader))
+
     ;
 
     enum class ToolType {
@@ -39,6 +42,7 @@ enum class EditMode (val symbol: String, val ringSize: Int, val type: ToolType, 
         RING_INSERT,
         SELECT_TOOL,
         FORMAL_CHARGE,
+        ARROW_CREATOR,
     }
 }
 

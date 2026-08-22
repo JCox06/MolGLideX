@@ -6,6 +6,7 @@ import kotlin.math.max
 class EditorStateData (
 
     private val molecules: MutableList<ChemMolecule> = mutableListOf(),
+    private val arrows: MutableList<ChemArrow> = mutableListOf()
     ) : IDataModelUI {
 
     var cameraX: Double = 0.0
@@ -78,6 +79,14 @@ class EditorStateData (
     }
 
     fun getMolecules() : List<ChemMolecule> = molecules
+
+    fun addArrow(chemArrow: ChemArrow) {
+        arrows.add(chemArrow)
+    }
+
+    fun removeArrow(chemArrow: ChemArrow) {
+        arrows.remove(chemArrow)
+    }
 
     override fun cameraX(): Double {
         return cameraX

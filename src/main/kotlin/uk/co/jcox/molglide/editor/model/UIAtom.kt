@@ -47,9 +47,14 @@ class UIAtom (
     }
 
     override fun drawSelectionMarker(g2d: Graphics2D, cameraZoom: Double) {
-        if (selected) {
+        if (selected || (hasErrors && !ignoreErrors)) {
             setupMetrics(g2d, cameraZoom)
-            paintAtomTextBoxBorder(g2d, MolGLideUtils.getAccentColour(), true)
+            if (selected) {
+                paintAtomTextBoxBorder(g2d, MolGLideUtils.getAccentColour(), true)
+            }
+            if (hasErrors && !ignoreErrors) {
+                paintAtomTextBoxBorder(g2d, Color.RED, false)
+            }
         }
     }
 

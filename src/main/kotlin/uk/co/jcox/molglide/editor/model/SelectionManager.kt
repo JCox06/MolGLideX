@@ -1,6 +1,5 @@
 package uk.co.jcox.molglide.editor.model
 
-import org.checkerframework.checker.units.qual.mol
 import org.joml.Vector2d
 import kotlin.collections.map
 

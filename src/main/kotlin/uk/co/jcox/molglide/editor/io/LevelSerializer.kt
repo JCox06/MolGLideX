@@ -4,7 +4,6 @@ import kotlinx.serialization.json.Json
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.model.IEditorSelectable
-import uk.co.jcox.molglide.editor.model.SelectionManager
 import java.io.IOException
 
 class LevelSerializer {

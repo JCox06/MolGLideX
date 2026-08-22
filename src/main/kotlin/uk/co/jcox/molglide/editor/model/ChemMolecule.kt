@@ -2,10 +2,6 @@ package uk.co.jcox.molglide.editor.model
 
 
 import io.github.dan2097.jnainchi.InchiStatus
-import net.sf.jniinchi.INCHI_OPTION
-import net.sf.jniinchi.INCHI_RET
-import org.apache.jena.sparql.pfunction.library.container
-import org.joml.GeometryUtils
 import org.joml.Vector2d
 import org.openscience.cdk.Atom
 import org.openscience.cdk.AtomContainer
@@ -13,7 +9,6 @@ import org.openscience.cdk.atomtype.CDKAtomTypeMatcher
 import org.openscience.cdk.exception.CDKException
 import org.openscience.cdk.geometry.GeometryUtil
 import org.openscience.cdk.graph.ConnectivityChecker
-import org.openscience.cdk.inchi.InChIGenerator
 import org.openscience.cdk.inchi.InChIGeneratorFactory
 import org.openscience.cdk.interfaces.IAtom
 import org.openscience.cdk.interfaces.IAtomContainer
@@ -26,9 +21,7 @@ import org.openscience.cdk.tools.CDKHydrogenAdder
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator
 import org.openscience.cdk.tools.manipulator.AtomTypeManipulator
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator
-import uk.co.jcox.molglide.editor.control.EditorStateController
 import uk.co.jcox.molglide.editor.control.tool.AtomBondTool
-import uk.co.jcox.molglide.editor.ui.EditorPanel
 import java.util.UUID
 import javax.vecmath.Point2d
 

@@ -1,10 +1,7 @@
 package uk.co.jcox.molglide.editor.control
 
 import com.github.jsonldjava.shaded.com.google.common.math.IntMath.pow
-import org.checkerframework.checker.units.qual.mol
-import org.openscience.cdk.geometry.GeometryUtil
 import org.openscience.cdk.interfaces.IBond
-import org.openscience.cdk.layout.StructureDiagramGenerator
 import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.IEditorSessionOrganiser
 import uk.co.jcox.molglide.editor.control.tool.AtomBondTool
@@ -29,10 +26,9 @@ import uk.co.jcox.molglide.editor.control.actions.ToggleAtomVisibilityAction
 import uk.co.jcox.molglide.editor.control.actions.TranslateAtomAction
 import uk.co.jcox.molglide.editor.control.actions.UpdateBondAromaticityAction
 import uk.co.jcox.molglide.editor.control.actions.UpdateBondOrderAction
-import uk.co.jcox.molglide.editor.model.ChemBond
+import uk.co.jcox.molglide.editor.control.tool.ArrowTool
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
-import uk.co.jcox.molglide.editor.model.SelectionManager
 import uk.co.jcox.molglide.editor.ui.EditorPanel
 import uk.co.jcox.molglide.editor.ui.EditorPanel.Companion.MOUSE_SENSE
 import uk.co.jcox.molglide.editor.ui.EditorPanel.Companion.MOUSE_SENSE_ZOOM
@@ -120,6 +116,10 @@ class EditorStateController (
 
         if (globalContext.getEditMode().type == EditMode.ToolType.FORMAL_CHARGE) {
             currentTool = FormalChargeLonePairTool(globalContext, actionManager, stateData.selectionManager)
+        }
+
+        if (globalContext.getEditMode().type == EditMode.ToolType.ARROW_CREATOR) {
+            currentTool = ArrowTool(actionManager, stateData.selectionManager)
         }
     }
 

@@ -15,7 +15,7 @@ import kotlin.math.roundToInt
 class UIDataBuilder (private val data: EditorStateData, private val selectionManager: SelectionManager) {
 
 
-    private val uiComponents: MutableMap<MolGLideChemData, AbstractUIComponent> = mutableMapOf()
+    private val uiComponents: MutableMap<Any, AbstractUIComponent> = mutableMapOf()
 
     fun getUIData(): Collection<AbstractUIComponent> {
         return uiComponents.values
