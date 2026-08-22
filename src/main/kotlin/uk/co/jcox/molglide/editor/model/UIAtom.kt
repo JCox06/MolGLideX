@@ -1,11 +1,15 @@
 package uk.co.jcox.molglide.editor.model
 
+import org.apache.jena.riot.other.G
+import org.checkerframework.checker.units.qual.m
 import org.joml.Vector2d
+import org.openscience.cdk.smiles.smarts.parser.SMARTSParserConstants.x
 import uk.co.jcox.molglide.MolGLideUtils
 import uk.co.jcox.molglide.editor.ui.MasterAtomMetric
 import java.awt.Color
 import java.awt.Graphics2D
 import java.awt.font.TextAttribute
+import java.awt.font.TextLayout
 import java.text.AttributedString
 
 class UIAtom (
@@ -20,18 +24,103 @@ class UIAtom (
     val ignoreErrors: Boolean,
 ) : AbstractUIComponent(selected) {
 
-    private fun calculateMasterMetrics(g2d: Graphics2D, x: Double, y: Double): MasterAtomMetric {
-        val textWidth = g2d.fontMetrics.stringWidth(element)
-        val textHeight = g2d.fontMetrics.ascent - g2d.fontMetrics.descent
+    var x = 0.0
+    var y = 0.0
 
-        val centreTextWidth = x - textWidth / 2
-        val centreBoxWidth = x - textWidth
-        val centreTextHeight = y + textHeight / 2
-        val centreBoxHeight = y - g2d.fontMetrics.height / 2
-        return MasterAtomMetric(centreTextWidth, centreTextHeight, centreBoxWidth, centreBoxHeight, textWidth, textHeight)
+    var textWidth = 0
+    var textHeight = 0
+    var centreTextWidth = 0.0
+    var centreTextHeight = 0.0
+    var centreBoxWidth = 0.0
+    var centreBoxHeight = 0.0
+
+    override fun drawComponent(g2d: Graphics2D, cameraZoom: Double) {
+        if (! visible) {
+            return
+        }
+        setupMetrics(g2d, cameraZoom)
+        paintMainAtomElementSymbol(g2d)
+
+        if (trailGroup != "") {
+            paintTrailGroup(g2d)
+        }
     }
 
-    private fun getSubscriptRange(trailGroup: String) : List<Int> {
+    override fun drawSelectionMarker(g2d: Graphics2D, cameraZoom: Double) {
+        if (selected) {
+            setupMetrics(g2d, cameraZoom)
+            paintAtomTextBoxBorder(g2d, MolGLideUtils.getAccentColour(), true)
+        }
+    }
+
+    private fun setupMetrics(g2d: Graphics2D, cameraZoom: Double) {
+        x = posX * cameraZoom
+        y = posY * cameraZoom
+        textWidth = g2d.fontMetrics.stringWidth(element)
+        textHeight = g2d.fontMetrics.ascent - g2d.fontMetrics.descent
+        centreTextWidth = x - textWidth / 2
+        centreTextHeight = y + textHeight / 2
+        centreBoxWidth = x - textWidth
+        centreBoxHeight = y - g2d.fontMetrics.height / 2
+    }
+
+
+    //Is used for the atom selection marker, but also for any errors that may arise
+    private fun paintAtomTextBoxBorder(g2d: Graphics2D, color: Color, shouldFill: Boolean) {
+        val oldColour = g2d.color
+        val newColour = color
+        g2d.color = newColour
+        if (shouldFill) {
+            g2d.fillRoundRect((centreBoxWidth).toInt(),
+                (centreBoxHeight).toInt(),
+                (textWidth * 2),
+                (textWidth * 2), textWidth, textWidth)
+        } else {
+            g2d.drawRect((centreBoxWidth).toInt(),
+                (centreBoxHeight).toInt(),
+                (textWidth * 2),
+                (textWidth * 2))
+        }
+        g2d.color = oldColour
+    }
+
+    private fun paintMainAtomElementSymbol(g2d: Graphics2D) {
+        g2d.drawString(element, centreTextWidth.toInt(), centreTextHeight.toInt())
+    }
+
+    private fun paintTrailGroup(g2d: Graphics2D) {
+        val attributedString = AttributedString(trailGroup)
+        attributedString.addAttribute(TextAttribute.FAMILY, g2d.font.family)
+        attributedString.addAttribute(TextAttribute.SIZE, g2d.font.size)
+
+        val subscriptRange = getSubscriptRange(trailGroup)
+        subscriptRange.forEach { attributedString.addAttribute(TextAttribute.SUPERSCRIPT, TextAttribute.SUPERSCRIPT_SUB, it, it+1) }
+
+        val renderingContext = g2d.fontRenderContext
+        val attributorIterator = attributedString.iterator
+
+        val textLayout = TextLayout(attributorIterator, renderingContext)
+        val position = getTextDrawForTrailPos(g2d, textLayout)
+
+        textLayout.draw(g2d, position.x.toFloat(), position.y.toFloat())
+    }
+
+    private fun getTextDrawForTrailPos(g2d: Graphics2D, textLayout: TextLayout) : Vector2d {
+        val defaultStartX = x + textWidth / 2
+        val defaultStartY = y + textHeight / 2
+
+        if (trailGroupPos == ChemMolecule.TrailingGroupPosition.RIGHT) {
+            return Vector2d(defaultStartX, defaultStartY)
+        }
+        if (trailGroupPos == ChemMolecule.TrailingGroupPosition.LEFT) {
+            val newX = defaultStartX - textLayout.bounds.width - textWidth
+            val newY = defaultStartY
+            return Vector2d(newX, newY)
+        }
+        return Vector2d()
+    }
+
+    private fun getSubscriptRange(trailGroup: String): List<Int> {
         val list = ArrayList<Int>()
         trailGroup.forEachIndexed { index, ch ->
             if (ch.isDigit()) {
@@ -39,88 +128,5 @@ class UIAtom (
             }
         }
         return list
-    }
-
-    //Is used for the atom selection marker, but also for any errors that may arise
-    private fun paintAtomTextBoxBorder(g2d: Graphics2D, m: MasterAtomMetric, color: Color, shouldFill: Boolean) {
-        val oldColour = g2d.color
-        val newColour = color
-        g2d.color = newColour
-        if (shouldFill) {
-            g2d.fillRoundRect((m.centreBoxWidth).toInt(),
-                (m.centreBoxHeight).toInt(),
-                (m.textWidth * 2),
-                (m.textWidth * 2), m.textWidth, m.textWidth)
-        } else {
-            g2d.drawRect((m.centreBoxWidth).toInt(),
-                (m.centreBoxHeight).toInt(),
-                (m.textWidth * 2),
-                (m.textWidth * 2))
-        }
-        g2d.color = oldColour
-    }
-
-    private fun paintMasterAtom(g2d: Graphics2D, m: MasterAtomMetric) {
-        g2d.drawString(element, m.centreTextWidth.toInt(), m.centreTextHeight.toInt())
-    }
-
-    private fun paintTrailGroup(g2d: Graphics2D, x: Double, y: Double, m: MasterAtomMetric) {
-
-        val s = getStartingPos(g2d,x, y, m)
-        val startX = s.x
-        val startY = s.y
-
-        val attString = AttributedString(trailGroup)
-        attString.addAttribute(TextAttribute.FAMILY, g2d.font.family)
-        attString.addAttribute(TextAttribute.SIZE, g2d.font.size)
-
-        val range = getSubscriptRange(trailGroup)
-        range.forEach {
-            attString.addAttribute(TextAttribute.SUPERSCRIPT, TextAttribute.SUPERSCRIPT_SUB,  it, it + 1)
-        }
-        g2d.drawString(attString.iterator, startX.toFloat(), startY.toFloat())
-    }
-
-    private fun getStartingPos(g2d: Graphics2D, x: Double, y: Double, m: MasterAtomMetric) : Vector2d {
-        val startX = x + m.textWidth / 2
-        val startY = y + m.textHeight / 2
-
-        if (trailGroupPos == ChemMolecule.TrailingGroupPosition.RIGHT) {
-            return Vector2d(startX, startY)
-        }
-        if (trailGroupPos == ChemMolecule.TrailingGroupPosition.LEFT) {
-            val trail = trailGroup
-            val textWidth = g2d.fontMetrics.stringWidth(trail)
-            return Vector2d(startX - textWidth - m.textWidth, startY)
-        }
-
-
-        return Vector2d(startX, startY)
-    }
-
-
-    override fun drawComponent(g2d: Graphics2D, cameraZoom: Double) {
-        val x = posX * cameraZoom
-        val y = posY * cameraZoom
-        val metrics = calculateMasterMetrics(g2d, x, y)
-
-        if (visible) {
-            paintMasterAtom(g2d,metrics)
-            if (trailGroup != "") {
-                paintTrailGroup(g2d, x, y, metrics)
-            }
-        }
-    }
-
-    override fun drawSelectionMarker(g2d: Graphics2D, cameraZoom: Double) {
-        //Draw the selection marker
-        val x = posX * cameraZoom
-        val y = posY * cameraZoom
-        val metrics = calculateMasterMetrics(g2d, x, y)
-        if (selected) paintAtomTextBoxBorder(g2d, metrics, MolGLideUtils.getAccentColour(), true)
-
-        //Check if error
-        val red = Color.red
-        if (!ignoreErrors && hasErrors) paintAtomTextBoxBorder(g2d, metrics, red, false)
     }
 }

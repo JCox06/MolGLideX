@@ -1,5 +1,6 @@
 package uk.co.jcox.molglide
 
+import com.formdev.flatlaf.FlatIntelliJLaf
 import com.formdev.flatlaf.FlatLightLaf
 import javax.swing.JDialog
 import javax.swing.JFrame
@@ -7,7 +8,10 @@ import javax.swing.SwingUtilities
 import javax.swing.UIManager
 
 fun main() {
-    FlatLightLaf.setup()
+
+    System.setProperty("sun.java2d.opengl", "true")
+
+    FlatIntelliJLaf.setup()
 
     JFrame.setDefaultLookAndFeelDecorated(true)
     JDialog.setDefaultLookAndFeelDecorated(false)

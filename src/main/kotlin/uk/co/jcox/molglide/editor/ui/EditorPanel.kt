@@ -123,6 +123,7 @@ class EditorPanel(private val uiData: IDataModelUI) : JPanel() {
     private fun preparePainter(g2d: Graphics2D) {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
+        g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON)
         g2d.font = Font("Liberation Serif", Font.PLAIN, -5)
         g2d.font = g2d.font.deriveFont(Font.PLAIN, getFontSize())
 

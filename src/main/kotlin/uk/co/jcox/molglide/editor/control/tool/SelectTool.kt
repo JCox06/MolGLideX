@@ -183,8 +183,6 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
         return toolMode == ToolMode.None
     }
 
-
-
     sealed class ToolMode {
         object None: ToolMode()
         class Dragging(val firstClickX: Int, val firstClickY: Int, val posMap: AtomPosSnapshot, val centre: Vector2d) : ToolMode()
