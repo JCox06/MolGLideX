@@ -59,6 +59,7 @@ class MainController (
 
         mainFrame.toolBox.registerEditModeCallback { editMode ->
             mainData.editToolMode = editMode
+            mainData.sessions.values.forEach { session -> session.editorController.prepareTool() }
         }
 
         newProject()

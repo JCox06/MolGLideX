@@ -18,6 +18,7 @@ import uk.co.jcox.molglide.editor.control.actions.MergeAndConnectAction
 import uk.co.jcox.molglide.editor.model.ChemAtom
 import uk.co.jcox.molglide.editor.model.ChemBond
 import uk.co.jcox.molglide.editor.model.EditorStateData
+import uk.co.jcox.molglide.editor.model.IEditorSelectable
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
@@ -254,6 +255,10 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
 
         //If nothing is selected, assume we are creating a new atom
         return Mode.MolCreation(clickX, clickY)
+    }
+
+    override fun isTypeValidPrimarySelection(entity: IEditorSelectable): Boolean {
+        return (entity is ChemAtom) or (entity is ChemBond)
     }
 
     sealed class Mode {

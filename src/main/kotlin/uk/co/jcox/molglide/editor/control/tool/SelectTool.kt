@@ -16,6 +16,8 @@ import uk.co.jcox.molglide.editor.control.actions.CompoundAction
 import uk.co.jcox.molglide.editor.control.actions.IDataAction
 import uk.co.jcox.molglide.editor.control.actions.MoveAtomAction
 import uk.co.jcox.molglide.editor.model.ChemAtom
+import uk.co.jcox.molglide.editor.model.ChemBond
+import uk.co.jcox.molglide.editor.model.IEditorSelectable
 import uk.co.jcox.molglide.editor.model.util.AtomPosSnapshot
 import java.util.Vector
 import javax.swing.SwingUtilities
@@ -181,6 +183,10 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
 
     override fun shouldShowAABB(): Boolean {
         return toolMode == ToolMode.None
+    }
+
+    override fun isTypeValidPrimarySelection(entity: IEditorSelectable): Boolean {
+        return (entity is ChemAtom) or (entity is ChemBond)
     }
 
     sealed class ToolMode {

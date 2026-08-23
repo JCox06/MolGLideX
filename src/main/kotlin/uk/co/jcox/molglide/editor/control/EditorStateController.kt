@@ -34,6 +34,8 @@ import uk.co.jcox.molglide.editor.ui.EditorPanel.Companion.MOUSE_SENSE
 import uk.co.jcox.molglide.editor.ui.EditorPanel.Companion.MOUSE_SENSE_ZOOM
 import uk.co.jcox.molglide.editor.ui.EditorPanel.Companion.SIG_MOUSE_DELTA
 import java.awt.Point
+import java.awt.event.FocusEvent
+import java.awt.event.FocusListener
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.event.MouseWheelEvent
@@ -59,6 +61,7 @@ class EditorStateController (
         editorPanel.addMouseListener(panelMouseEvents)
         editorPanel.addMouseWheelListener(panelMouseEvents)
 
+
         val timer = Timer(16) {
             editorPanel.refreshEditor()
             val world = screenToWorld(stateData.mouseX.toDouble(), stateData.mouseY.toDouble())
@@ -75,7 +78,6 @@ class EditorStateController (
     }
 
     private fun handleMouseClick(clickX: Int, clickY: Int, eventContext: EventContext) {
-        prepareTool()
         currentTool.onClick(clickX, clickY, eventContext)
     }
 
@@ -98,10 +100,10 @@ class EditorStateController (
 
     fun update(worldX: Int, worldY: Int) {
         currentTool.updateMouseWorld(worldX, worldY)
-        stateData.selectionManager.updatePrimarySelection(stateData, worldX, worldY)
+        stateData.selectionManager.updatePrimarySelection(stateData, worldX, worldY, currentTool)
     }
 
-    private fun prepareTool() {
+    fun prepareTool() {
         if (globalContext.getEditMode().type == EditMode.ToolType.ATOM_INSERT) {
             currentTool = AtomBondTool(globalContext, actionManager, stateData.selectionManager, stateData)
             stateData.selectionManager.clearSelectionBoundingBox()

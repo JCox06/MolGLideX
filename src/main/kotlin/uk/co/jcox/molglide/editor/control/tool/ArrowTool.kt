@@ -59,7 +59,7 @@ class ArrowTool(val data: EditorStateData, actionManager: ActionManager, selecti
 
         if (selection == null) {
             val newArrow = ChemArrow.ofSimple(Vector2d(clickX.toDouble(), clickY.toDouble()), Vector2d(clickX.toDouble(), clickY.toDouble()),
-                Vector2d())
+                Vector2d(clickX.toDouble(), clickY.toDouble()))
             data.addArrow(newArrow)
             newArrow.setTransient(true)
             return ToolMode.NewArrowDragging(newArrow)
@@ -101,6 +101,9 @@ class ArrowTool(val data: EditorStateData, actionManager: ActionManager, selecti
         }
     }
 
+    override fun isTypeValidPrimarySelection(entity: IEditorSelectable): Boolean {
+        return entity is ChemArrow
+    }
 
     sealed class ToolMode {
         object None: ToolMode()

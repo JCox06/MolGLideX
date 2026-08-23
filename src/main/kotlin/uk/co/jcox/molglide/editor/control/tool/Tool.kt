@@ -2,6 +2,7 @@ package uk.co.jcox.molglide.editor.control.tool
 
 import uk.co.jcox.molglide.editor.control.ActionManager
 import uk.co.jcox.molglide.editor.control.EventContext
+import uk.co.jcox.molglide.editor.model.IEditorSelectable
 import uk.co.jcox.molglide.editor.model.SelectionManager
 
 abstract class Tool (
@@ -27,9 +28,15 @@ abstract class Tool (
         return false
     }
 
-
     fun updateMouseWorld(mouseX: Int, mouseY: Int) {
         this.mouseX = mouseX
         this.mouseY = mouseY
+    }
+
+    /**
+     * Checks if a given object can be selected as the primary selection when this tool is active
+     */
+    open fun isTypeValidPrimarySelection(entity: IEditorSelectable): Boolean {
+        return true
     }
 }

@@ -9,6 +9,9 @@ import uk.co.jcox.molglide.editor.model.SelectionManager
 import uk.co.jcox.molglide.editor.control.actions.RingCreatorAction
 import uk.co.jcox.molglide.IMainAppData
 import uk.co.jcox.molglide.editor.control.EventContext
+import uk.co.jcox.molglide.editor.model.ChemAtom
+import uk.co.jcox.molglide.editor.model.ChemBond
+import uk.co.jcox.molglide.editor.model.IEditorSelectable
 import uk.co.jcox.molglide.editor.model.util.AtomPosSnapshot
 import javax.vecmath.Point2d
 import kotlin.math.round
@@ -71,6 +74,10 @@ class TemplateRingTool(val globalContext: IMainAppData, actionManager: ActionMan
         }
     }
 
+
+    override fun isTypeValidPrimarySelection(entity: IEditorSelectable): Boolean {
+        return (entity is ChemAtom) or (entity is ChemBond)
+    }
 
     override fun onSuddenMove() {
 

@@ -1,6 +1,7 @@
 package uk.co.jcox.molglide.editor.model
 
 import org.joml.Vector2d
+import uk.co.jcox.molglide.editor.control.tool.Tool
 import kotlin.collections.map
 
 class SelectionManager (
@@ -11,9 +12,9 @@ class SelectionManager (
 
     var batchSelection = mutableSetOf<IEditorSelectable>()
 
-    fun updatePrimarySelection(levelData: EditorStateData, worldX: Int, worldY: Int) {
+    fun updatePrimarySelection(levelData: EditorStateData, worldX: Int, worldY: Int, currentTool: Tool) {
         val closestSelectable = getClosestSelectable(levelData, worldX, worldY)
-        if (closestSelectable == null) {
+        if (closestSelectable == null || !currentTool.isTypeValidPrimarySelection(closestSelectable.selectable)) {
             primarySelection = null
             return
         }
