@@ -1,6 +1,7 @@
 package uk.co.jcox.molglide.editor.io
 
 import kotlinx.serialization.json.Json
+import uk.co.jcox.molglide.editor.model.ChemArrow
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.model.IEditorSelectable
@@ -14,24 +15,28 @@ class LevelSerializer {
      * @param saveData The data to save
      * @param batchSelection If not null, acts as a filter
      */
-    fun getJSONEncoding(saveData: EditorStateData, metaData: MolGLideMetaData = MolGLideMetaData(), selected: List<IEditorSelectable>? = null) : String {
+    fun getJSONEncoding(saveData: EditorStateData, metaData: MolGLideMetaData = MolGLideMetaData(), selected: Collection<IEditorSelectable>? = null) : String {
         val dataSaveFile = saveEditorState(saveData, metaData, selected)
         val result = Json.encodeToString(dataSaveFile)
         return result
     }
 
-    fun saveEditorState(stateData: EditorStateData, metaData: MolGLideMetaData, selected: List<IEditorSelectable>? = null): DataSaveFile {
+    fun saveEditorState(stateData: EditorStateData, metaData: MolGLideMetaData, selected: Collection<IEditorSelectable>? = null): DataSaveFile {
         val saveFile = DataSaveFile(metaData)
         val idMappings = generateLevelIDs(stateData)
 
         stateData.getMolecules().forEach { molecule ->
             serializeMolecule(saveFile, idMappings, molecule, selected)
         }
+
+        stateData.getArrows().forEach { chemArrow ->
+            serializeArrow(stateData, saveFile, chemArrow)
+        }
         return saveFile
     }
 
 
-    private fun serializeMolecule(saveFile: DataSaveFile, idMappings: DataObjectIDMap, molecule: ChemMolecule, selected: List<IEditorSelectable>? = null) {
+    private fun serializeMolecule(saveFile: DataSaveFile, idMappings: DataObjectIDMap, molecule: ChemMolecule, selected: Collection<IEditorSelectable>? = null) {
         val dataMolecule = MoleculeDataObject()
         var addMolecule = false
 
@@ -82,5 +87,19 @@ class LevelSerializer {
             }
         }
         return dataMapping
+    }
+
+
+    private fun serializeArrow(stateData: EditorStateData, dataSaveFile: DataSaveFile, chemArrow: ChemArrow) {
+
+        val vecMap = mutableMapOf<Int, VectorDataObject>()
+
+        chemArrow.arrowPoints.forEach { id, jmolVec ->
+            vecMap[id] = VectorDataObject(jmolVec.x, jmolVec.y)
+        }
+
+        val serialChemArrow = ArrowDataObject(vecMap, chemArrow.startArrow, chemArrow.endArrow)
+
+        dataSaveFile.arrows.add(serialChemArrow)
     }
 }

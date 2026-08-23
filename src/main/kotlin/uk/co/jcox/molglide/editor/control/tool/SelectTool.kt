@@ -147,7 +147,7 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
         //Check if the selected atom was covered in the AABB
         val batchSelection = selectionManager.batchSelection
         val primary = selectionManager.primarySelection
-        val mouseOverSelection = selectionManager.isAABBSelected(selectionManager.primarySelection)
+        val mouseOverSelection = selectionManager.isAABBSelected(selectionManager.primarySelection?.selectable)
         if (mouseOverSelection) {
             val atomList = selectionManager.getBatchAtoms()
             return ToolMode.Dragging(clickX, clickY, AtomPosSnapshot(atomList), calcMoleculeCentre(atomList))

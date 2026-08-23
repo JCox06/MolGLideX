@@ -48,7 +48,7 @@ class ChemAtom (
         return super.isTransient() || molecule.isTransient()
     }
 
-    override fun getSelectionPosition(): Vector2d {
-        return getPos()
+    override fun getObjectSelectionPoints(): Map<Int, Vector2d> {
+        return mutableMapOf(0 to getPos())
     }
 }

@@ -1,5 +1,6 @@
 package uk.co.jcox.molglide.editor.model
 
+import kotlinx.serialization.descriptors.PrimitiveKind
 import org.joml.Vector2d
 import org.joml.minus
 import org.joml.plus
@@ -429,9 +430,39 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
                 return@forEach
             }
 
-            val lineComponent = UILine(chemArrow.start.x, chemArrow.start.y, chemArrow.end.x, chemArrow.end.y)
-            uiComponents[chemArrow] = lineComponent
+
+            val triangles = mutableListOf<AbstractUIComponent>()
+
+            if (chemArrow.endArrow != ChemArrow.ArrowHead.NONE) {
+                val pos = chemArrow.end()
+                val grad = (chemArrow.controlA() - pos).normalize()
+                val triangle = buildArrow(pos, grad, chemArrow.endArrow)
+                triangles.add(triangle)
+            }
+            if (chemArrow.startArrow != ChemArrow.ArrowHead.NONE) {
+                val pos = chemArrow.start()
+                val grad = (chemArrow.controlA() - pos).normalize()
+                val triangle = buildArrow(pos, grad, chemArrow.endArrow)
+                triangles.add(triangle)
+            }
+
+            val bezierComponent = UIChemArrow(chemArrow.start(), chemArrow.end(), chemArrow.controlA(), triangles, isSelected)
+            uiComponents[chemArrow] = bezierComponent
         }
+    }
+
+    private fun buildArrow(position: Vector2d, orientation: Vector2d, arrowHead: ChemArrow.ArrowHead) : UITriangle {
+        val v1 = position + orientation * -2.5
+        val perpVector = Vector2d(orientation.y, - orientation.x).normalize()
+
+        val midForV2V3 = v1 + (orientation) * ARROW_LENGTH
+
+        val v2 = midForV2V3 + (perpVector) * ARROW_LENGTH
+        var v3 =  midForV2V3
+        if (arrowHead == ChemArrow.ArrowHead.DOUBLE_BARBED) {
+            v3 = midForV2V3 - (perpVector) * ARROW_LENGTH
+        }
+        return UITriangle(v1, v2, v3)
     }
 
 
@@ -462,5 +493,8 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         private const val INTER_BOND_DISTANCE = 6.0
         private const val INTER_DASH_DISTANCE = AtomBondTool.CONNECTION_DISTANCE / 10.0
         private const val DASH_DISTANCE = AtomBondTool.CONNECTION_DISTANCE / 3.0
+
+        private const val ARROW_WIDTH = INTER_DASH_DISTANCE / 2
+        private const val ARROW_LENGTH = ARROW_WIDTH * 2
     }
 }

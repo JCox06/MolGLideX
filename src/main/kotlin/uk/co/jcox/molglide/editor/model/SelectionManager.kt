@@ -7,9 +7,9 @@ class SelectionManager (
 ) {
 
 
-    var primarySelection: IEditorSelectable? = null
+    var primarySelection: SelectionInfo? = null
 
-    var batchSelection = mutableListOf<IEditorSelectable>()
+    var batchSelection = mutableSetOf<IEditorSelectable>()
 
     fun updatePrimarySelection(levelData: EditorStateData, worldX: Int, worldY: Int) {
         val closestSelectable = getClosestSelectable(levelData, worldX, worldY)
@@ -17,8 +17,8 @@ class SelectionManager (
             primarySelection = null
             return
         }
-        if (closestSelectable.second < MIN_DIST) {
-            primarySelection = closestSelectable.first
+        if (closestSelectable.distanceFromMouse < MIN_DIST) {
+            primarySelection = closestSelectable
             return
         }
 
@@ -31,10 +31,13 @@ class SelectionManager (
         val items = mutableListOf<IEditorSelectable>()
 
         levelData.getSelectables().forEach { selectable ->
-            val pos = selectable.getSelectionPosition()
-            if (checkInside(x1, y1, x2, y2, pos)) {
-                items.add(selectable)
+            val points = selectable.getObjectSelectionPoints()
+            points.values.forEach { position ->
+                if (checkInside(x1, y1, x2, y2, position)) {
+                    items.add(selectable)
+                }
             }
+
         }
         batchSelection.clear()
         batchSelection.addAll(items)
@@ -71,13 +74,21 @@ class SelectionManager (
         return false
     }
 
-    private fun getClosestSelectable(levelData: EditorStateData, worldX: Int, worldY: Int) : Pair<IEditorSelectable, Double>? {
+    private fun getClosestSelectable(levelData: EditorStateData, worldX: Int, worldY: Int) : SelectionInfo? {
         val selectables = levelData.getSelectables()
         val x = worldX.toDouble()
         val y = worldY.toDouble()
 
-        val lengthFromMouse = selectables.map {it to it.getSelectionPosition().distance(x, y) }
-        val result = lengthFromMouse.minByOrNull {it.second}
+        val fullSelection = mutableListOf<SelectionInfo>()
+        selectables.forEach { selectable ->
+            val points = selectable.getObjectSelectionPoints()
+            points.forEach { (anchorID, anchor) ->
+                val lengthFromMouse = anchor.distance(Vector2d(x, y))
+                fullSelection.add(SelectionInfo(lengthFromMouse, anchorID, selectable))
+            }
+        }
+
+        val result = fullSelection.minByOrNull { it.distanceFromMouse }
         return result
     }
 
@@ -86,7 +97,7 @@ class SelectionManager (
      * @return the currently selected bond or null if no bond is selected
      */
     fun getBond(): ChemBond? {
-        val selection = primarySelection
+        val selection = primarySelection?.selectable
         if (selection is ChemBond) {
             return selection
         }
@@ -98,9 +109,9 @@ class SelectionManager (
      * @return the currently selected atom or null if no bond is selected
      */
     fun getAtom(): ChemAtom? {
-        val selection = primarySelection
-        if (selection is ChemAtom) {
-            return selection
+        val selectable = primarySelection?.selectable
+        if (selectable is ChemAtom) {
+            return selectable
         }
         return null
     }
@@ -110,7 +121,7 @@ class SelectionManager (
      * @return the currently selected molecule from either the currently selected atom or bond or null if not selected
      */
     fun getMolecule() : ChemMolecule? {
-        val selection = primarySelection
+        val selection = primarySelection?.selectable
         if (selection is ChemAtom) {
             return selection.molecule
         }
@@ -128,7 +139,7 @@ class SelectionManager (
      * in the batch selection
      */
     fun isSelected(item: IEditorSelectable): Boolean {
-        val p = primarySelection
+        val p = primarySelection?.selectable
         if (p == item) {
             return true
         }
@@ -167,4 +178,10 @@ class SelectionManager (
     companion object {
         const val MIN_DIST: Int = 50
     }
+
+    class SelectionInfo (
+        val distanceFromMouse: Double,
+        val objectAnchorID: Int,
+        val selectable: IEditorSelectable,
+    )
 }

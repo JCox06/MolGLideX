@@ -2,6 +2,7 @@ package uk.co.jcox.molglide.editor.io
 
 import kotlinx.serialization.json.Json
 import uk.co.jcox.molglide.editor.control.ActionManager
+import uk.co.jcox.molglide.editor.control.actions.DirectAddArrowAction
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.control.actions.DirectAtomCreationAction
@@ -65,8 +66,11 @@ class LevelLoader {
                 val directBondConnectionAction = DirectBondConnectionAction(dataBond, chemMolecule, atomA, atomB)
                 actionManager.executeAction(directBondConnectionAction)
             }
-
             chemMolecule.calculateAtomProperties()
+        }
+        saveFile.arrows.forEach { dataArrow ->
+            val action = DirectAddArrowAction(dataArrow)
+            actionManager.executeAction(action)
         }
     }
 }

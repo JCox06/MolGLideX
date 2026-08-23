@@ -13,7 +13,7 @@ import javax.swing.UIManager
 
 object MolGLideUtils {
 
-    const val VERSION = "ALPHA-0.0.1"
+    const val VERSION = "ALPHA-0.0.2"
     const val WEBSITE = "https://molglide.com/"
     const val REPO = "https://github.com/JCox06/MolGLideX"
     const val BUG_TRACKER = "https://github.com/JCox06/MolGLideX/issues"

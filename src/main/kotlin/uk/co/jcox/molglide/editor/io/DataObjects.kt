@@ -1,7 +1,9 @@
 package uk.co.jcox.molglide.editor.io
 
 import kotlinx.serialization.Serializable
+import org.joml.Vector2d
 import uk.co.jcox.molglide.StereoChem
+import uk.co.jcox.molglide.editor.model.ChemArrow
 import uk.co.jcox.molglide.editor.model.ChemAtom
 import uk.co.jcox.molglide.editor.model.ChemBond
 import uk.co.jcox.molglide.editor.model.ChemMolecule
@@ -13,6 +15,7 @@ data class DataSaveFile (
     val dataMolecules: MutableList<MoleculeDataObject> = mutableListOf(),
     val dataBonds: MutableMap<Int, BondDataObject> = mutableMapOf(),
     val dataAtoms: MutableMap<Int, AtomDataObject> = mutableMapOf(),
+    val arrows: MutableList<ArrowDataObject> = mutableListOf()
 )
 
 @Serializable
@@ -42,7 +45,18 @@ data class BondDataObject (
     val aromatic: Boolean,
 )
 
+@Serializable
+data class ArrowDataObject (
+    val points: Map<Int, VectorDataObject>,
+    val arrowStart: ChemArrow.ArrowHead,
+    val arrowEnd: ChemArrow.ArrowHead
+)
 
+@Serializable
+data class VectorDataObject (
+    val x: Double,
+    val y: Double,
+)
 
 @Serializable
 data class MolGLideMetaData (

@@ -37,22 +37,9 @@ class UIBond (
         bondLines.forEach { it.drawComponent(g2d, cameraZoom) }
     }
 
-
-    private fun getDiscreteSelectionBoxStart(camZoom: Double, width: Float, height: Float): Vector2d {
-        val startX = midPoint.x * camZoom
-        val startY = midPoint.y * camZoom
-        return Vector2d(startX - width / 2, startY - height / 2)
-    }
-
     override fun drawSelectionMarker(g2d: Graphics2D, cameraZoom: Double) {
-        val width = BOND_MARKER * cameraZoom
-        val height = BOND_MARKER * cameraZoom
-        val oldColour = g2d.color
-        g2d.color = MolGLideUtils.getAccentColour()
         if (selected) {
-            val start = getDiscreteSelectionBoxStart(cameraZoom, width.toFloat(), height.toFloat())
-            g2d.fillRect(start.x.toInt(), start.y.toInt(), width.toInt(), height.toInt())
+            drawSimpleSelection(g2d, cameraZoom, midPoint.x, midPoint.y)
         }
-        g2d.color = oldColour
     }
 }

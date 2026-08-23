@@ -56,7 +56,7 @@ class ChemBond (
         return super.isTransient() || molecule.isTransient()
     }
 
-    override fun getSelectionPosition(): Vector2d {
-        return midPoint()
+    override fun getObjectSelectionPoints(): Map<Int, Vector2d> {
+        return mutableMapOf(0 to midPoint())
     }
 }

@@ -242,12 +242,13 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
 
         //If the selection is active (as in the user is selecting an atom)
         //Any subsequent click should replace the atom selected with the active atom from the toolbox
-        if (selection is ChemAtom ) {
-            return Mode.AtomReplacement(selection)
+        val selectable = selection?.selectable
+        if (selectable is ChemAtom ) {
+            return Mode.AtomReplacement(selectable)
         }
 
-        //If a bond is selected, then do nothing
-        if (selection is ChemBond) {
+        //If anything else is selected do nothing
+        if (selection != null) {
             return Mode.None
         }
 

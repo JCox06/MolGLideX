@@ -1,5 +1,9 @@
 # MolGLideX 
 
+> [!CAUTION]
+> MolGLide is unstable! This application is a prototype. This software is not meant for daily use. 
+
+
 MolGLideX is a continuation of [my previous project](https://github.com/JCox06/MolGLide) - Also called MolGLide.
 This time, instead of writing overly complicated OpenGL graphics code to draw molecules, I am using Java's Graphics2D 
 classes to render molecules and create the editor.
@@ -12,7 +16,7 @@ wrapped inside a (.mgx) file.
 
 Everything else aside, the application uses a very similar core to the original version.
 
-![MolGLideX Screenshot](img.png)
+![MolGLideX Screenshot](screenshots/ALPHA-0.0.2.png)
 
 
 ## Features and Todo List
@@ -21,14 +25,16 @@ Everything else aside, the application uses a very similar core to the original 
 - [x] Seamlessly copy over molecules as SVG images into other applications (Tested on LibreOffice Writer)
 - [x] Create basic and simplistic molecules
 - [x] Create molecules from ring templates (mostly working, but see issues)
+- [ ] Formal Charge Tool
 - [ ] Append/Fuse ring fragments to other molecules
 - [x] Load and save your project as JSON text files (.mgx files)
 - [x] Delete atoms, delete bonds, change element of already inserted atom
 - [x] Undo, Redo support in the editor
 - [x] Molecular formula and molecular weight calculation
 - [ ] Exporting to other software
-- [ ] Reaction Arrows, Curly Arrows, Custom text boxes
-- [ ] Editing label of atom with custom text - like (Me, Et, CH2CH(OMe)CH3)
+- [X] Reaction Arrows, Curly Arrows*
+- [ ] Custom Text Boxes
+- [ ] Editing label of atom with custom text - like (Me, Et*, CH2CH(OMe)CH3)
 - [ ] Formal charge and lone pairs tool 
 
 ## Building
