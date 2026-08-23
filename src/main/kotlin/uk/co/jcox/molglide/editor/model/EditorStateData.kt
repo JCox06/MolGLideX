@@ -74,9 +74,12 @@ class EditorStateData (
         val selectables = mutableListOf<IEditorSelectable>()
         molecules.forEach { chemMolecule ->
             selectables.addAll(chemMolecule.selectables())
+            selectables.addAll(arrows)
         }
         return selectables
     }
+
+    fun getArrows(): List<ChemArrow> = arrows
 
     fun getMolecules() : List<ChemMolecule> = molecules
 

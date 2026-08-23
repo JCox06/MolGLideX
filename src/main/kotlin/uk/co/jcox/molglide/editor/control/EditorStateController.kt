@@ -119,7 +119,7 @@ class EditorStateController (
         }
 
         if (globalContext.getEditMode().type == EditMode.ToolType.ARROW_CREATOR) {
-            currentTool = ArrowTool(actionManager, stateData.selectionManager)
+            currentTool = ArrowTool(stateData, actionManager, stateData.selectionManager)
         }
     }
 

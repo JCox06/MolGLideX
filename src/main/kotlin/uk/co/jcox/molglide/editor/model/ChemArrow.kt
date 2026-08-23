@@ -8,13 +8,23 @@ class ChemArrow (
     var midAnchor: Vector2d? = null,
     var startArrow: ArrowHead = ArrowHead.NONE,
     var endArrow: ArrowHead = ArrowHead.DOUBLE_BARBED
-) : IEditorSelectable {
+) : IEditorSelectable, IChemComponent {
+
+
+    private var transient = false
 
     override fun getSelectionPosition(): Vector2d {
         val a = midAnchor ?: return start.lerp(end, 0.5, Vector2d())
         return a
     }
 
+    override fun isTransient(): Boolean {
+        return transient
+    }
+
+    override fun setTransient(value: Boolean) {
+        transient = value
+    }
 
     enum class ArrowHead {
         DOUBLE_BARBED,

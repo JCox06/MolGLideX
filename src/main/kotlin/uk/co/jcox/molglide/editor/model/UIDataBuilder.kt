@@ -37,9 +37,10 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
      */
     fun rebuild(fullBuild: Boolean = false) {
         if (fullBuild) uiComponents.clear()
-
+        buildArrowUI(fullBuild)
         buildAtomUI(fullBuild)
         buildBondUI(fullBuild)
+
     }
 
 
@@ -418,6 +419,20 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
     }
 
 
+
+    private fun buildArrowUI(fullBuild: Boolean) {
+        data.getArrows().forEach { chemArrow ->
+            val isSelected = selectionManager.isSelected(chemArrow)
+            uiComponents[chemArrow]?.selected = isSelected
+
+            if (! (chemArrow.isTransient() || isSelected) && !fullBuild) {
+                return@forEach
+            }
+
+            val lineComponent = UILine(chemArrow.start.x, chemArrow.start.y, chemArrow.end.x, chemArrow.end.y)
+            uiComponents[chemArrow] = lineComponent
+        }
+    }
 
 
     fun getSelectedFormula(): String {

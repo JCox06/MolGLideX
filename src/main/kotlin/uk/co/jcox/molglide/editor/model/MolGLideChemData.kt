@@ -11,11 +11,11 @@ open class MolGLideChemData(
      */
     private val cdkObject: IChemObject,
 
-    ) {
-    open fun isTransient(): Boolean {
+    ) : IChemComponent {
+    override fun isTransient(): Boolean {
         return cdkObject.getProperty(TRANSIENT)
     }
-    fun setTransient(value: Boolean) {
+    override fun setTransient(value: Boolean) {
         cdkObject.setProperty(TRANSIENT, value)
     }
 
