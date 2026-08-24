@@ -2,6 +2,7 @@ package uk.co.jcox.molglide
 
 import com.formdev.flatlaf.FlatIntelliJLaf
 import com.formdev.flatlaf.FlatLightLaf
+import com.sun.java.swing.plaf.gtk.GTKLookAndFeel
 import javax.swing.JDialog
 import javax.swing.JFrame
 import javax.swing.SwingUtilities

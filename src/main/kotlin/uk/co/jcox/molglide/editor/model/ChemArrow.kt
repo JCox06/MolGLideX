@@ -49,6 +49,12 @@ class ChemArrow (
         }
     }
 
+    fun getArrowType(objectID: Int) : ArrowHead {
+        if (objectID == START) return startArrow
+        if (objectID == END) return endArrow
+        return startArrow
+    }
+
 
     enum class ArrowHead {
         DOUBLE_BARBED,
@@ -65,5 +71,8 @@ class ChemArrow (
             )
             return ChemArrow(points, startArrow, endArrow)
         }
+
+        const val START = 0
+        const val END = 1
     }
 }

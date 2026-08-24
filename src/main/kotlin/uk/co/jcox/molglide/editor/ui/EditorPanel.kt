@@ -1,6 +1,9 @@
 package uk.co.jcox.molglide.editor.ui
 
 import uk.co.jcox.molglide.MainController
+import uk.co.jcox.molglide.MainController.Companion.ARROW_DOUBLE
+import uk.co.jcox.molglide.MainController.Companion.ARROW_NONE
+import uk.co.jcox.molglide.MainController.Companion.ARROW_SINGLE
 import uk.co.jcox.molglide.MainController.Companion.TOGGLE_ATOM_VISIBILITY_ACTION
 import uk.co.jcox.molglide.MolGLideUtils
 import uk.co.jcox.molglide.SwingActionRegistry
@@ -26,6 +29,7 @@ class EditorPanel(private val uiData: IDataModelUI) : JPanel() {
     var atomMenu: JPopupMenu? = null
     var selectionMenu: JPopupMenu? = null
     var normalMenu: JPopupMenu? = null
+    var arrowMenu: JPopupMenu? = null
 
     /**
      * Called by the controller 60 times a second
@@ -88,10 +92,17 @@ class EditorPanel(private val uiData: IDataModelUI) : JPanel() {
         atomContextMenu.addSeparator()
         buildCDKCommon(atomContextMenu)
 
+
+        val arrowContextMenu = JPopupMenu()
+        arrowContextMenu.add(JCheckBoxMenuItem(actionRegistry[ARROW_DOUBLE]))
+        arrowContextMenu.add(JCheckBoxMenuItem(actionRegistry[ARROW_SINGLE]))
+        arrowContextMenu.add(JCheckBoxMenuItem(actionRegistry[ARROW_NONE]))
+
         atomMenu = atomContextMenu
         bondMenu = bondContextMenu
         selectionMenu = selectionContextMenu
         normalMenu = genericContextMenu
+        arrowMenu = arrowContextMenu
     }
 
 

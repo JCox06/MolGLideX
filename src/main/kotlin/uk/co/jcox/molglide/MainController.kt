@@ -271,6 +271,10 @@ class MainController (
         actionRegistry.registerAction(CDK_CLEANUP_STRUCTURE, CDKCleanupStructure(getControllerFunc))
         actionRegistry.registerAction(CDK_COPY_CANONICAL_SMILES_ACTION, CDKCopyCanonicalSmilesAction(this))
         actionRegistry.registerAction(CDK_INCHI, CDKCopyInChi(this))
+
+        actionRegistry.registerAction(ARROW_DOUBLE, SetSingleElectronTransfer(getControllerFunc))
+        actionRegistry.registerAction(ARROW_SINGLE, SetDoubleElectronTransfer(getControllerFunc))
+        actionRegistry.registerAction(ARROW_NONE, SetNoElectronTransfer(getControllerFunc))
     }
 
     private fun buildFileMenu() {
@@ -310,6 +314,11 @@ class MainController (
         mainFrame.objectMenu.add(actionRegistry[CDK_COPY_CANONICAL_SMILES_ACTION])
         mainFrame.objectMenu.add(actionRegistry[CDK_CLEANUP_STRUCTURE])
         mainFrame.objectMenu.add(actionRegistry[CDK_INCHI])
+        mainFrame.objectMenu.addSeparator()
+        mainFrame.objectMenu.add(JCheckBoxMenuItem(actionRegistry[ARROW_DOUBLE]))
+        mainFrame.objectMenu.add(JCheckBoxMenuItem(actionRegistry[ARROW_SINGLE]))
+        mainFrame.objectMenu.add(JCheckBoxMenuItem(actionRegistry[ARROW_NONE]))
+
     }
 
     private fun buildAboutMenu() {
@@ -357,5 +366,9 @@ class MainController (
         const val CDK_COPY_CANONICAL_SMILES_ACTION = "CDK_COPY_CANONICAL"
         const val CDK_CLEANUP_STRUCTURE = "CDK_CLEANUP"
         const val CDK_INCHI = "CDK_COPY_INCHI"
+
+        const val ARROW_SINGLE = "ARROW_SINGLE_ACTION"
+        const val ARROW_DOUBLE = "ARROW_DOUBLE_ACTION"
+        const val ARROW_NONE = "ARROW_NONE_ACTION"
     }
 }

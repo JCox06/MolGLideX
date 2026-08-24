@@ -2,6 +2,7 @@ package uk.co.jcox.molglide
 
 import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.editor.control.EditorStateController
+import uk.co.jcox.molglide.editor.model.ChemArrow
 import uk.co.jcox.molglide.editor.model.ChemAtom
 import uk.co.jcox.molglide.editor.model.ChemBond
 import java.awt.Desktop
@@ -239,7 +240,7 @@ class SetAromaticDoubleBondMenuAction (val getController: () -> EditorStateContr
 
     override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
         super.chemDataChanged(activeSession, currentBond, currentAtom)
-        putValue(SELECTED_KEY, currentBond?.bond?.order == IBond.Order.DOUBLE)
+        putValue(SELECTED_KEY, currentBond?.bond?.isAromatic)
     }
 }
 
@@ -490,6 +491,78 @@ class CDKCopyInChi (val mainController: MainController): MolGLideSwingAction("Co
         isEnabled = activeSession.editorData.selectionManager.getMolecule() != null
     }
 
+}
+
+
+class SetSingleElectronTransfer(val getController: () -> EditorStateController?) : MolGLideSwingAction("Single Barbed Arrow") {
+
+    init {
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_1, 0))
+    }
+
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+        val selectionInfo = activeSession.editorData.selectionManager.primarySelection
+        val arrow = selectionInfo?.selectable
+        val objectID = selectionInfo?.objectAnchorID
+        if (arrow !is ChemArrow || objectID == null) {
+            isEnabled = false
+            return
+        }
+        isEnabled = objectID == 0 || objectID == 1
+        putValue(SELECTED_KEY, arrow.getArrowType(objectID) == ChemArrow.ArrowHead.SINGLE_BARBED)
+
+
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        getController()?.updateSelectedArrowHead(ChemArrow.ArrowHead.SINGLE_BARBED)
+    }
+}
+
+class SetDoubleElectronTransfer(val getController: () -> EditorStateController?) : MolGLideSwingAction("Double Barbed Arrow") {
+
+    init {
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_2, 0))
+    }
+
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+        val selectionInfo = activeSession.editorData.selectionManager.primarySelection
+        val arrow = selectionInfo?.selectable
+        val objectID = selectionInfo?.objectAnchorID
+        if (arrow !is ChemArrow || objectID == null) {
+            isEnabled = false
+            return
+        }
+        isEnabled = objectID == 0 || objectID == 1
+        putValue(SELECTED_KEY, arrow.getArrowType(objectID) == ChemArrow.ArrowHead.DOUBLE_BARBED)
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        getController()?.updateSelectedArrowHead(ChemArrow.ArrowHead.DOUBLE_BARBED)
+    }
+}
+
+class SetNoElectronTransfer(val getController: () -> EditorStateController?) : MolGLideSwingAction("No Arrow Head") {
+
+    init {
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_3, 0))
+    }
+
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+        val selectionInfo = activeSession.editorData.selectionManager.primarySelection
+        val arrow = selectionInfo?.selectable
+        val objectID = selectionInfo?.objectAnchorID
+        if (arrow !is ChemArrow || objectID == null) {
+            isEnabled = false
+            return
+        }
+        isEnabled = objectID == 0 || objectID == 1
+        putValue(SELECTED_KEY, arrow.getArrowType(objectID) == ChemArrow.ArrowHead.NONE)
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        getController()?.updateSelectedArrowHead(ChemArrow.ArrowHead.NONE)
+    }
 }
 
 

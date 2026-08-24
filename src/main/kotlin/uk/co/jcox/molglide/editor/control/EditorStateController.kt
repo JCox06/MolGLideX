@@ -20,6 +20,7 @@ import uk.co.jcox.molglide.editor.control.actions.CompoundAction
 import uk.co.jcox.molglide.editor.control.actions.FlipBondAction
 import uk.co.jcox.molglide.editor.control.actions.IDataAction
 import uk.co.jcox.molglide.editor.control.actions.ImportMoleculesAction
+import uk.co.jcox.molglide.editor.control.actions.ModifyArrowHeadAction
 import uk.co.jcox.molglide.editor.control.actions.MoveSpatialAction
 import uk.co.jcox.molglide.editor.control.actions.PartitionFragmentsAction
 import uk.co.jcox.molglide.editor.control.actions.ReplaceAtomAction
@@ -29,6 +30,7 @@ import uk.co.jcox.molglide.editor.control.actions.TranslateAtomAction
 import uk.co.jcox.molglide.editor.control.actions.UpdateBondAromaticityAction
 import uk.co.jcox.molglide.editor.control.actions.UpdateBondOrderAction
 import uk.co.jcox.molglide.editor.control.tool.ArrowTool
+import uk.co.jcox.molglide.editor.model.ChemArrow
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.model.util.EditorPositionSnapshot
@@ -311,6 +313,18 @@ class EditorStateController (
     }
 
 
+    fun updateSelectedArrowHead(arrowHead: ChemArrow.ArrowHead) {
+        val selected = stateData.selectionManager.primarySelection
+        val selectable = selected?.selectable
+        val objectID = selected?.objectAnchorID
+        if (selectable !is ChemArrow || objectID == null) {
+            return
+        }
+
+        val action = ModifyArrowHeadAction(selectable, objectID, arrowHead)
+        actionManager.executeAction(action)
+    }
+
     inner class MenuPopupListener: PopupMenuListener {
         override fun popupMenuWillBecomeVisible(e: PopupMenuEvent?) {
             stateData.pauseEvents = true
@@ -437,6 +451,14 @@ class EditorStateController (
                 editorPanel.bondMenu?.show(e.component, e.x, e.y)
                 return
             }
+
+            if (stateData.selectionManager.primarySelection?.selectable is ChemArrow
+                && (stateData.selectionManager.primarySelection?.objectAnchorID == 0 ||
+                        stateData.selectionManager.primarySelection?.objectAnchorID == 1)) {
+                editorPanel.arrowMenu?.show(e.component, e.x, e.y)
+                return
+            }
+
             editorPanel.normalMenu?.show(e.component, e.x, e.y)
         }
     }
