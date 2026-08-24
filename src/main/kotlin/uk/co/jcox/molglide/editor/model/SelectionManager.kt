@@ -2,7 +2,6 @@ package uk.co.jcox.molglide.editor.model
 
 import org.joml.Vector2d
 import uk.co.jcox.molglide.editor.control.tool.Tool
-import kotlin.collections.map
 
 class SelectionManager (
 ) {
@@ -49,11 +48,9 @@ class SelectionManager (
     }
 
 
-    fun clearAndAddSelection(molecules: List<ChemMolecule>) {
+    fun clearAndAddSelection(selectables: List<IEditorSelectable>) {
         batchSelection.clear()
-        molecules.forEach { molecule ->
-            batchSelection.addAll(molecule.selectables())
-        }
+        batchSelection.addAll(selectables)
     }
 
     private fun checkInside(boxX1: Int, boxY1: Int, boxX2: Int, boxY2: Int, checkAgainst: Vector2d) : Boolean {

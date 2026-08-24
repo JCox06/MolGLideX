@@ -60,8 +60,8 @@ class LevelLoader {
 
             dataMolecule.bonds.forEach { bondID ->
                 val dataBond = saveFile.dataBonds[bondID] ?: throw IOException("Save file was corrupted - Unable to open")
-                val atomA = idChemAtomMap[dataBond.atomA] ?: throw IOException("Save file was corrupted - Unable to open")
-                val atomB = idChemAtomMap[dataBond.atomB] ?: throw IOException("Save file was corrupted - Unable to open")
+                val atomA = idChemAtomMap[dataBond.atomA] ?: return@forEach
+                val atomB = idChemAtomMap[dataBond.atomB] ?: return@forEach
 
                 val directBondConnectionAction = DirectBondConnectionAction(dataBond, chemMolecule, atomA, atomB)
                 actionManager.executeAction(directBondConnectionAction)

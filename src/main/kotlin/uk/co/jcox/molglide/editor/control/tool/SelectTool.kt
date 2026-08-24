@@ -11,6 +11,7 @@ import uk.co.jcox.molglide.editor.model.ChemAtom
 import uk.co.jcox.molglide.editor.model.IEditorSelectable
 import uk.co.jcox.molglide.editor.model.ISpatialInfo
 import uk.co.jcox.molglide.editor.model.util.EditorPositionSnapshot
+import kotlin.math.round
 
 /**
  * This tool works by interacting with the Selection Manager's axis aligned bounding selection box

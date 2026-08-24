@@ -1,6 +1,7 @@
 package uk.co.jcox.molglide.editor.control
 
 import com.github.jsonldjava.shaded.com.google.common.math.IntMath.pow
+import org.apache.jena.sparql.procedure.library.debug
 import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.IEditorSessionOrganiser
@@ -19,6 +20,7 @@ import uk.co.jcox.molglide.editor.control.actions.CompoundAction
 import uk.co.jcox.molglide.editor.control.actions.FlipBondAction
 import uk.co.jcox.molglide.editor.control.actions.IDataAction
 import uk.co.jcox.molglide.editor.control.actions.ImportMoleculesAction
+import uk.co.jcox.molglide.editor.control.actions.MoveSpatialAction
 import uk.co.jcox.molglide.editor.control.actions.PartitionFragmentsAction
 import uk.co.jcox.molglide.editor.control.actions.ReplaceAtomAction
 import uk.co.jcox.molglide.editor.control.actions.SetIgnoreErrorsOnAtom
@@ -29,6 +31,7 @@ import uk.co.jcox.molglide.editor.control.actions.UpdateBondOrderAction
 import uk.co.jcox.molglide.editor.control.tool.ArrowTool
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
+import uk.co.jcox.molglide.editor.model.util.EditorPositionSnapshot
 import uk.co.jcox.molglide.editor.ui.EditorPanel
 import uk.co.jcox.molglide.editor.ui.EditorPanel.Companion.MOUSE_SENSE
 import uk.co.jcox.molglide.editor.ui.EditorPanel.Companion.MOUSE_SENSE_ZOOM
@@ -240,33 +243,31 @@ class EditorStateController (
 
         //The meta data contains the mouse click on copy
         //Compare this with the current screen x, and y, to get dy, and dx, for the copy
-
         val mouseWorld = screenToWorld(newMouseX.toDouble(), newMouseY.toDouble())
-
         val importActionManager = ActionManager(importData)
         val rel = importData.getMolecules().first().atoms().first().getPos()
+
+        val deferredActions = mutableListOf<IDataAction>()
+
+        val dx = mouseWorld.x - rel.x
+        val dy = mouseWorld.y - rel.y
+
+        val spatialManipulator = EditorPositionSnapshot(importData.getSpatials())
+        spatialManipulator.translateCoordinates(dx, dy)
+
         importData.getMolecules().forEach { chemMolecule ->
-            chemMolecule.atoms().forEach { chemAtom ->
-                //First we need to move the atom to a new position based on where the mouse clicked
-                //A simple move action would move all the atoms to the same position
-                //So we have to calculate the dx, dy for each individual atom as to
-                //preserve the original structure
-                val dx = mouseWorld.x - rel.x
-                val dy = mouseWorld.y - rel.y
-                val moveAtom = TranslateAtomAction(chemAtom, dx, dy)
-                importActionManager.executeAction(moveAtom)
-            }
             //Then validate the data in the level and ensure it is all properly
             //fragmented
             val partitionAction = PartitionFragmentsAction(chemMolecule)
-            importActionManager.executeAction(partitionAction)
+            deferredActions.add(partitionAction)
         }
+        actionManager.executeAction(CompoundAction(*deferredActions.toTypedArray()))
         //Now import the data
         val importAction = ImportMoleculesAction(importData)
         this.actionManager.executeAction(importAction)
 
         //Now remove the old selection, and highlight the newly selected data
-        this.stateData.selectionManager.clearAndAddSelection(importData.getMolecules())
+        this.stateData.selectionManager.clearAndAddSelection(importData.getSelectables())
     }
 
     fun deleteSelectedComponents() {

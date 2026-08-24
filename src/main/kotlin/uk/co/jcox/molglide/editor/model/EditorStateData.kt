@@ -1,5 +1,6 @@
 package uk.co.jcox.molglide.editor.model
 
+import org.checkerframework.checker.units.qual.mol
 import kotlin.math.max
 
 
@@ -79,7 +80,24 @@ class EditorStateData (
         return selectables
     }
 
+    fun getSpatials(): List<ISpatialInfo> {
+        val spatials = mutableListOf<ISpatialInfo>()
+        molecules.forEach { chemMolecule ->
+            spatials.addAll(chemMolecule.atoms())
+        }
+        spatials.addAll(arrows)
+        return spatials
+    }
+
     fun getArrows(): List<ChemArrow> = arrows
+
+    fun addArrows(newArrows: List<ChemArrow>) {
+        arrows.addAll(newArrows)
+    }
+
+    fun removeArrows(removeArrows: List<ChemArrow>) {
+        arrows.removeAll(removeArrows)
+    }
 
     fun getMolecules() : List<ChemMolecule> = molecules
 
