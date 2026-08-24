@@ -1,28 +1,16 @@
 package uk.co.jcox.molglide.editor.control.tool
 
-import com.sun.org.apache.xpath.internal.operations.Bool
-import org.apache.jena.sparql.function.library.evenInteger
-import org.checkerframework.checker.units.qual.m
-import org.checkerframework.checker.units.qual.mol
-import org.joml.GeometryUtils
 import org.joml.Vector2d
 import org.joml.minus
 import uk.co.jcox.molglide.editor.control.ActionManager
 import uk.co.jcox.molglide.editor.control.EventContext
-import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.model.SelectionManager
-import uk.co.jcox.molglide.editor.control.actions.CompoundAction
-import uk.co.jcox.molglide.editor.control.actions.IDataAction
-import uk.co.jcox.molglide.editor.control.actions.MoveAtomAction
+import uk.co.jcox.molglide.editor.control.actions.MoveSpatialAction
 import uk.co.jcox.molglide.editor.model.ChemAtom
-import uk.co.jcox.molglide.editor.model.ChemBond
 import uk.co.jcox.molglide.editor.model.IEditorSelectable
-import uk.co.jcox.molglide.editor.model.util.AtomPosSnapshot
-import java.util.Vector
-import javax.swing.SwingUtilities
-import javax.vecmath.Point2d
-import kotlin.math.PI
+import uk.co.jcox.molglide.editor.model.ISpatialInfo
+import uk.co.jcox.molglide.editor.model.util.EditorPositionSnapshot
 
 /**
  * This tool works by interacting with the Selection Manager's axis aligned bounding selection box
@@ -52,13 +40,9 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
 
     override fun onClick(clickX: Int, clickY: Int, eventContext: EventContext) {
         //First check if the atom should be selected in the batch selection
-        val primaryAtom = selectionManager.getAtom()
-        if ((eventContext.isShiftDown || eventContext.isCtrlDown) && primaryAtom != null) {
-            selectionManager.batchSelection.add(primaryAtom)
-        }
-        val primaryBond = selectionManager.getBond()
-        if ((eventContext.isShiftDown || eventContext.isCtrlDown) && primaryBond != null) {
-            selectionManager.batchSelection.add(primaryBond)
+        val primarySelection = selectionManager.primarySelection?.selectable
+        if ((eventContext.isShiftDown || eventContext.isCtrlDown) && primarySelection != null) {
+            selectionManager.batchSelection.add(primarySelection)
         }
 
         toolMode = getToolMode(clickX, clickY, eventContext)
@@ -82,15 +66,10 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
     }
 
     private fun submitActions(m: ToolMode.Dragging) {
-        val actionList = mutableListOf<IDataAction>()
-        m.posMap.map().forEach { (chemAtom, originalPos) ->
-            val currentPos = chemAtom.atom.point2d
-            val pseudoAction = MoveAtomAction(chemAtom, currentPos, Point2d(originalPos.x, originalPos.y))
-            actionList.add(pseudoAction)
-        }
-        val actions = actionList.toTypedArray()
-        val compoundAction = CompoundAction(*actions)
-        actionManager.executeAction(compoundAction)
+        val currentPosMap = m.posMap.newSnapshot()
+        val oldPosMap = m.posMap
+        val moveSpatials = MoveSpatialAction(currentPosMap, oldPosMap)
+        actionManager.executeAction(moveSpatials)
     }
 
     override fun onDragMouse(clickX: Int, clickY: Int, dx: Double, dy: Double, eventContext: EventContext) {
@@ -115,13 +94,9 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
 
 
     private fun translateSelection(m: ToolMode.Dragging, clickX: Int, clickY: Int) {
-        m.posMap.map().keys.forEach{ chemAtom ->
-            val originalPos = m.posMap[chemAtom] ?: return
-            val newPosX = originalPos.x + (clickX.toDouble() - m.firstClickX)
-            val newPosY = originalPos.y + (clickY.toDouble() - m.firstClickY)
-            chemAtom.atom.point2d.x = newPosX
-            chemAtom.atom.point2d.y = newPosY
-        }
+        val dx = (clickX.toDouble() - m.firstClickX)
+        val dy = (clickY.toDouble() - m.firstClickY)
+        m.posMap.translateCoordinates(dx, dy)
     }
 
 
@@ -133,12 +108,7 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
         val randomUpVector = Vector2d(0.0, 1.0)
         val angle = randomUpVector.angle(vecToMouse)
 
-        m.posMap.map().keys.forEach { chemAtom ->
-            val originalPos = m.posMap[chemAtom] ?: return
-            val newPos = originalPos.rotateAround(angle,  moleculeCentre, Vector2d())
-            chemAtom.atom.point2d.x = newPos.x
-            chemAtom.atom.point2d.y = newPos.y
-        }
+        m.posMap.rotateCoordinates(moleculeCentre.x, moleculeCentre.y, angle)
     }
 
     override fun onSuddenMove() {
@@ -146,21 +116,19 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
     }
 
     private fun getToolMode(clickX: Int, clickY: Int, eventContext: EventContext) : ToolMode {
-        //Check if the selected atom was covered in the AABB
-        val batchSelection = selectionManager.batchSelection
-        val primary = selectionManager.primarySelection
+        //Check if the selected primary was covered in the AABB
         val mouseOverSelection = selectionManager.isAABBSelected(selectionManager.primarySelection?.selectable)
         if (mouseOverSelection) {
-            val atomList = selectionManager.getBatchAtoms()
-            return ToolMode.Dragging(clickX, clickY, AtomPosSnapshot(atomList), calcMoleculeCentre(atomList))
+            val spatials = selectionManager.getBatchSpatials()
+            return ToolMode.Dragging(clickX, clickY, EditorPositionSnapshot(spatials), calcMoleculeCentre(selectionManager.getBatchAtoms()))
         }
 
         //Check to see if the user has just selected one atom through the primary selection
         //and control or shift is not down
-        val atom = selectionManager.getAtom()
-        if (atom != null && !(eventContext.isShiftDown || eventContext.isCtrlDown)) {
-            val atomList = listOf(atom)
-            return ToolMode.Dragging(clickX, clickY, AtomPosSnapshot(atomList), calcMoleculeCentre(atomList))
+        val selection = selectionManager.primarySelection?.selectable
+        if (selection != null && selection is ISpatialInfo && !(eventContext.isShiftDown || eventContext.isCtrlDown)) {
+            val atomList: List<ISpatialInfo> = listOf(selection)
+            return ToolMode.Dragging(clickX, clickY, EditorPositionSnapshot(atomList), Vector2d(clickX.toDouble(), clickY.toDouble()))
         }
 
         selectionManager.clearSelectionBoundingBox()
@@ -186,11 +154,11 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
     }
 
     override fun isTypeValidPrimarySelection(entity: IEditorSelectable): Boolean {
-        return (entity is ChemAtom) or (entity is ChemBond)
+        return true
     }
 
     sealed class ToolMode {
         object None: ToolMode()
-        class Dragging(val firstClickX: Int, val firstClickY: Int, val posMap: AtomPosSnapshot, val centre: Vector2d) : ToolMode()
+        class Dragging(val firstClickX: Int, val firstClickY: Int, val posMap: EditorPositionSnapshot, val centre: Vector2d) : ToolMode()
     }
 }

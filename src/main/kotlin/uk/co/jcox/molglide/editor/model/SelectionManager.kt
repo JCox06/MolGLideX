@@ -170,6 +170,10 @@ class SelectionManager (
         return batchSelection.filterIsInstance<ChemAtom>()
     }
 
+    fun getBatchSpatials(): Collection<ISpatialInfo> {
+        return batchSelection.filterIsInstance<ISpatialInfo>()
+    }
+
 
     fun hasBatchSelection(): Boolean {
         return batchSelection.isNotEmpty()

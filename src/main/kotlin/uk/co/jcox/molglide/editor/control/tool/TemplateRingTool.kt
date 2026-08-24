@@ -2,7 +2,6 @@ package uk.co.jcox.molglide.editor.control.tool
 
 import org.joml.Vector2d
 import org.joml.minus
-import org.openscience.cdk.geometry.GeometryUtil
 import uk.co.jcox.molglide.editor.control.ActionManager
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.SelectionManager
@@ -12,10 +11,8 @@ import uk.co.jcox.molglide.editor.control.EventContext
 import uk.co.jcox.molglide.editor.model.ChemAtom
 import uk.co.jcox.molglide.editor.model.ChemBond
 import uk.co.jcox.molglide.editor.model.IEditorSelectable
-import uk.co.jcox.molglide.editor.model.util.AtomPosSnapshot
-import javax.vecmath.Point2d
+import uk.co.jcox.molglide.editor.model.util.EditorPositionSnapshot
 import kotlin.math.round
-import kotlin.math.roundToInt
 
 class TemplateRingTool(val globalContext: IMainAppData, actionManager: ActionManager, selectionManager: SelectionManager) : Tool(actionManager, selectionManager) {
 
@@ -34,7 +31,7 @@ class TemplateRingTool(val globalContext: IMainAppData, actionManager: ActionMan
         val action = RingCreatorAction(centreX, centreY, globalContext.getEditMode())
         actionManager.executeAction(action)
         val c = action.getRingCentre()
-        toolMode = Mode.Rotate(action.placedRing, c.x, c.y, AtomPosSnapshot.ofMolecule(action.placedRing))
+        toolMode = Mode.Rotate(action.placedRing, c.x, c.y, EditorPositionSnapshot.ofMolecule(action.placedRing))
         action.placedRing.setTransient(true)
     }
 
@@ -64,14 +61,9 @@ class TemplateRingTool(val globalContext: IMainAppData, actionManager: ActionMan
 
         val angle = randomUpVector.angle(vecToMouse)
         val angleIncr = (Math.PI * 0.5) / globalContext.getEditMode().ringSize
-        var nearestSnap: Double = round((angle / angleIncr)) * angleIncr
+        val nearestSnap: Double = round((angle / angleIncr)) * angleIncr
 
-        currentMode.inserted.atoms().forEach { chemAtom ->
-            val originalPos = currentMode.posMap[chemAtom]
-            val newPos = originalPos.rotateAround(nearestSnap, currentMode.ringCentreX, currentMode.ringCentreY, Vector2d())
-            chemAtom.atom.point2d.x = newPos.x
-            chemAtom.atom.point2d.y = newPos.y
-        }
+        currentMode.posMap.rotateCoordinates(currentMode.ringCentreX, currentMode.ringCentreY, nearestSnap)
     }
 
 
@@ -86,6 +78,6 @@ class TemplateRingTool(val globalContext: IMainAppData, actionManager: ActionMan
 
     private sealed class Mode {
         object None : Mode()
-        class Rotate(val inserted: ChemMolecule, val ringCentreX: Double, val ringCentreY: Double, val posMap: AtomPosSnapshot): Mode()
+        class Rotate(val inserted: ChemMolecule, val ringCentreX: Double, val ringCentreY: Double, val posMap: EditorPositionSnapshot): Mode()
     }
 }
