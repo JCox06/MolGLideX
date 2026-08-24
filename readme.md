@@ -32,7 +32,7 @@ Everything else aside, the application uses a very similar core to the original 
 - [x] Undo, Redo support in the editor
 - [x] Molecular formula and molecular weight calculation
 - [ ] Exporting to other software
-- [X] Reaction Arrows, Curly Arrows*
+- [X] Reaction Arrows, Curly Mechanism Arrows, Resonance Arrows
 - [ ] Custom Text Boxes
 - [ ] Editing label of atom with custom text - like (Me, Et*, CH2CH(OMe)CH3)
 - [ ] Formal charge and lone pairs tool 

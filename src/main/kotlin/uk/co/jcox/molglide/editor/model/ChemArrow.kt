@@ -7,7 +7,7 @@ class ChemArrow (
     val arrowPoints: MutableMap<Int, Vector2d>,
     var startArrow: ArrowHead = ArrowHead.NONE,
     var endArrow: ArrowHead = ArrowHead.DOUBLE_BARBED
-) : IEditorSelectable, IChemComponent {
+) : IEditorSelectable, IChemComponent, ISpatialInfo {
 
     private var transient = false
 
@@ -28,7 +28,7 @@ class ChemArrow (
     }
 
     override fun getObjectSelectionPoints(): Map<Int, Vector2d> {
-        return arrowPoints
+        return arrowPoints.mapValues { Vector2d(it.value) }
     }
 
     override fun isTransient(): Boolean {
@@ -37,6 +37,22 @@ class ChemArrow (
 
     override fun setTransient(value: Boolean) {
         transient = value
+    }
+
+    override fun getAllCoordinates(): Map<Int, Vector2d> {
+        return getObjectSelectionPoints()
+    }
+
+    override fun pushNewCoordinates(coordinateMap: Map<Int, Vector2d>) {
+        coordinateMap.forEach { (i, d) ->
+            arrowPoints[i] = d
+        }
+    }
+
+    fun getArrowType(objectID: Int) : ArrowHead {
+        if (objectID == START) return startArrow
+        if (objectID == END) return endArrow
+        return startArrow
     }
 
 
@@ -55,5 +71,8 @@ class ChemArrow (
             )
             return ChemArrow(points, startArrow, endArrow)
         }
+
+        const val START = 0
+        const val END = 1
     }
 }

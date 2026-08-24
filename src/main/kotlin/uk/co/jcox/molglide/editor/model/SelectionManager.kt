@@ -1,7 +1,7 @@
 package uk.co.jcox.molglide.editor.model
 
 import org.joml.Vector2d
-import kotlin.collections.map
+import uk.co.jcox.molglide.editor.control.tool.Tool
 
 class SelectionManager (
 ) {
@@ -11,9 +11,9 @@ class SelectionManager (
 
     var batchSelection = mutableSetOf<IEditorSelectable>()
 
-    fun updatePrimarySelection(levelData: EditorStateData, worldX: Int, worldY: Int) {
+    fun updatePrimarySelection(levelData: EditorStateData, worldX: Int, worldY: Int, currentTool: Tool) {
         val closestSelectable = getClosestSelectable(levelData, worldX, worldY)
-        if (closestSelectable == null) {
+        if (closestSelectable == null || !currentTool.isTypeValidPrimarySelection(closestSelectable.selectable)) {
             primarySelection = null
             return
         }
@@ -48,11 +48,9 @@ class SelectionManager (
     }
 
 
-    fun clearAndAddSelection(molecules: List<ChemMolecule>) {
+    fun clearAndAddSelection(selectables: List<IEditorSelectable>) {
         batchSelection.clear()
-        molecules.forEach { molecule ->
-            batchSelection.addAll(molecule.selectables())
-        }
+        batchSelection.addAll(selectables)
     }
 
     private fun checkInside(boxX1: Int, boxY1: Int, boxX2: Int, boxY2: Int, checkAgainst: Vector2d) : Boolean {
@@ -167,6 +165,10 @@ class SelectionManager (
 
     fun getBatchAtoms(): List<ChemAtom> {
         return batchSelection.filterIsInstance<ChemAtom>()
+    }
+
+    fun getBatchSpatials(): Collection<ISpatialInfo> {
+        return batchSelection.filterIsInstance<ISpatialInfo>()
     }
 
 

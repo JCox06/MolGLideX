@@ -4,6 +4,9 @@ import uk.co.jcox.molglide.editor.control.ActionManager
 import uk.co.jcox.molglide.editor.model.SelectionManager
 import uk.co.jcox.molglide.IMainAppData
 import uk.co.jcox.molglide.editor.control.EventContext
+import uk.co.jcox.molglide.editor.model.ChemArrow
+import uk.co.jcox.molglide.editor.model.ChemAtom
+import uk.co.jcox.molglide.editor.model.IEditorSelectable
 
 class FormalChargeLonePairTool(val globalContext: IMainAppData, actionManager: ActionManager,
                                selectionManager: SelectionManager) : Tool(actionManager, selectionManager) {
@@ -23,5 +26,9 @@ class FormalChargeLonePairTool(val globalContext: IMainAppData, actionManager: A
 
     override fun onSuddenMove() {
 
+    }
+
+    override fun isTypeValidPrimarySelection(entity: IEditorSelectable): Boolean {
+        return entity is ChemAtom
     }
 }

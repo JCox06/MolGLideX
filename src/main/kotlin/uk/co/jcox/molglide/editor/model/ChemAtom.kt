@@ -1,5 +1,6 @@
 package uk.co.jcox.molglide.editor.model
 
+import jdk.internal.jshell.tool.resources.version
 import org.joml.Vector2d
 import org.openscience.cdk.interfaces.IAtom
 import uk.co.jcox.molglide.editor.model.ChemMolecule.Companion.IGNORE_ERRORS
@@ -10,7 +11,7 @@ import uk.co.jcox.molglide.editor.model.ChemMolecule.TrailingGroupPosition
 class ChemAtom (
     val atom: IAtom,
     val molecule: ChemMolecule,
-) : IEditorSelectable, MolGLideChemData(atom) {
+) : IEditorSelectable, ISpatialInfo, MolGLideChemData(atom) {
     fun isVisible(): Boolean {
         return atom.getProperty<Boolean>(VISIBLE)
     }
@@ -50,5 +51,19 @@ class ChemAtom (
 
     override fun getObjectSelectionPoints(): Map<Int, Vector2d> {
         return mutableMapOf(0 to getPos())
+    }
+
+    override fun getAllCoordinates(): Map<Int, Vector2d> {
+        return getObjectSelectionPoints()
+    }
+
+    override fun pushNewCoordinates(coordinateMap: Map<Int, Vector2d>) {
+        val newPos = coordinateMap[0] ?: return
+        setPos(newPos)
+    }
+
+    fun setPos(vector: Vector2d) {
+        atom.point2d.x = vector.x
+        atom.point2d.y = vector.y
     }
 }

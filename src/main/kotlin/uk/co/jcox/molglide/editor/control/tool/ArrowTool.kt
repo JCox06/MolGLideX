@@ -1,13 +1,10 @@
 package uk.co.jcox.molglide.editor.control.tool
 
-import org.apache.jena.sparql.function.library.date
-import org.checkerframework.checker.units.qual.m
 import org.joml.Vector2d
-import org.xmlcml.euclid.Vector2
 import uk.co.jcox.molglide.editor.control.ActionManager
 import uk.co.jcox.molglide.editor.control.EventContext
-import uk.co.jcox.molglide.editor.control.actions.RegisterChemArrowAction
-import uk.co.jcox.molglide.editor.control.actions.RegisterNewArrowPositionAction
+import uk.co.jcox.molglide.editor.control.actions.RestoreChemArrowAction
+import uk.co.jcox.molglide.editor.control.actions.RestoreChemArrowPositionAction
 import uk.co.jcox.molglide.editor.model.ChemArrow
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.model.IEditorSelectable
@@ -27,12 +24,12 @@ class ArrowTool(val data: EditorStateData, actionManager: ActionManager, selecti
     override fun onRelease(clickX: Int, clickY: Int, eventContext: EventContext) {
         val m = toolMode
         if (m is ToolMode.NewArrowDragging) {
-            val action = RegisterChemArrowAction(m.newArrow)
+            val action = RestoreChemArrowAction(m.newArrow)
             m.newArrow.setTransient(false)
             actionManager.executeAction(action)
         }
         if (m is ToolMode.ExistingArrowDragging) {
-            val action = RegisterNewArrowPositionAction(m.chemArrow, m.existing, m.selection.objectAnchorID)
+            val action = RestoreChemArrowPositionAction(m.chemArrow, m.existing, m.selection.objectAnchorID)
             actionManager.executeAction(action)
         }
         toolMode = ToolMode.None
@@ -59,7 +56,7 @@ class ArrowTool(val data: EditorStateData, actionManager: ActionManager, selecti
 
         if (selection == null) {
             val newArrow = ChemArrow.ofSimple(Vector2d(clickX.toDouble(), clickY.toDouble()), Vector2d(clickX.toDouble(), clickY.toDouble()),
-                Vector2d())
+                Vector2d(clickX.toDouble(), clickY.toDouble()))
             data.addArrow(newArrow)
             newArrow.setTransient(true)
             return ToolMode.NewArrowDragging(newArrow)
@@ -101,6 +98,9 @@ class ArrowTool(val data: EditorStateData, actionManager: ActionManager, selecti
         }
     }
 
+    override fun isTypeValidPrimarySelection(entity: IEditorSelectable): Boolean {
+        return entity is ChemArrow
+    }
 
     sealed class ToolMode {
         object None: ToolMode()
