@@ -49,7 +49,6 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         data.getMolecules().forEach { chemMolecule ->
             chemMolecule.atoms().forEach { chemAtom ->
                 val isSelected = selectionManager.isSelected(chemAtom, ChemAtom.MAIN_ATOM)
-                buildFormalCharge(chemAtom)
                 uiComponents[chemAtom]?.selected = isSelected
                 if (!fullBuild && !(chemAtom.isTransient() || isSelected)) {
                     return@forEach
@@ -59,19 +58,6 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         }
     }
 
-
-    private fun buildFormalCharge(chemAtom: ChemAtom) {
-        //Check to see if the atom has a formal charge
-        val fc = chemAtom.getFormalCharge()
-        if (fc == 0) {
-            return
-        }
-
-        val formalChargePos = chemAtom.getAbsFormalChargeLocation()
-        val selected = selectionManager.isSelected(chemAtom, ChemAtom.CHARGE)
-        val uiCharge = UISimpleText(formalChargePos.x, formalChargePos.y, getFormalChargeText(fc), selected)
-        uiComponents[formalChargePos] = uiCharge
-    }
 
 
     //1 = +

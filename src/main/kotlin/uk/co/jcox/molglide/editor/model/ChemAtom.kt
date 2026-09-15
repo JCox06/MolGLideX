@@ -57,9 +57,6 @@ class ChemAtom (
     override fun getObjectSelectionPoints(): Map<Int, Vector2d> {
         val map = mutableMapOf<Int, Vector2d>()
         map[MAIN_ATOM] = getPos()
-        if (atom.formalCharge != 0) {
-            map[CHARGE] = getAbsFormalChargeLocation()
-        }
         return map
     }
 
@@ -81,27 +78,6 @@ class ChemAtom (
         molecule.calculateAtomProperties()
     }
 
-    fun setFormalChargeLocation(locationX: Double, locationY: Double) {
-        val pos = atom.getProperty<Vector2d>(ChemMolecule.FORMAL_CHARGE)
-        pos.x = locationX
-        pos.y = locationY
-    }
-    fun getFormalChargeLocation(): Vector2d {
-        return atom.getProperty(ChemMolecule.FORMAL_CHARGE)
-    }
-    fun getAbsFormalChargeLocation(): Vector2d {
-        val result = (getFormalChargeLocation() * EditorPanel.UNMODDED_TEXT_SIZE.toDouble()) + getPos()
-        println("Atom: ${getPos().x} ${getPos().y}, Mod: ${getFormalChargeLocation().x} ${getFormalChargeLocation().y}, Result: ${result.x} ${result.y}")
-        return getPos()
-    }
-    fun setLonePairLocation(locationX: Double, locationY: Double) {
-        val pos = atom.getProperty<Vector2d>(ChemMolecule.LONE_PAIR)
-        pos.x = locationX
-        pos.y = locationY
-    }
-    fun getLonePairLocation(): Vector2d {
-        return atom.getProperty(ChemMolecule.LONE_PAIR)
-    }
 
     fun setPos(vector: Vector2d) {
         atom.point2d.x = vector.x
