@@ -22,7 +22,6 @@ class UIAtom (
     selected: Boolean,
     val hasErrors: Boolean,
     val ignoreErrors: Boolean,
-    val formalCharge: Int,
 ) : AbstractUIComponent(selected) {
 
     var x = 0.0
@@ -91,22 +90,7 @@ class UIAtom (
     }
 
     private fun paintMainAtomElementSymbol(g2d: Graphics2D) {
-        if (formalCharge == 0) {
-            g2d.drawString(element, centreTextWidth.toInt(), centreTextHeight.toInt())
-        } else {
-            val toDraw = "$element${getFormalChargeString(formalCharge)}"
-            val superscriptRange = getSuperscriptRange(toDraw)
-
-            val attributedString = AttributedString(toDraw)
-            attributedString.addAttribute(TextAttribute.FAMILY, g2d.font.family)
-            attributedString.addAttribute(TextAttribute.SIZE, g2d.font.size)
-            superscriptRange.forEach { attributedString.addAttribute(TextAttribute.SUPERSCRIPT, TextAttribute.SUPERSCRIPT_SUPER, it, it+1) }
-
-            val renderingContext = g2d.fontRenderContext
-            val attributedIterator = attributedString.iterator
-            val textLayout = TextLayout(attributedIterator, renderingContext)
-            textLayout.draw(g2d, centreTextWidth.toFloat(), centreTextHeight.toFloat())
-        }
+        g2d.drawString(element, centreTextWidth.toInt(), centreTextHeight.toInt())
     }
 
     private fun getFormalChargeString(charge: Int) : String {

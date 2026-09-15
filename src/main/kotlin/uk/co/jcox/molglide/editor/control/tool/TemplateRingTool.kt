@@ -67,8 +67,9 @@ class TemplateRingTool(val globalContext: IMainAppData, actionManager: ActionMan
     }
 
 
-    override fun isTypeValidPrimarySelection(entity: IEditorSelectable): Boolean {
-        return (entity is ChemAtom) or (entity is ChemBond)
+    override fun isTypeValidPrimarySelection(selectionContext: SelectionManager.SelectionInfo): Boolean {
+        val entity = selectionContext.selectable
+        return (entity is ChemAtom) || (entity is ChemBond)
     }
 
     override fun onSuddenMove() {

@@ -13,7 +13,7 @@ class SelectionManager (
 
     fun updatePrimarySelection(levelData: EditorStateData, worldX: Int, worldY: Int, currentTool: Tool) {
         val closestSelectable = getClosestSelectable(levelData, worldX, worldY)
-        if (closestSelectable == null || !currentTool.isTypeValidPrimarySelection(closestSelectable.selectable)) {
+        if (closestSelectable == null || !currentTool.isTypeValidPrimarySelection(closestSelectable)) {
             primarySelection = null
             return
         }
@@ -136,10 +136,16 @@ class SelectionManager (
      * in the primary selection (discrete) or if it is active
      * in the batch selection
      */
-    fun isSelected(item: IEditorSelectable): Boolean {
+    fun isSelected(item: IEditorSelectable, anchorID: Int? = null): Boolean {
         val p = primarySelection?.selectable
         if (p == item) {
-            return true
+            if (anchorID == null) {
+                return true
+            }
+            if (primarySelection?.objectAnchorID == anchorID) {
+                return true
+            }
+            return false
         }
         if (batchSelection.contains(item)) {
             return true

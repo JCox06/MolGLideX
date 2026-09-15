@@ -154,7 +154,7 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
         return toolMode == ToolMode.None
     }
 
-    override fun isTypeValidPrimarySelection(entity: IEditorSelectable): Boolean {
+    override fun isTypeValidPrimarySelection(selectionContext: SelectionManager.SelectionInfo): Boolean {
         return true
     }
 

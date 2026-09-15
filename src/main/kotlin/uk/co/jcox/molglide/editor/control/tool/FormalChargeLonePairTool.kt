@@ -41,7 +41,7 @@ class FormalChargeLonePairTool(val globalContext: IMainAppData, actionManager: A
 
     }
 
-    override fun isTypeValidPrimarySelection(entity: IEditorSelectable): Boolean {
-        return entity is ChemAtom
+    override fun isTypeValidPrimarySelection(selectionContext: SelectionManager.SelectionInfo): Boolean {
+        return (selectionContext.selectable is ChemAtom)
     }
 }

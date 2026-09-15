@@ -11,6 +11,7 @@ import uk.co.jcox.molglide.StereoChem
 
 import uk.co.jcox.molglide.editor.control.tool.AtomBondTool
 import uk.co.jcox.molglide.editor.ui.EditorPanel
+import java.lang.System.gc
 import kotlin.math.roundToInt
 
 class UIDataBuilder (private val data: EditorStateData, private val selectionManager: SelectionManager) {
@@ -41,22 +42,55 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         buildArrowUI(fullBuild)
         buildAtomUI(fullBuild)
         buildBondUI(fullBuild)
-
     }
 
 
     private fun buildAtomUI(fullBuild: Boolean) {
         data.getMolecules().forEach { chemMolecule ->
             chemMolecule.atoms().forEach { chemAtom ->
-                val isSelected = selectionManager.isSelected(chemAtom)
+                val isSelected = selectionManager.isSelected(chemAtom, ChemAtom.MAIN_ATOM)
+                buildFormalCharge(chemAtom)
                 uiComponents[chemAtom]?.selected = isSelected
                 if (!fullBuild && !(chemAtom.isTransient() || isSelected)) {
                     return@forEach
                 }
                 val ui = buildUIAtom(chemAtom)
-                uiComponents[chemAtom] = ui
-            }
+                uiComponents[chemAtom] = ui }
         }
+    }
+
+
+    private fun buildFormalCharge(chemAtom: ChemAtom) {
+        //Check to see if the atom has a formal charge
+        val fc = chemAtom.getFormalCharge()
+        if (fc == 0) {
+            return
+        }
+
+        val formalChargePos = chemAtom.getAbsFormalChargeLocation()
+        val selected = selectionManager.isSelected(chemAtom, ChemAtom.CHARGE)
+        val uiCharge = UISimpleText(formalChargePos.x, formalChargePos.y, getFormalChargeText(fc), selected)
+        uiComponents[formalChargePos] = uiCharge
+    }
+
+
+    //1 = +
+    //2 = 2+
+    //-1 = -
+    private fun getFormalChargeText(formalCharge: Int): String {
+        if (formalCharge == 1) {
+            return "+"
+        }
+        if (formalCharge == -1) {
+            return "-"
+        }
+        if (formalCharge > 1) {
+            return "$formalCharge+"
+        }
+        if (formalCharge < -1) {
+            return "$formalCharge-"
+        }
+        return ""
     }
 
 
@@ -74,7 +108,6 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
             selectionManager.isSelected(chemAtom),
             checkForAtomErrors(chemAtom),
             chemAtom.shouldIgnoreErrors(),
-            chemAtom.getFormalCharge()
         )
         return ui
     }

@@ -2,11 +2,16 @@ package uk.co.jcox.molglide.editor.model
 
 import jdk.internal.jshell.tool.resources.version
 import org.joml.Vector2d
+import org.joml.Vector2f
+import org.joml.plus
+import org.joml.times
 import org.openscience.cdk.interfaces.IAtom
+import uk.co.jcox.molglide.editor.control.tool.AtomBondTool
 import uk.co.jcox.molglide.editor.model.ChemMolecule.Companion.IGNORE_ERRORS
 import uk.co.jcox.molglide.editor.model.ChemMolecule.Companion.TRAILING_POS
 import uk.co.jcox.molglide.editor.model.ChemMolecule.Companion.VISIBLE
 import uk.co.jcox.molglide.editor.model.ChemMolecule.TrailingGroupPosition
+import uk.co.jcox.molglide.editor.ui.EditorPanel
 
 class ChemAtom (
     val atom: IAtom,
@@ -50,7 +55,12 @@ class ChemAtom (
     }
 
     override fun getObjectSelectionPoints(): Map<Int, Vector2d> {
-        return mutableMapOf(0 to getPos())
+        val map = mutableMapOf<Int, Vector2d>()
+        map[MAIN_ATOM] = getPos()
+        if (atom.formalCharge != 0) {
+            map[CHARGE] = getAbsFormalChargeLocation()
+        }
+        return map
     }
 
     override fun getAllCoordinates(): Map<Int, Vector2d> {
@@ -71,8 +81,36 @@ class ChemAtom (
         molecule.calculateAtomProperties()
     }
 
+    fun setFormalChargeLocation(locationX: Double, locationY: Double) {
+        val pos = atom.getProperty<Vector2d>(ChemMolecule.FORMAL_CHARGE)
+        pos.x = locationX
+        pos.y = locationY
+    }
+    fun getFormalChargeLocation(): Vector2d {
+        return atom.getProperty(ChemMolecule.FORMAL_CHARGE)
+    }
+    fun getAbsFormalChargeLocation(): Vector2d {
+        val result = (getFormalChargeLocation() * EditorPanel.UNMODDED_TEXT_SIZE.toDouble()) + getPos()
+        println("Atom: ${getPos().x} ${getPos().y}, Mod: ${getFormalChargeLocation().x} ${getFormalChargeLocation().y}, Result: ${result.x} ${result.y}")
+        return getPos()
+    }
+    fun setLonePairLocation(locationX: Double, locationY: Double) {
+        val pos = atom.getProperty<Vector2d>(ChemMolecule.LONE_PAIR)
+        pos.x = locationX
+        pos.y = locationY
+    }
+    fun getLonePairLocation(): Vector2d {
+        return atom.getProperty(ChemMolecule.LONE_PAIR)
+    }
+
     fun setPos(vector: Vector2d) {
         atom.point2d.x = vector.x
         atom.point2d.y = vector.y
+    }
+
+
+    companion object {
+        const val MAIN_ATOM = 0
+        const val CHARGE = 1
     }
 }

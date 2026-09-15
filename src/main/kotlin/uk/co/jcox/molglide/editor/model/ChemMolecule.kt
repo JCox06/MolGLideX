@@ -281,6 +281,8 @@ class ChemMolecule (
         atom.setProperty(TRAILING_POS, TrailingGroupPosition.RIGHT)
         atom.setProperty(IGNORE_ERRORS, false)
         atom.setProperty(TRANSIENT, false)
+        atom.setProperty(FORMAL_CHARGE, Vector2d(1.0,1.0).normalize())
+        atom.setProperty(LONE_PAIR, Vector2d(0.5, 1.0).normalize())
     }
 
     private fun initDefaultBondProperties(cdkBond: IBond) {
@@ -327,5 +329,7 @@ class ChemMolecule (
         const val IGNORE_ERRORS = "MOLGLIDE_IGNORE_ERRORS"
         const val TRANSIENT = "MOLGLIDE_TRANSIENT"
         const val UNKNOWN = "X"
+        const val FORMAL_CHARGE = "FORMAL_CHARGE"
+        const val LONE_PAIR = "LONE_PAIR"
     }
 }

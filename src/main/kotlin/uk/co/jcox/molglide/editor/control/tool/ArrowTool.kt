@@ -98,8 +98,8 @@ class ArrowTool(val data: EditorStateData, actionManager: ActionManager, selecti
         }
     }
 
-    override fun isTypeValidPrimarySelection(entity: IEditorSelectable): Boolean {
-        return entity is ChemArrow
+    override fun isTypeValidPrimarySelection(selectionContext: SelectionManager.SelectionInfo): Boolean {
+        return selectionContext.selectable is ChemArrow
     }
 
     sealed class ToolMode {

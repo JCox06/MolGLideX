@@ -257,8 +257,9 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
         return Mode.MolCreation(clickX, clickY)
     }
 
-    override fun isTypeValidPrimarySelection(entity: IEditorSelectable): Boolean {
-        return (entity is ChemAtom) or (entity is ChemBond)
+    override fun isTypeValidPrimarySelection(selectionContext: SelectionManager.SelectionInfo): Boolean {
+        val entity = selectionContext.selectable
+        return (entity is ChemAtom && selectionContext.objectAnchorID == ChemAtom.MAIN_ATOM) || (entity is ChemBond)
     }
 
     sealed class Mode {
