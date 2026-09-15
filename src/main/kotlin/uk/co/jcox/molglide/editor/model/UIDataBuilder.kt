@@ -74,6 +74,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
             selectionManager.isSelected(chemAtom),
             checkForAtomErrors(chemAtom),
             chemAtom.shouldIgnoreErrors(),
+            chemAtom.getFormalCharge()
         )
         return ui
     }
@@ -209,8 +210,8 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         val bPos = atomB.getPos()
         val aVis = atomA.isVisible()
         val bVis = atomB.isVisible()
-        val start = if (aVis) getCappedEnd(bPos, aPos, EditorPanel.UNMODDED_TEXT_SIZE / AtomBondTool.CONNECTION_DISTANCE.toDouble()) else aPos
-        val end = if (bVis) getCappedEnd(aPos, bPos, EditorPanel.UNMODDED_TEXT_SIZE / AtomBondTool.CONNECTION_DISTANCE.toDouble()) else bPos
+        val start = if (aVis) getCappedEnd(bPos, aPos, (EditorPanel.UNMODDED_TEXT_SIZE / AtomBondTool.CONNECTION_DISTANCE.toDouble())*1.2) else aPos
+        val end = if (bVis) getCappedEnd(aPos, bPos, (EditorPanel.UNMODDED_TEXT_SIZE / AtomBondTool.CONNECTION_DISTANCE.toDouble())*1.2) else bPos
         val id = chemBond.bond.id
         val uiLine: UILine = UILine(start.x, start.y, end.x, end.y)
         return uiLine
@@ -378,8 +379,8 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         }
         val startDouble = Vector2d(doubleUILine.startX, doubleUILine.startY)
         val endDouble = Vector2d(doubleUILine.endX, doubleUILine.endY)
-        val newStart = getCappedEnd(startDouble, endDouble, (EditorPanel.UNMODDED_TEXT_SIZE / AtomBondTool.CONNECTION_DISTANCE.toDouble()) * 1.2)
-        val newEnd = getCappedEnd(endDouble, startDouble, (EditorPanel.UNMODDED_TEXT_SIZE / AtomBondTool.CONNECTION_DISTANCE.toDouble()) * 1.2)
+        val newStart = getCappedEnd(startDouble, endDouble, (EditorPanel.UNMODDED_TEXT_SIZE / AtomBondTool.CONNECTION_DISTANCE.toDouble()) * 1.3)
+        val newEnd = getCappedEnd(endDouble, startDouble, (EditorPanel.UNMODDED_TEXT_SIZE / AtomBondTool.CONNECTION_DISTANCE.toDouble()) * 1.3)
         return UILine(newStart.x, newStart.y, newEnd.x, newEnd.y)
     }
 
@@ -414,7 +415,6 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
     }
 
     private fun getCappedEnd(start: Vector2d, end: Vector2d, amount: Double): Vector2d {
-        println("Amount is ${amount}")
         val diff = end - start
         val newEnd = start + (diff * amount)
         return newEnd

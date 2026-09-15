@@ -62,6 +62,15 @@ class ChemAtom (
         setPos(newPos)
     }
 
+    fun getFormalCharge(): Int {
+        return atom.formalCharge
+    }
+
+    fun setFormalCharge(newCharge: Int) {
+        atom.formalCharge = newCharge
+        molecule.calculateAtomProperties()
+    }
+
     fun setPos(vector: Vector2d) {
         atom.point2d.x = vector.x
         atom.point2d.y = vector.y

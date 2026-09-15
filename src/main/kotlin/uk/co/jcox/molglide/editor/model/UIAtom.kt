@@ -22,6 +22,7 @@ class UIAtom (
     selected: Boolean,
     val hasErrors: Boolean,
     val ignoreErrors: Boolean,
+    val formalCharge: Int,
 ) : AbstractUIComponent(selected) {
 
     var x = 0.0
@@ -90,7 +91,38 @@ class UIAtom (
     }
 
     private fun paintMainAtomElementSymbol(g2d: Graphics2D) {
-        g2d.drawString(element, centreTextWidth.toInt(), centreTextHeight.toInt())
+        if (formalCharge == 0) {
+            g2d.drawString(element, centreTextWidth.toInt(), centreTextHeight.toInt())
+        } else {
+            val toDraw = "$element${getFormalChargeString(formalCharge)}"
+            val superscriptRange = getSuperscriptRange(toDraw)
+
+            val attributedString = AttributedString(toDraw)
+            attributedString.addAttribute(TextAttribute.FAMILY, g2d.font.family)
+            attributedString.addAttribute(TextAttribute.SIZE, g2d.font.size)
+            superscriptRange.forEach { attributedString.addAttribute(TextAttribute.SUPERSCRIPT, TextAttribute.SUPERSCRIPT_SUPER, it, it+1) }
+
+            val renderingContext = g2d.fontRenderContext
+            val attributedIterator = attributedString.iterator
+            val textLayout = TextLayout(attributedIterator, renderingContext)
+            textLayout.draw(g2d, centreTextWidth.toFloat(), centreTextHeight.toFloat())
+        }
+    }
+
+    private fun getFormalChargeString(charge: Int) : String {
+        if (charge == 1) {
+            return "+"
+        }
+        if (charge == -1) {
+            return "-"
+        }
+        if (charge > 1) {
+            return "${charge}+"
+        }
+        if (charge < -1) {
+            return "${charge}-"
+        }
+        return ""
     }
 
     private fun paintTrailGroup(g2d: Graphics2D) {
@@ -129,6 +161,16 @@ class UIAtom (
         val list = ArrayList<Int>()
         trailGroup.forEachIndexed { index, ch ->
             if (ch.isDigit()) {
+                list.add(index)
+            }
+        }
+        return list
+    }
+
+    private fun getSuperscriptRange(label: String): List<Int> {
+        val list = ArrayList<Int>()
+        label.forEachIndexed { index, ch ->
+            if (ch == '+' || ch == '-' || ch.isDigit()) {
                 list.add(index)
             }
         }

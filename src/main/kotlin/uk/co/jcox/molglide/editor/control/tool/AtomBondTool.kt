@@ -281,7 +281,7 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
 
     companion object {
 
-        const val CONNECTION_DISTANCE = 50
+        const val CONNECTION_DISTANCE = 55
 
         private val COMMON_ANGLES = listOf<Float>(
             //Cardinal directions
