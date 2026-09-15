@@ -566,3 +566,25 @@ class SetNoElectronTransfer(val getController: () -> EditorStateController?) : M
 }
 
 
+class DeleteArrowAction(val getController: () -> EditorStateController?): MolGLideSwingAction("Delete Arrow") {
+    init {
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0))
+    }
+
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+        val selectionInfo = activeSession.editorData.selectionManager.primarySelection
+        val arrow = selectionInfo?.selectable
+        val objectID = selectionInfo?.objectAnchorID
+        if (arrow !is ChemArrow || objectID == null) {
+            isEnabled = false
+            return
+        }
+        isEnabled = true
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        getController()?.deleteSelectedArrow()
+    }
+}
+
+

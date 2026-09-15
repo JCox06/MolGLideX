@@ -275,6 +275,7 @@ class MainController (
         actionRegistry.registerAction(ARROW_DOUBLE, SetSingleElectronTransfer(getControllerFunc))
         actionRegistry.registerAction(ARROW_SINGLE, SetDoubleElectronTransfer(getControllerFunc))
         actionRegistry.registerAction(ARROW_NONE, SetNoElectronTransfer(getControllerFunc))
+        actionRegistry.registerAction(DELETE_ARROW_ACTION, DeleteArrowAction(getControllerFunc))
     }
 
     private fun buildFileMenu() {
@@ -318,7 +319,7 @@ class MainController (
         mainFrame.objectMenu.add(JCheckBoxMenuItem(actionRegistry[ARROW_DOUBLE]))
         mainFrame.objectMenu.add(JCheckBoxMenuItem(actionRegistry[ARROW_SINGLE]))
         mainFrame.objectMenu.add(JCheckBoxMenuItem(actionRegistry[ARROW_NONE]))
-
+        mainFrame.objectMenu.add(actionRegistry[DELETE_ARROW_ACTION])
     }
 
     private fun buildAboutMenu() {
@@ -370,5 +371,6 @@ class MainController (
         const val ARROW_SINGLE = "ARROW_SINGLE_ACTION"
         const val ARROW_DOUBLE = "ARROW_DOUBLE_ACTION"
         const val ARROW_NONE = "ARROW_NONE_ACTION"
+        const val DELETE_ARROW_ACTION = "DELETE_ARROW_ACTION"
     }
 }

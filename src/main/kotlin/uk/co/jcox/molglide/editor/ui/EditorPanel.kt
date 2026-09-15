@@ -97,6 +97,7 @@ class EditorPanel(private val uiData: IDataModelUI) : JPanel() {
         arrowContextMenu.add(JCheckBoxMenuItem(actionRegistry[ARROW_DOUBLE]))
         arrowContextMenu.add(JCheckBoxMenuItem(actionRegistry[ARROW_SINGLE]))
         arrowContextMenu.add(JCheckBoxMenuItem(actionRegistry[ARROW_NONE]))
+        arrowContextMenu.add(actionRegistry[MainController.DELETE_ARROW_ACTION])
 
         atomMenu = atomContextMenu
         bondMenu = bondContextMenu

@@ -12,6 +12,7 @@ import uk.co.jcox.molglide.editor.control.tool.TemplateRingTool
 import uk.co.jcox.molglide.editor.control.tool.Tool
 import uk.co.jcox.molglide.IMainAppData
 import uk.co.jcox.molglide.StereoChem
+import uk.co.jcox.molglide.editor.control.actions.ArrowDeletionAction
 import uk.co.jcox.molglide.editor.control.actions.AtomDeletionAction
 import uk.co.jcox.molglide.editor.control.actions.BondDeletionAction
 import uk.co.jcox.molglide.editor.control.actions.ChangeStereoChemAction
@@ -312,6 +313,15 @@ class EditorStateController (
         actionManager.executeAction(action)
     }
 
+
+    fun deleteSelectedArrow() {
+        val arrow = stateData.selectionManager.primarySelection
+        val s = arrow?.selectable
+        if (s is ChemArrow) {
+            val action = ArrowDeletionAction(s);
+            actionManager.executeAction(action);
+        }
+    }
 
     fun updateSelectedArrowHead(arrowHead: ChemArrow.ArrowHead) {
         val selected = stateData.selectionManager.primarySelection
