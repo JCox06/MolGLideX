@@ -123,7 +123,7 @@ class EditorStateController (
         }
 
         if (globalContext.getEditMode().type == EditMode.ToolType.FORMAL_CHARGE) {
-            currentTool = FormalChargeLonePairTool(globalContext, actionManager, stateData.selectionManager)
+            currentTool = FormalChargeLonePairTool(globalContext, actionManager, stateData.selectionManager, stateData)
         }
 
         if (globalContext.getEditMode().type == EditMode.ToolType.ARROW_CREATOR) {

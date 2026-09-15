@@ -42,6 +42,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         buildArrowUI(fullBuild)
         buildAtomUI(fullBuild)
         buildBondUI(fullBuild)
+        buildFormalChargeUI(fullBuild)
     }
 
 
@@ -59,10 +60,6 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
     }
 
 
-
-    //1 = +
-    //2 = 2+
-    //-1 = -
     private fun getFormalChargeText(formalCharge: Int): String {
         if (formalCharge == 1) {
             return "+"
@@ -486,6 +483,21 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         return UITriangle(v1, v2, v3)
     }
 
+
+    private fun buildFormalChargeUI(fullBuild: Boolean) {
+        data.getCharges().forEach { formalCharge ->
+            val isSelected = selectionManager.isSelected(formalCharge)
+            uiComponents[formalCharge]?.selected = isSelected
+            if (!(formalCharge.isTransient() || isSelected) && !fullBuild) {
+                return@forEach
+            }
+
+            val text = getFormalChargeText(formalCharge.getCharge())
+            val position = formalCharge.position
+            val ui = UITextComponent(text, position.x, position.y, formalCharge.chemAtom.isVisible())
+            uiComponents[formalCharge] = ui
+        }
+    }
 
     fun getSelectedFormula(): String {
         val s = selectionManager.getMolecule() ?: return ""

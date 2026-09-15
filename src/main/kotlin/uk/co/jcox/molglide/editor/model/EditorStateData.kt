@@ -7,7 +7,8 @@ import kotlin.math.max
 class EditorStateData (
 
     private val molecules: MutableList<ChemMolecule> = mutableListOf(),
-    private val arrows: MutableList<ChemArrow> = mutableListOf()
+    private val arrows: MutableList<ChemArrow> = mutableListOf(),
+    private val charges: MutableList<ChemFormalCharge> = mutableListOf(),
     ) : IDataModelUI {
 
     var cameraX: Double = 0.0
@@ -77,6 +78,7 @@ class EditorStateData (
             selectables.addAll(chemMolecule.selectables())
         }
         selectables.addAll(arrows)
+        selectables.addAll(charges)
         return selectables
     }
 
@@ -86,8 +88,20 @@ class EditorStateData (
             spatials.addAll(chemMolecule.atoms())
         }
         spatials.addAll(arrows)
+        spatials.addAll(charges)
         return spatials
     }
+
+
+    fun addCharge(newCharge: ChemFormalCharge) {
+        charges.add(newCharge)
+    }
+
+    fun removeCharge(toRemove: ChemFormalCharge) {
+        charges.remove(toRemove)
+    }
+
+    fun getCharges(): List<ChemFormalCharge> = charges
 
     fun getArrows(): List<ChemArrow> = arrows
 
