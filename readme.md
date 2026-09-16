@@ -19,13 +19,17 @@ Everything else aside, the application uses a very similar core to the original 
 ![MolGLideX Screenshot](screenshots/ALPHA-0.0.2.png)
 
 
+> [!Warning]
+> It has become clear to me that a lot of the code needs rewriting. I shall begin working on the 
+> refactor as the next addition to the project. In the meantime version 0.0.3 will be released.
+
 ## Features and Todo List
 - [x] Snappy and high-performance editor
 - [x] Detect valency and other chemical errors
 - [x] Seamlessly copy over molecules as SVG images into other applications (Tested on LibreOffice Writer)
 - [x] Create basic and simplistic molecules
 - [x] Create molecules from ring templates (mostly working, but see issues)
-- [ ] Formal Charge Tool
+- [x] Formal Charge Tool
 - [ ] Append/Fuse ring fragments to other molecules
 - [x] Load and save your project as JSON text files (.mgx files)
 - [x] Delete atoms, delete bonds, change element of already inserted atom
@@ -35,7 +39,7 @@ Everything else aside, the application uses a very similar core to the original 
 - [X] Reaction Arrows, Curly Mechanism Arrows, Resonance Arrows
 - [ ] Custom Text Boxes
 - [ ] Editing label of atom with custom text - like (Me, Et*, CH2CH(OMe)CH3)
-- [ ] Formal charge and lone pairs tool 
+- [ ] Add lone pair tool to formal charge tool
 
 ## Building
 To build the project install maven or use an inbuilt version in your IDE

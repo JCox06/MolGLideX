@@ -50,10 +50,13 @@ class FormalChargeLonePairTool(val globalContext: IMainAppData, actionManager: A
         }
         //Otherwise create a formal charge, and place it at the mouse click:
         val fc = ChemFormalCharge(Vector2d(clickX.toDouble(), clickY.toDouble()), chemAtom)
+        var defaultCharge = 1
+        if (globalContext.getEditMode() == EditMode.CHARGE_NEGATIVE) {
+            defaultCharge = -1
+        }
+        fc.setCharge(defaultCharge)
         val creation = CreateFormalCharge(fc)
-        val modification = handleChargeClick(fc)
-        val ca = CompoundAction(creation, modification)
-        actionManager.executeAction(ca)
+        actionManager.executeAction(creation)
         fc.chemAtom.molecule.calculateAtomProperties()
     }
 

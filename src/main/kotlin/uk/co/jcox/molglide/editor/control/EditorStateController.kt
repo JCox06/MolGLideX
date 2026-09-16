@@ -24,6 +24,7 @@ import uk.co.jcox.molglide.editor.control.actions.ImportMoleculesAction
 import uk.co.jcox.molglide.editor.control.actions.ModifyArrowHeadAction
 import uk.co.jcox.molglide.editor.control.actions.MoveSpatialAction
 import uk.co.jcox.molglide.editor.control.actions.PartitionFragmentsAction
+import uk.co.jcox.molglide.editor.control.actions.RemoveFormalChargeAction
 import uk.co.jcox.molglide.editor.control.actions.ReplaceAtomAction
 import uk.co.jcox.molglide.editor.control.actions.SetIgnoreErrorsOnAtom
 import uk.co.jcox.molglide.editor.control.actions.ToggleAtomVisibilityAction
@@ -32,6 +33,7 @@ import uk.co.jcox.molglide.editor.control.actions.UpdateBondAromaticityAction
 import uk.co.jcox.molglide.editor.control.actions.UpdateBondOrderAction
 import uk.co.jcox.molglide.editor.control.tool.ArrowTool
 import uk.co.jcox.molglide.editor.model.ChemArrow
+import uk.co.jcox.molglide.editor.model.ChemFormalCharge
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.model.util.EditorPositionSnapshot
@@ -291,6 +293,14 @@ class EditorStateController (
             val deleteAtomAction = AtomDeletionAction(chemAtom)
             actions.add(deleteAtomAction)
             molsToCheck.add(chemAtom.molecule)
+        }
+        stateData.selectionManager.getBatchSpatials().filterIsInstance<ChemArrow>().forEach { chemArrow ->
+            val arrowDeletion = ArrowDeletionAction(chemArrow)
+            actions.add(arrowDeletion)
+        }
+        stateData.selectionManager.getBatchSpatials().filterIsInstance<ChemFormalCharge>().forEach { chemFc ->
+            val fcDeletion = RemoveFormalChargeAction(chemFc)
+            actions.add(fcDeletion)
         }
 
         molsToCheck.forEach { molecule ->
