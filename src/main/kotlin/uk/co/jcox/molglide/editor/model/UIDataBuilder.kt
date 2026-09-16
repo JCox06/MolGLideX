@@ -226,8 +226,8 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         val bPos = atomB.getPos()
         val aVis = atomA.isVisible()
         val bVis = atomB.isVisible()
-        val start = if (aVis) getCappedEnd(bPos, aPos, (EditorPanel.UNMODDED_TEXT_SIZE / AtomBondTool.CONNECTION_DISTANCE.toDouble())*1.2) else aPos
-        val end = if (bVis) getCappedEnd(aPos, bPos, (EditorPanel.UNMODDED_TEXT_SIZE / AtomBondTool.CONNECTION_DISTANCE.toDouble())*1.2) else bPos
+        val start = if (aVis) getCappedEnd(bPos, aPos, (EditorPanel.UNMODDED_TEXT_SIZE / AtomBondTool.CONNECTION_DISTANCE.toDouble())*1.0) else aPos
+        val end = if (bVis) getCappedEnd(aPos, bPos, (EditorPanel.UNMODDED_TEXT_SIZE / AtomBondTool.CONNECTION_DISTANCE.toDouble())*1.0) else bPos
         val id = chemBond.bond.id
         val uiLine: UILine = UILine(start.x, start.y, end.x, end.y)
         return uiLine
