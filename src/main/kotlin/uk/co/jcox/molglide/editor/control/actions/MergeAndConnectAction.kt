@@ -1,11 +1,8 @@
 package uk.co.jcox.molglide.editor.control.actions
 
-import org.checkerframework.checker.units.qual.mol
-import org.openscience.cdk.smiles.smarts.parser.SMARTSParserConstants.c
 import uk.co.jcox.molglide.editor.model.ChemAtom
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
-import java.util.UUID
 
 class MergeAndConnectAction (private val chemAtomA: ChemAtom, private val chemAtomB: ChemAtom) : IDataAction {
 

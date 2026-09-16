@@ -8,12 +8,7 @@ import uk.co.jcox.molglide.MainController.Companion.TOGGLE_ATOM_VISIBILITY_ACTIO
 import uk.co.jcox.molglide.MolGLideUtils
 import uk.co.jcox.molglide.SwingActionRegistry
 import uk.co.jcox.molglide.editor.model.IDataModelUI
-import java.awt.BasicStroke
-import java.awt.Font
-import java.awt.Graphics
-import java.awt.Graphics2D
-import java.awt.RenderingHints
-import java.awt.event.MouseEvent
+import java.awt.*
 import javax.swing.JCheckBoxMenuItem
 import javax.swing.JMenu
 import javax.swing.JPanel

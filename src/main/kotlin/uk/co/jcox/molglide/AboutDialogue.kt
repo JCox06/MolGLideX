@@ -1,18 +1,8 @@
 package uk.co.jcox.molglide
 
-import com.formdev.flatlaf.extras.FlatSVGIcon
 import java.awt.Font
-import java.awt.TextArea
 import java.io.File
-import javax.swing.BorderFactory
-import javax.swing.BoxLayout
-import javax.swing.JButton
-import javax.swing.JDialog
-import javax.swing.JFrame
-import javax.swing.JLabel
-import javax.swing.JPanel
-import javax.swing.JScrollPane
-import javax.swing.JTextArea
+import javax.swing.*
 
 class AboutDialogue(mainFrame: JFrame) : JDialog(mainFrame, "About MolGLideX", ModalityType.APPLICATION_MODAL) {
 

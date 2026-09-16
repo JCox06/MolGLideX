@@ -1,6 +1,6 @@
 package uk.co.jcox.molglide.editor.model
 
-import org.joml.Vector2d
+import org.joml.Vector2dc
 
 interface IEditorSelectable {
 
@@ -12,7 +12,9 @@ interface IEditorSelectable {
      * - This means the line has three selection points
      * 2) The selection manager receives a list of points
      * 3) The Arrow tool knows which point is which based on the index that the mouse is near
+     *
+     * The params are not modified!
      */
-    fun getObjectSelectionPoints(): Map<Int, Vector2d>
+    fun getObjectSelectionPoints(): Map<Int, Vector2dc>
 
 }

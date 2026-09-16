@@ -1,37 +1,15 @@
 package uk.co.jcox.molglide.editor.control
 
 import com.github.jsonldjava.shaded.com.google.common.math.IntMath.pow
-import org.apache.jena.sparql.procedure.library.debug
 import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.IEditorSessionOrganiser
-import uk.co.jcox.molglide.editor.control.tool.AtomBondTool
-import uk.co.jcox.molglide.editor.control.tool.FormalChargeLonePairTool
-import uk.co.jcox.molglide.editor.control.tool.SelectTool
-import uk.co.jcox.molglide.editor.control.tool.TemplateRingTool
-import uk.co.jcox.molglide.editor.control.tool.Tool
 import uk.co.jcox.molglide.IMainAppData
 import uk.co.jcox.molglide.StereoChem
-import uk.co.jcox.molglide.editor.control.actions.ArrowDeletionAction
-import uk.co.jcox.molglide.editor.control.actions.AtomDeletionAction
-import uk.co.jcox.molglide.editor.control.actions.BondDeletionAction
-import uk.co.jcox.molglide.editor.control.actions.ChangeStereoChemAction
-import uk.co.jcox.molglide.editor.control.actions.CleanupStructure
-import uk.co.jcox.molglide.editor.control.actions.CompoundAction
-import uk.co.jcox.molglide.editor.control.actions.FlipBondAction
-import uk.co.jcox.molglide.editor.control.actions.IDataAction
-import uk.co.jcox.molglide.editor.control.actions.ImportMoleculesAction
-import uk.co.jcox.molglide.editor.control.actions.ModifyArrowHeadAction
-import uk.co.jcox.molglide.editor.control.actions.MoveSpatialAction
-import uk.co.jcox.molglide.editor.control.actions.PartitionFragmentsAction
-import uk.co.jcox.molglide.editor.control.actions.ReplaceAtomAction
-import uk.co.jcox.molglide.editor.control.actions.SetIgnoreErrorsOnAtom
-import uk.co.jcox.molglide.editor.control.actions.ToggleAtomVisibilityAction
-import uk.co.jcox.molglide.editor.control.actions.TranslateAtomAction
-import uk.co.jcox.molglide.editor.control.actions.UpdateBondAromaticityAction
-import uk.co.jcox.molglide.editor.control.actions.UpdateBondOrderAction
-import uk.co.jcox.molglide.editor.control.tool.ArrowTool
+import uk.co.jcox.molglide.editor.control.actions.*
+import uk.co.jcox.molglide.editor.control.tool.*
 import uk.co.jcox.molglide.editor.model.ChemArrow
+import uk.co.jcox.molglide.editor.model.ChemFormalCharge
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.model.util.EditorPositionSnapshot
@@ -40,8 +18,6 @@ import uk.co.jcox.molglide.editor.ui.EditorPanel.Companion.MOUSE_SENSE
 import uk.co.jcox.molglide.editor.ui.EditorPanel.Companion.MOUSE_SENSE_ZOOM
 import uk.co.jcox.molglide.editor.ui.EditorPanel.Companion.SIG_MOUSE_DELTA
 import java.awt.Point
-import java.awt.event.FocusEvent
-import java.awt.event.FocusListener
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.event.MouseWheelEvent
@@ -49,7 +25,6 @@ import javax.swing.SwingUtilities
 import javax.swing.Timer
 import javax.swing.event.PopupMenuEvent
 import javax.swing.event.PopupMenuListener
-import kotlin.collections.toTypedArray
 import kotlin.math.sqrt
 
 class EditorStateController (
@@ -123,7 +98,7 @@ class EditorStateController (
         }
 
         if (globalContext.getEditMode().type == EditMode.ToolType.FORMAL_CHARGE) {
-            currentTool = FormalChargeLonePairTool(globalContext, actionManager, stateData.selectionManager)
+            currentTool = FormalChargeLonePairTool(globalContext, actionManager, stateData.selectionManager, stateData)
         }
 
         if (globalContext.getEditMode().type == EditMode.ToolType.ARROW_CREATOR) {
@@ -291,6 +266,14 @@ class EditorStateController (
             val deleteAtomAction = AtomDeletionAction(chemAtom)
             actions.add(deleteAtomAction)
             molsToCheck.add(chemAtom.molecule)
+        }
+        stateData.selectionManager.getBatchSpatials().filterIsInstance<ChemArrow>().forEach { chemArrow ->
+            val arrowDeletion = ArrowDeletionAction(chemArrow)
+            actions.add(arrowDeletion)
+        }
+        stateData.selectionManager.getBatchSpatials().filterIsInstance<ChemFormalCharge>().forEach { chemFc ->
+            val fcDeletion = RemoveFormalChargeAction(chemFc)
+            actions.add(fcDeletion)
         }
 
         molsToCheck.forEach { molecule ->

@@ -3,12 +3,8 @@ package uk.co.jcox.molglide
 import com.formdev.flatlaf.util.SystemFileChooser
 import java.awt.Color
 import java.awt.Component
-import java.awt.Image
-import java.awt.image.ImageFilter
 import java.io.File
 import java.time.LocalTime
-import javax.swing.JComponent
-import javax.swing.JPanel
 import javax.swing.UIManager
 
 object MolGLideUtils {

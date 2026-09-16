@@ -1,14 +1,12 @@
 package uk.co.jcox.molglide.editor.io
 
 import kotlinx.serialization.json.Json
+import org.joml.Vector2d
 import uk.co.jcox.molglide.editor.control.ActionManager
-import uk.co.jcox.molglide.editor.control.actions.DirectAddArrowAction
-import uk.co.jcox.molglide.editor.model.ChemMolecule
-import uk.co.jcox.molglide.editor.model.EditorStateData
-import uk.co.jcox.molglide.editor.control.actions.DirectAtomCreationAction
-import uk.co.jcox.molglide.editor.control.actions.DirectBondConnectionAction
-import uk.co.jcox.molglide.editor.control.actions.DirectMoleculeCreationAction
+import uk.co.jcox.molglide.editor.control.actions.*
 import uk.co.jcox.molglide.editor.model.ChemAtom
+import uk.co.jcox.molglide.editor.model.ChemFormalCharge
+import uk.co.jcox.molglide.editor.model.EditorStateData
 import java.io.File
 import java.io.IOException
 
@@ -70,6 +68,14 @@ class LevelLoader {
         }
         saveFile.arrows.forEach { dataArrow ->
             val action = DirectAddArrowAction(dataArrow)
+            actionManager.executeAction(action)
+        }
+
+        saveFile.charges.forEach { dataCharge ->
+            val chemAtom = idChemAtomMap[dataCharge.atomRef] ?: return@forEach
+            val chemFormalCharge = ChemFormalCharge(Vector2d(dataCharge.position.x, dataCharge.position.y), chemAtom)
+            chemFormalCharge.setCharge(dataCharge.charge)
+            val action = CreateFormalCharge(chemFormalCharge)
             actionManager.executeAction(action)
         }
     }

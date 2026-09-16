@@ -1,11 +1,7 @@
 package uk.co.jcox.molglide.editor.model
 
-import org.apache.jena.riot.other.G
-import org.checkerframework.checker.units.qual.m
 import org.joml.Vector2d
-import org.openscience.cdk.smiles.smarts.parser.SMARTSParserConstants.x
 import uk.co.jcox.molglide.MolGLideUtils
-import uk.co.jcox.molglide.editor.ui.MasterAtomMetric
 import java.awt.Color
 import java.awt.Graphics2D
 import java.awt.font.TextAttribute
@@ -13,27 +9,16 @@ import java.awt.font.TextLayout
 import java.text.AttributedString
 
 class UIAtom (
-    val element: String,
-    val posX: Double,
-    val posY: Double,
+    element: String,
+    posX: Double,
+    posY: Double,
     val trailGroup: String,
     val trailGroupPos: ChemMolecule.TrailingGroupPosition,
     val visible: Boolean,
     selected: Boolean,
     val hasErrors: Boolean,
     val ignoreErrors: Boolean,
-    val formalCharge: Int,
-) : AbstractUIComponent(selected) {
-
-    var x = 0.0
-    var y = 0.0
-
-    var textWidth = 0
-    var textHeight = 0
-    var centreTextWidth = 0.0
-    var centreTextHeight = 0.0
-    var centreBoxWidth = 0.0
-    var centreBoxHeight = 0.0
+) : UITextComponent (element, posX, posY, selected) {
 
     override fun drawComponent(g2d: Graphics2D, cameraZoom: Double) {
         if (! visible) {
@@ -59,70 +44,8 @@ class UIAtom (
         }
     }
 
-    private fun setupMetrics(g2d: Graphics2D, cameraZoom: Double) {
-        x = posX * cameraZoom
-        y = posY * cameraZoom
-        textWidth = g2d.fontMetrics.stringWidth(element)
-        textHeight = g2d.fontMetrics.ascent - g2d.fontMetrics.descent
-        centreTextWidth = x - textWidth / 2
-        centreTextHeight = y + textHeight / 2
-        centreBoxWidth = x - textWidth
-        centreBoxHeight = y - g2d.fontMetrics.height / 2
-    }
-
-
-    //Is used for the atom selection marker, but also for any errors that may arise
-    private fun paintAtomTextBoxBorder(g2d: Graphics2D, color: Color, shouldFill: Boolean) {
-        val oldColour = g2d.color
-        val newColour = color
-        g2d.color = newColour
-        if (shouldFill) {
-            g2d.fillRoundRect((centreBoxWidth).toInt(),
-                (centreBoxHeight).toInt(),
-                (textWidth * 2),
-                (textWidth * 2), textWidth, textWidth)
-        } else {
-            g2d.drawRect((centreBoxWidth).toInt(),
-                (centreBoxHeight).toInt(),
-                (textWidth * 2),
-                (textWidth * 2))
-        }
-        g2d.color = oldColour
-    }
-
     private fun paintMainAtomElementSymbol(g2d: Graphics2D) {
-        if (formalCharge == 0) {
-            g2d.drawString(element, centreTextWidth.toInt(), centreTextHeight.toInt())
-        } else {
-            val toDraw = "$element${getFormalChargeString(formalCharge)}"
-            val superscriptRange = getSuperscriptRange(toDraw)
-
-            val attributedString = AttributedString(toDraw)
-            attributedString.addAttribute(TextAttribute.FAMILY, g2d.font.family)
-            attributedString.addAttribute(TextAttribute.SIZE, g2d.font.size)
-            superscriptRange.forEach { attributedString.addAttribute(TextAttribute.SUPERSCRIPT, TextAttribute.SUPERSCRIPT_SUPER, it, it+1) }
-
-            val renderingContext = g2d.fontRenderContext
-            val attributedIterator = attributedString.iterator
-            val textLayout = TextLayout(attributedIterator, renderingContext)
-            textLayout.draw(g2d, centreTextWidth.toFloat(), centreTextHeight.toFloat())
-        }
-    }
-
-    private fun getFormalChargeString(charge: Int) : String {
-        if (charge == 1) {
-            return "+"
-        }
-        if (charge == -1) {
-            return "-"
-        }
-        if (charge > 1) {
-            return "${charge}+"
-        }
-        if (charge < -1) {
-            return "${charge}-"
-        }
-        return ""
+        g2d.drawString(element, centreTextWidth.toInt(), centreTextHeight.toInt())
     }
 
     private fun paintTrailGroup(g2d: Graphics2D) {

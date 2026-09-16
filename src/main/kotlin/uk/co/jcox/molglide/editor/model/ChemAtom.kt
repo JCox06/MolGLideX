@@ -1,6 +1,5 @@
 package uk.co.jcox.molglide.editor.model
 
-import jdk.internal.jshell.tool.resources.version
 import org.joml.Vector2d
 import org.openscience.cdk.interfaces.IAtom
 import uk.co.jcox.molglide.editor.model.ChemMolecule.Companion.IGNORE_ERRORS
@@ -50,7 +49,9 @@ class ChemAtom (
     }
 
     override fun getObjectSelectionPoints(): Map<Int, Vector2d> {
-        return mutableMapOf(0 to getPos())
+        val map = mutableMapOf<Int, Vector2d>()
+        map[MAIN_ATOM] = getPos()
+        return map
     }
 
     override fun getAllCoordinates(): Map<Int, Vector2d> {
@@ -71,8 +72,15 @@ class ChemAtom (
         molecule.calculateAtomProperties()
     }
 
+
     fun setPos(vector: Vector2d) {
         atom.point2d.x = vector.x
         atom.point2d.y = vector.y
+    }
+
+
+    companion object {
+        const val MAIN_ATOM = 0
+        const val CHARGE = 1
     }
 }

@@ -1,6 +1,7 @@
 package uk.co.jcox.molglide.editor.model
 
 import org.joml.Vector2d
+import org.joml.Vector2dc
 import uk.co.jcox.molglide.editor.control.tool.Tool
 
 class SelectionManager (
@@ -13,7 +14,7 @@ class SelectionManager (
 
     fun updatePrimarySelection(levelData: EditorStateData, worldX: Int, worldY: Int, currentTool: Tool) {
         val closestSelectable = getClosestSelectable(levelData, worldX, worldY)
-        if (closestSelectable == null || !currentTool.isTypeValidPrimarySelection(closestSelectable.selectable)) {
+        if (closestSelectable == null || !currentTool.isTypeValidPrimarySelection(closestSelectable)) {
             primarySelection = null
             return
         }
@@ -53,9 +54,9 @@ class SelectionManager (
         batchSelection.addAll(selectables)
     }
 
-    private fun checkInside(boxX1: Int, boxY1: Int, boxX2: Int, boxY2: Int, checkAgainst: Vector2d) : Boolean {
-        val pointX = checkAgainst.x
-        val pointY = checkAgainst.y
+    private fun checkInside(boxX1: Int, boxY1: Int, boxX2: Int, boxY2: Int, checkAgainst: Vector2dc) : Boolean {
+        val pointX = checkAgainst.x()
+        val pointY = checkAgainst.y()
 
         if (pointX.toInt() in boxX1..boxX2 && pointY.toInt() in boxY1 .. boxY2) {
             return true
@@ -135,11 +136,20 @@ class SelectionManager (
      * This method checks if the object is active either
      * in the primary selection (discrete) or if it is active
      * in the batch selection
+     * @param item The item to check if it is selected
+     * @param anchorID If you want to specifically check if a specific anchor is selected on this item (null is standard)
+     * @return true if the item is selected
      */
-    fun isSelected(item: IEditorSelectable): Boolean {
+    fun isSelected(item: IEditorSelectable, anchorID: Int? = null): Boolean {
         val p = primarySelection?.selectable
         if (p == item) {
-            return true
+            if (anchorID == null) {
+                return true
+            }
+            if (primarySelection?.objectAnchorID == anchorID) {
+                return true
+            }
+            return false
         }
         if (batchSelection.contains(item)) {
             return true

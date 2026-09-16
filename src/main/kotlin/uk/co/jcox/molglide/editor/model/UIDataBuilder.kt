@@ -8,7 +8,6 @@ import org.openscience.cdk.interfaces.IAtom
 import org.openscience.cdk.interfaces.IAtomContainer
 import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.StereoChem
-
 import uk.co.jcox.molglide.editor.control.tool.AtomBondTool
 import uk.co.jcox.molglide.editor.ui.EditorPanel
 import kotlin.math.roundToInt
@@ -41,22 +40,38 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         buildArrowUI(fullBuild)
         buildAtomUI(fullBuild)
         buildBondUI(fullBuild)
-
+        buildFormalChargeUI(fullBuild)
     }
 
 
     private fun buildAtomUI(fullBuild: Boolean) {
         data.getMolecules().forEach { chemMolecule ->
             chemMolecule.atoms().forEach { chemAtom ->
-                val isSelected = selectionManager.isSelected(chemAtom)
+                val isSelected = selectionManager.isSelected(chemAtom, ChemAtom.MAIN_ATOM)
                 uiComponents[chemAtom]?.selected = isSelected
                 if (!fullBuild && !(chemAtom.isTransient() || isSelected)) {
                     return@forEach
                 }
                 val ui = buildUIAtom(chemAtom)
-                uiComponents[chemAtom] = ui
-            }
+                uiComponents[chemAtom] = ui }
         }
+    }
+
+
+    private fun getFormalChargeText(formalCharge: Int): String {
+        if (formalCharge == 1) {
+            return "+"
+        }
+        if (formalCharge == -1) {
+            return "-"
+        }
+        if (formalCharge > 1) {
+            return "$formalCharge+"
+        }
+        if (formalCharge < -1) {
+            return "$formalCharge-"
+        }
+        return ""
     }
 
 
@@ -74,7 +89,6 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
             selectionManager.isSelected(chemAtom),
             checkForAtomErrors(chemAtom),
             chemAtom.shouldIgnoreErrors(),
-            chemAtom.getFormalCharge()
         )
         return ui
     }
@@ -210,8 +224,8 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         val bPos = atomB.getPos()
         val aVis = atomA.isVisible()
         val bVis = atomB.isVisible()
-        val start = if (aVis) getCappedEnd(bPos, aPos, (EditorPanel.UNMODDED_TEXT_SIZE / AtomBondTool.CONNECTION_DISTANCE.toDouble())*1.2) else aPos
-        val end = if (bVis) getCappedEnd(aPos, bPos, (EditorPanel.UNMODDED_TEXT_SIZE / AtomBondTool.CONNECTION_DISTANCE.toDouble())*1.2) else bPos
+        val start = if (aVis) getCappedEnd(bPos, aPos, (EditorPanel.UNMODDED_TEXT_SIZE / AtomBondTool.CONNECTION_DISTANCE.toDouble())*1.0) else aPos
+        val end = if (bVis) getCappedEnd(aPos, bPos, (EditorPanel.UNMODDED_TEXT_SIZE / AtomBondTool.CONNECTION_DISTANCE.toDouble())*1.0) else bPos
         val id = chemBond.bond.id
         val uiLine: UILine = UILine(start.x, start.y, end.x, end.y)
         return uiLine
@@ -467,6 +481,21 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         return UITriangle(v1, v2, v3)
     }
 
+
+    private fun buildFormalChargeUI(fullBuild: Boolean) {
+        data.getCharges().forEach { formalCharge ->
+            val isSelected = selectionManager.isSelected(formalCharge)
+            uiComponents[formalCharge]?.selected = isSelected
+            if (!(formalCharge.isTransient() || isSelected) && !fullBuild) {
+                return@forEach
+            }
+
+            val text = getFormalChargeText(formalCharge.getCharge())
+            val position = formalCharge.position
+            val ui = UITextComponent(text, position.x, position.y, formalCharge.chemAtom.isVisible())
+            uiComponents[formalCharge] = ui
+        }
+    }
 
     fun getSelectedFormula(): String {
         val s = selectionManager.getMolecule() ?: return ""

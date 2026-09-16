@@ -1,7 +1,5 @@
 package uk.co.jcox.molglide.editor.control.actions
 
-import org.apache.jena.sparql.function.library.date
-import org.checkerframework.checker.units.qual.mol
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 

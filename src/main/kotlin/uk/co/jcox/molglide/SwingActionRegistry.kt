@@ -2,7 +2,6 @@ package uk.co.jcox.molglide
 
 import uk.co.jcox.molglide.editor.model.ChemAtom
 import uk.co.jcox.molglide.editor.model.ChemBond
-import javax.swing.AbstractAction
 
 class SwingActionRegistry {
 

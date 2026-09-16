@@ -4,14 +4,12 @@ import org.joml.Vector2d
 import org.joml.minus
 import uk.co.jcox.molglide.editor.control.ActionManager
 import uk.co.jcox.molglide.editor.control.EventContext
-import uk.co.jcox.molglide.editor.model.EditorStateData
-import uk.co.jcox.molglide.editor.model.SelectionManager
 import uk.co.jcox.molglide.editor.control.actions.MoveSpatialAction
 import uk.co.jcox.molglide.editor.model.ChemAtom
-import uk.co.jcox.molglide.editor.model.IEditorSelectable
+import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.model.ISpatialInfo
+import uk.co.jcox.molglide.editor.model.SelectionManager
 import uk.co.jcox.molglide.editor.model.util.EditorPositionSnapshot
-import kotlin.math.round
 
 /**
  * This tool works by interacting with the Selection Manager's axis aligned bounding selection box
@@ -154,7 +152,7 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
         return toolMode == ToolMode.None
     }
 
-    override fun isTypeValidPrimarySelection(entity: IEditorSelectable): Boolean {
+    override fun isTypeValidPrimarySelection(selectionContext: SelectionManager.SelectionInfo): Boolean {
         return true
     }
 
