@@ -1,9 +1,7 @@
 package uk.co.jcox.molglide.editor.model
 
 import org.joml.Vector2d
-import uk.co.jcox.molglide.MolGLideUtils
 import uk.co.jcox.molglide.StereoChem
-import uk.co.jcox.molglide.editor.ui.EditorPanel.Companion.BOND_MARKER
 import java.awt.Graphics2D
 
 //INFORMATION

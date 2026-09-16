@@ -1,6 +1,5 @@
 package uk.co.jcox.molglide.editor.model
 
-import org.checkerframework.checker.units.qual.mol
 import kotlin.math.max
 
 

@@ -1,11 +1,7 @@
 package uk.co.jcox.molglide.editor.model
 
-import org.apache.jena.riot.other.G
-import org.checkerframework.checker.units.qual.m
 import org.joml.Vector2d
-import org.openscience.cdk.smiles.smarts.parser.SMARTSParserConstants.x
 import uk.co.jcox.molglide.MolGLideUtils
-import uk.co.jcox.molglide.editor.ui.MasterAtomMetric
 import java.awt.Color
 import java.awt.Graphics2D
 import java.awt.font.TextAttribute

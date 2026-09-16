@@ -1,7 +1,6 @@
 package uk.co.jcox.molglide.editor.model
 
 import org.joml.Vector2d
-import org.joml.minus
 import org.joml.times
 import java.awt.Graphics2D
 import java.awt.geom.QuadCurve2D

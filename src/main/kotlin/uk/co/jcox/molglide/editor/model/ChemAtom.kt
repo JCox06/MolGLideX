@@ -1,17 +1,11 @@
 package uk.co.jcox.molglide.editor.model
 
-import jdk.internal.jshell.tool.resources.version
 import org.joml.Vector2d
-import org.joml.Vector2f
-import org.joml.plus
-import org.joml.times
 import org.openscience.cdk.interfaces.IAtom
-import uk.co.jcox.molglide.editor.control.tool.AtomBondTool
 import uk.co.jcox.molglide.editor.model.ChemMolecule.Companion.IGNORE_ERRORS
 import uk.co.jcox.molglide.editor.model.ChemMolecule.Companion.TRAILING_POS
 import uk.co.jcox.molglide.editor.model.ChemMolecule.Companion.VISIBLE
 import uk.co.jcox.molglide.editor.model.ChemMolecule.TrailingGroupPosition
-import uk.co.jcox.molglide.editor.ui.EditorPanel
 
 class ChemAtom (
     val atom: IAtom,

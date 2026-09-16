@@ -2,15 +2,14 @@ package uk.co.jcox.molglide.editor.control.tool
 
 import org.joml.Vector2d
 import org.joml.minus
-import uk.co.jcox.molglide.editor.control.ActionManager
-import uk.co.jcox.molglide.editor.model.ChemMolecule
-import uk.co.jcox.molglide.editor.model.SelectionManager
-import uk.co.jcox.molglide.editor.control.actions.RingCreatorAction
 import uk.co.jcox.molglide.IMainAppData
+import uk.co.jcox.molglide.editor.control.ActionManager
 import uk.co.jcox.molglide.editor.control.EventContext
+import uk.co.jcox.molglide.editor.control.actions.RingCreatorAction
 import uk.co.jcox.molglide.editor.model.ChemAtom
 import uk.co.jcox.molglide.editor.model.ChemBond
-import uk.co.jcox.molglide.editor.model.IEditorSelectable
+import uk.co.jcox.molglide.editor.model.ChemMolecule
+import uk.co.jcox.molglide.editor.model.SelectionManager
 import uk.co.jcox.molglide.editor.model.util.EditorPositionSnapshot
 import kotlin.math.round
 

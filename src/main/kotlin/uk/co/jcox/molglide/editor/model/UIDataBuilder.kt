@@ -8,10 +8,8 @@ import org.openscience.cdk.interfaces.IAtom
 import org.openscience.cdk.interfaces.IAtomContainer
 import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.StereoChem
-
 import uk.co.jcox.molglide.editor.control.tool.AtomBondTool
 import uk.co.jcox.molglide.editor.ui.EditorPanel
-import java.lang.System.gc
 import kotlin.math.roundToInt
 
 class UIDataBuilder (private val data: EditorStateData, private val selectionManager: SelectionManager) {

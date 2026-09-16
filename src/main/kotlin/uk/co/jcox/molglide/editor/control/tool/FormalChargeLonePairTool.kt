@@ -1,24 +1,18 @@
 package uk.co.jcox.molglide.editor.control.tool
 
-import jdk.javadoc.internal.doclets.formats.html.resources.standard
-import org.apache.jena.sparql.function.library.date
-import org.apache.jena.vocabulary.TestManifest.action
 import org.joml.Vector2d
 import uk.co.jcox.molglide.EditMode
-import uk.co.jcox.molglide.editor.control.ActionManager
-import uk.co.jcox.molglide.editor.model.SelectionManager
 import uk.co.jcox.molglide.IMainAppData
+import uk.co.jcox.molglide.editor.control.ActionManager
 import uk.co.jcox.molglide.editor.control.EventContext
-import uk.co.jcox.molglide.editor.control.actions.CompoundAction
 import uk.co.jcox.molglide.editor.control.actions.CreateFormalCharge
 import uk.co.jcox.molglide.editor.control.actions.DecrementFormalChargeAction
 import uk.co.jcox.molglide.editor.control.actions.IDataAction
 import uk.co.jcox.molglide.editor.control.actions.IncrementFormalChargeAction
-import uk.co.jcox.molglide.editor.model.ChemArrow
 import uk.co.jcox.molglide.editor.model.ChemAtom
 import uk.co.jcox.molglide.editor.model.ChemFormalCharge
 import uk.co.jcox.molglide.editor.model.EditorStateData
-import uk.co.jcox.molglide.editor.model.IEditorSelectable
+import uk.co.jcox.molglide.editor.model.SelectionManager
 
 class FormalChargeLonePairTool(val globalContext: IMainAppData, actionManager: ActionManager,
                                selectionManager: SelectionManager, val stateData: EditorStateData) : Tool(actionManager, selectionManager) {
