@@ -15,7 +15,8 @@ data class DataSaveFile (
     val dataMolecules: MutableList<MoleculeDataObject> = mutableListOf(),
     val dataBonds: MutableMap<Int, BondDataObject> = mutableMapOf(),
     val dataAtoms: MutableMap<Int, AtomDataObject> = mutableMapOf(),
-    val arrows: MutableList<ArrowDataObject> = mutableListOf()
+    val arrows: MutableList<ArrowDataObject> = mutableListOf(),
+    val charges: MutableList<FormalChargeObject> = mutableListOf()
 )
 
 @Serializable
@@ -63,6 +64,15 @@ data class MolGLideMetaData (
     val copyAtScreenX: Int = 0,
     val copyAtScreenY: Int = 0,
 )
+
+
+@Serializable
+data class FormalChargeObject(
+    val atomRef: Int,
+    val charge: Int,
+    val position: VectorDataObject
+)
+
 
 data class DataObjectIDMap (
     val chemMolecules: MutableMap<ChemMolecule, Int> = mutableMapOf(),

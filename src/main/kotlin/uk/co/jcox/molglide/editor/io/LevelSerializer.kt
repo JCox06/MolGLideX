@@ -2,6 +2,7 @@ package uk.co.jcox.molglide.editor.io
 
 import kotlinx.serialization.json.Json
 import uk.co.jcox.molglide.editor.model.ChemArrow
+import uk.co.jcox.molglide.editor.model.ChemFormalCharge
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.model.IEditorSelectable
@@ -31,6 +32,10 @@ class LevelSerializer {
 
         stateData.getArrows().forEach { chemArrow ->
             serializeArrow(stateData, saveFile, chemArrow)
+        }
+
+        stateData.getCharges().forEach { chemFc ->
+            serializeFormalCharge(saveFile, idMappings, chemFc)
         }
         return saveFile
     }
@@ -101,5 +106,14 @@ class LevelSerializer {
         val serialChemArrow = ArrowDataObject(vecMap, chemArrow.startArrow, chemArrow.endArrow)
 
         dataSaveFile.arrows.add(serialChemArrow)
+    }
+
+
+    private fun serializeFormalCharge(dataSaveFile: DataSaveFile, idMappings: DataObjectIDMap, fc: ChemFormalCharge) {
+        val atomRef = idMappings.chemAtoms[fc.chemAtom] ?: return
+        val p = fc.position
+        val dataObject = FormalChargeObject(atomRef, fc.getCharge(), VectorDataObject(p.x, p.y))
+
+        dataSaveFile.charges.add(dataObject)
     }
 }

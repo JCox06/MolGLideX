@@ -123,6 +123,14 @@ class EditorStateData (
         arrows.remove(chemArrow)
     }
 
+    fun addCharges(extra: Collection<ChemFormalCharge>) {
+        charges.addAll(extra)
+    }
+
+    fun removeCharges(remove: Collection<ChemFormalCharge>) {
+        charges.removeAll(remove)
+    }
+
     override fun cameraX(): Double {
         return cameraX
     }

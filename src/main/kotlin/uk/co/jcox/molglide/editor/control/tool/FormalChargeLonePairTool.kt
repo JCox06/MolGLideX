@@ -48,8 +48,6 @@ class FormalChargeLonePairTool(val globalContext: IMainAppData, actionManager: A
             actionManager.executeAction(click)
             return
         }
-
-        println("It looks like the charge is null")
         //Otherwise create a formal charge, and place it at the mouse click:
         val fc = ChemFormalCharge(Vector2d(clickX.toDouble(), clickY.toDouble()), chemAtom)
         val creation = CreateFormalCharge(fc)

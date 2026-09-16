@@ -13,10 +13,12 @@ class ImportMoleculesAction (
     override fun execute(data: EditorStateData) {
         data.addMolecules(dataToImport.getMolecules())
         data.addArrows(dataToImport.getArrows())
+        data.addCharges(dataToImport.getCharges())
     }
 
     override fun undo(data: EditorStateData) {
         data.removeMolecules(dataToImport.getMolecules())
         data.removeArrows(dataToImport.getArrows())
+        data.removeCharges(dataToImport.getCharges())
     }
 }
