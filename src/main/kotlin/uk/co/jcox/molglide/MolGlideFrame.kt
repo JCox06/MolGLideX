@@ -8,13 +8,7 @@ import java.awt.BorderLayout
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.time.LocalDate
-import javax.swing.JFrame
-import javax.swing.JLabel
-import javax.swing.JMenu
-import javax.swing.JMenuBar
-import javax.swing.JOptionPane
-import javax.swing.JPanel
-import javax.swing.SwingUtilities
+import javax.swing.*
 
 class MolGlideFrame (
     private val appData: IMainAppData,
@@ -72,6 +66,7 @@ class MolGlideFrame (
         this.addWindowListener(object : WindowAdapter() {
             override fun windowClosing(e: WindowEvent?) {
                 if (confirmClose()) {
+                    AppSettings.saveToDisc()
                     setDefaultCloseOperation(EXIT_ON_CLOSE)
                 }
                 super.windowClosing(e)

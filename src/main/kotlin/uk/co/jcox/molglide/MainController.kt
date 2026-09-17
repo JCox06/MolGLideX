@@ -33,7 +33,6 @@ class MainController (
 
 
     init {
-
         registerGlobalActions()
         buildFileMenu()
         buildEditMenu()
@@ -235,6 +234,7 @@ class MainController (
         actionRegistry.registerAction(LOAD_PROJECT_ACTION, LoadFileAction(this, mainFrame))
         actionRegistry.registerAction(SAVE_PROJECT_ACTION, SaveFileAction(this))
         actionRegistry.registerAction(SAVE_PROJECT_AS_ACTION, SaveAsFileAction(this, mainFrame))
+        actionRegistry.registerAction(VISIT_SETTINGS_MENU, ShowSettingsMenu(mainFrame))
         actionRegistry.registerAction(QUIT_APPLICATION_ACTION, QuitAction(this))
 
         actionRegistry.registerAction(UNDO_ACTION, UndoAction(this))
@@ -278,6 +278,7 @@ class MainController (
         mainFrame.fileMenu.add(actionRegistry[LOAD_PROJECT_ACTION])
         mainFrame.fileMenu.add(actionRegistry[SAVE_PROJECT_ACTION])
         mainFrame.fileMenu.add(actionRegistry[SAVE_PROJECT_AS_ACTION])
+        mainFrame.fileMenu.add(actionRegistry[VISIT_SETTINGS_MENU])
         mainFrame.fileMenu.add(actionRegistry[QUIT_APPLICATION_ACTION])
     }
 
@@ -340,6 +341,7 @@ class MainController (
         const val VISIT_REPO_ACTION = "VISIT_REPO"
         const val VISIT_ISSUE_TRACKER_ACTION = "VISIT_ISSUE_TRACKER"
         const val VISIT_ABOUT_ACTION = "VISIT_ABOUT"
+        const val VISIT_SETTINGS_MENU = "VISIT_SETTINGS"
 
         const val EDIT_LABEL_ACTION = "EDIT_LABEL_ACTION"
         const val DELETE_ATOM_MENU_ACTION = "DELETE_ATOM"

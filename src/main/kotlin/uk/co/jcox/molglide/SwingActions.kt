@@ -444,6 +444,16 @@ class ShowAboutMenuAction(val mainFrame: MolGlideFrame) : MolGLideSwingAction("A
     }
 }
 
+class ShowSettingsMenu(val mainFrame: MolGlideFrame) : MolGLideSwingAction("Settings") {
+    init {
+        putValue(SHORT_DESCRIPTION, "Change application settings")
+    }
+    override fun actionPerformed(e: ActionEvent?) {
+        val dialogue = SettingsDialogue(mainFrame)
+        dialogue.isVisible = true
+    }
+}
+
 class CDKCopyCanonicalSmilesAction (val mainController: MainController) : MolGLideSwingAction("Copy canonical SMILES") {
 
     init {

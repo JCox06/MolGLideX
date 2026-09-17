@@ -4,7 +4,7 @@ import com.formdev.flatlaf.util.SystemFileChooser
 import java.awt.Color
 import java.awt.Component
 import java.io.File
-import java.time.LocalTime
+import java.util.*
 import javax.swing.UIManager
 
 object MolGLideUtils {
@@ -71,7 +71,7 @@ object MolGLideUtils {
     }
 
     fun getTempFile(): File {
-        val temp = File.createTempFile("molglide_graphics_${LocalTime.now()}", ".svg")
+        val temp = File.createTempFile("MGX_${UUID.randomUUID().toString()}", ".svg")
         temp.deleteOnExit()
         return temp
     }
