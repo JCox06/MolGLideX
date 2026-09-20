@@ -11,17 +11,13 @@ class UIAtom (
     element: String,
     posX: Double,
     posY: Double,
-    var trailGroup: String,
+    val trailGroup: String,
     val trailGroupPos: ChemMolecule.TrailingGroupPosition,
     val visible: Boolean,
     selected: Boolean,
     val hasErrors: Boolean,
     val ignoreErrors: Boolean,
 ) : UITextComponent (element, posX, posY, selected) {
-
-    init {
-        trailGroup = "Me"
-    }
 
     override fun drawComponent(g2d: Graphics2D, cameraZoom: Double) {
         if (! visible) {
