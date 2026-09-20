@@ -49,31 +49,40 @@ class UIAtom (
     }
 
     private fun paintTrailGroup(g2d: Graphics2D) {
-        val attributedString = AttributedString(trailGroup)
-        attributedString.addAttribute(TextAttribute.FAMILY, g2d.font.family)
-        attributedString.addAttribute(TextAttribute.SIZE, g2d.font.size)
 
-        val subscriptRange = getSubscriptRange(trailGroup)
-        subscriptRange.forEach { attributedString.addAttribute(TextAttribute.SUPERSCRIPT, TextAttribute.SUPERSCRIPT_SUB, it, it+1) }
+        val trailGroupTextLayout = getChemTextLayout(g2d, trailGroup)
+        val leftLeaningTextLayout = getChemTextLayout(g2d, "${trailGroup}${element}")
 
-        val renderingContext = g2d.fontRenderContext
-        val attributorIterator = attributedString.iterator
+        val position = getTextDrawForTrailPos(g2d, leftLeaningTextLayout)
 
-        val textLayout = TextLayout(attributorIterator, renderingContext)
-        val position = getTextDrawForTrailPos(g2d, textLayout)
-
-        textLayout.draw(g2d, position.x.toFloat(), position.y.toFloat())
+        trailGroupTextLayout.draw(g2d, position.x.toFloat(), position.y.toFloat())
     }
 
-    private fun getTextDrawForTrailPos(g2d: Graphics2D, textLayout: TextLayout) : Vector2d {
-        val defaultStartX = x + textWidth / 2
-        val defaultStartY = y + textHeight / 2
+    //todo come back to this for the custom label system!
+    private fun getChemTextLayout(g2d: Graphics2D, chemText: String): TextLayout {
+        val attStr = AttributedString(chemText)
+        attStr.addAttribute(TextAttribute.FAMILY, g2d.font.family)
+        attStr.addAttribute(TextAttribute.SIZE, g2d.font.size)
+
+        val subscriptRange = getSubscriptRange(chemText)
+        subscriptRange.forEach { attStr.addAttribute(TextAttribute.SUPERSCRIPT, TextAttribute.SUPERSCRIPT_SUB, it, it+1) }
+
+        val renderingContext = g2d.fontRenderContext
+        val attributorIterator = attStr.iterator
+
+        val textLayout = TextLayout(attributorIterator, renderingContext)
+        return textLayout
+    }
+
+    private fun getTextDrawForTrailPos(g2d: Graphics2D, leftLeaningTextLayout: TextLayout) : Vector2d {
+        val defaultStartX = x + textWidth.toDouble() / 2
+        val defaultStartY = y + textHeight.toDouble() / 2
 
         if (trailGroupPos == ChemMolecule.TrailingGroupPosition.RIGHT) {
             return Vector2d(defaultStartX, defaultStartY)
         }
         if (trailGroupPos == ChemMolecule.TrailingGroupPosition.LEFT) {
-            val newX = defaultStartX - textLayout.bounds.width - textWidth
+            val newX = defaultStartX - leftLeaningTextLayout.bounds.width
             val newY = defaultStartY
             return Vector2d(newX, newY)
         }

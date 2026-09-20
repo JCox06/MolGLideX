@@ -3,6 +3,8 @@ package uk.co.jcox.molglide.editor.model
 import uk.co.jcox.molglide.MolGLideUtils
 import java.awt.Color
 import java.awt.Graphics2D
+import java.awt.font.TextAttribute
+import java.text.AttributedString
 
 open class UITextComponent (
     val element: String,
@@ -55,7 +57,12 @@ open class UITextComponent (
 
 
     private fun paintText(g2d: Graphics2D) {
-        g2d.drawString(element, centreTextWidth.toFloat(), centreTextHeight.toFloat())
+        //todo fix selection marker for this!
+        val attStr = AttributedString(element)
+        attStr.addAttribute(TextAttribute.FAMILY, g2d.font.family)
+        attStr.addAttribute(TextAttribute.SIZE, g2d.font.size)
+        attStr.addAttribute(TextAttribute.SUPERSCRIPT, TextAttribute.SUPERSCRIPT_SUPER)
+        g2d.drawString(attStr.iterator, x.toInt(), y.toInt())
     }
 
     override fun drawComponent(g2d: Graphics2D, cameraZoom: Double) {
