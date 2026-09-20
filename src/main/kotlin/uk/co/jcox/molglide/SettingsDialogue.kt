@@ -19,9 +19,9 @@ class SettingsDialogue (mainFrame: JFrame) : JDialog (mainFrame, "Settings", Mod
         mainPanel.add(tabbedLayout, BorderLayout.CENTER)
         mainPanel.add(buildCloseButtons(), BorderLayout.PAGE_END)
 
-        this.setLocationRelativeTo(mainFrame)
         this.add(mainPanel)
         this.pack()
+        this.setLocationRelativeTo(mainFrame)
     }
 
 
