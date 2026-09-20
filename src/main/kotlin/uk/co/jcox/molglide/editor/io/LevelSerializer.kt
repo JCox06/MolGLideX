@@ -1,11 +1,7 @@
 package uk.co.jcox.molglide.editor.io
 
 import kotlinx.serialization.json.Json
-import uk.co.jcox.molglide.editor.model.ChemArrow
-import uk.co.jcox.molglide.editor.model.ChemFormalCharge
-import uk.co.jcox.molglide.editor.model.ChemMolecule
-import uk.co.jcox.molglide.editor.model.EditorStateData
-import uk.co.jcox.molglide.editor.model.IEditorSelectable
+import uk.co.jcox.molglide.editor.model.*
 import java.io.IOException
 
 class LevelSerializer {
@@ -31,10 +27,16 @@ class LevelSerializer {
         }
 
         stateData.getArrows().forEach { chemArrow ->
+            if (!checkShouldSerialize(chemArrow, selected)) {
+                return@forEach
+            }
             serializeArrow(stateData, saveFile, chemArrow)
         }
 
         stateData.getCharges().forEach { chemFc ->
+            if (!checkShouldSerialize(chemFc, selected)) {
+                return@forEach
+            }
             serializeFormalCharge(saveFile, idMappings, chemFc)
         }
         return saveFile
@@ -46,7 +48,7 @@ class LevelSerializer {
         var addMolecule = false
 
         molecule.atoms().forEach { chemAtom ->
-            if (selected != null && !selected.contains(chemAtom)) {
+            if (!checkShouldSerialize(chemAtom, selected)) {
                 return@forEach
             }
             val id = idMappings.chemAtoms[chemAtom] ?: throw IOException("Level Data ID for atom is missing upon molecule serialization")
@@ -58,7 +60,7 @@ class LevelSerializer {
         }
 
         molecule.bonds().forEach { chemBond ->
-            if (selected != null && !selected.contains(chemBond)) {
+            if (!checkShouldSerialize(chemBond, selected)) {
                 return@forEach
             }
             val bondID = idMappings.chemBonds[chemBond] ?: throw IOException("Level Data ID for bond is missing upon molecule serialization")
@@ -115,5 +117,15 @@ class LevelSerializer {
         val dataObject = FormalChargeObject(atomRef, fc.getCharge(), VectorDataObject(p.x, p.y))
 
         dataSaveFile.charges.add(dataObject)
+    }
+
+    private fun checkShouldSerialize(component: IEditorSelectable, selected: Collection<IEditorSelectable>?): Boolean {
+        if (selected == null) {
+            return true
+        }
+        if (selected.contains(component)) {
+            return true
+        }
+        return false
     }
 }

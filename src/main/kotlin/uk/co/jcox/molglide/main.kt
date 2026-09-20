@@ -10,11 +10,11 @@ fun main() {
 
     System.setProperty("sun.java2d.opengl", "true")
 
-    AppSettings.refreshDataFromDisc()
+    AppConfig.refreshDataFromDisc()
 
     try {
-        val theme = AppSettings.settings.lookAndFeel
-        val className = AppSettings.themes[theme]
+        val theme = AppConfig.settings.lookAndFeel
+        val className = AppConfig.themes[theme]
         require(className != null) { "Invalid theme type" }
         UIManager.setLookAndFeel(className)
     } catch (e: Exception) {

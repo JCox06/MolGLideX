@@ -35,7 +35,7 @@ class MolGlideFrame (
         iconImage = svgImg.derive(32, 32).image
 
         initDocking()
-        add(toolBox, BorderLayout.PAGE_START)
+        add(toolBox, BorderLayout.LINE_START)
         add(buildStatusBar(), BorderLayout.PAGE_END)
         addQuitHandler()
 
@@ -66,7 +66,7 @@ class MolGlideFrame (
         this.addWindowListener(object : WindowAdapter() {
             override fun windowClosing(e: WindowEvent?) {
                 if (confirmClose()) {
-                    AppSettings.saveToDisc()
+                    AppConfig.saveToDisc()
                     setDefaultCloseOperation(EXIT_ON_CLOSE)
                 }
                 super.windowClosing(e)

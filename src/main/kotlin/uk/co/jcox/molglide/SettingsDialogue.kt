@@ -6,7 +6,7 @@ import javax.swing.*
 
 class SettingsDialogue (mainFrame: JFrame) : JDialog (mainFrame, "Settings", ModalityType.APPLICATION_MODAL) {
 
-    private val modify = AppSettings.settings.copy()
+    private val modify = AppConfig.settings.copy()
 
     init {
         val mainPanel = JPanel(BorderLayout())
@@ -30,9 +30,9 @@ class SettingsDialogue (mainFrame: JFrame) : JDialog (mainFrame, "Settings", Mod
 
         val label = JLabel("Select Application Theme")
 
-        val themeArr = AppSettings.themes.keys.toTypedArray()
+        val themeArr = AppConfig.themes.keys.toTypedArray()
         val themeSelection = JComboBox(themeArr)
-        val currentTheme = AppSettings.settings.lookAndFeel
+        val currentTheme = AppConfig.settings.lookAndFeel
         val themeID = themeArr.indexOf(currentTheme)
         themeSelection.selectedIndex = themeID
         themeSelection.addActionListener {
@@ -41,17 +41,17 @@ class SettingsDialogue (mainFrame: JFrame) : JDialog (mainFrame, "Settings", Mod
         }
 
 
-        val componentAlias = JCheckBox("Component Anti-Aliasing", AppSettings.settings.componentAntialiasing)
+        val componentAlias = JCheckBox("Component Anti-Aliasing", AppConfig.settings.componentAntialiasing)
         componentAlias.addActionListener { modify.componentAntialiasing = componentAlias.isSelected }
 
-        val textAlias = JCheckBox("Text Anti-Aliasing", AppSettings.settings.textAntialiasing)
+        val textAlias = JCheckBox("Text Anti-Aliasing", AppConfig.settings.textAntialiasing)
         textAlias.addActionListener { modify.textAntialiasing = textAlias.isSelected }
 
         val fontOptions = GraphicsEnvironment.getLocalGraphicsEnvironment().availableFontFamilyNames
 
         val fontLabel = JLabel("Select Editor Font")
         val fontSelection = JComboBox(fontOptions)
-        val fontID = fontOptions.indexOf(AppSettings.settings.editorFont)
+        val fontID = fontOptions.indexOf(AppConfig.settings.editorFont)
         fontSelection.selectedIndex = fontID
         fontSelection.addActionListener {
             val newFont = fontSelection.getItemAt(fontSelection.selectedIndex)
@@ -78,8 +78,8 @@ class SettingsDialogue (mainFrame: JFrame) : JDialog (mainFrame, "Settings", Mod
 
         close.addActionListener { dispose() }
         apply.addActionListener {
-            AppSettings.settings = modify
-            AppSettings.saveToDisc()
+            AppConfig.settings = modify
+            AppConfig.saveToDisc()
             dispose()
         }
 

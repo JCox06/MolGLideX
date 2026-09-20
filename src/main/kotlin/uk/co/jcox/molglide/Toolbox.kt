@@ -23,7 +23,10 @@ class Toolbox(private val data: IMainAppData) : JToolBar("Toolbox") {
         isFloatable = true
         isRollover = true
 
-        val panel = JPanel(GridLayout(2, 2, 5, 5))
+        val gridLayout = GridLayout(2, 2, 5, 5)
+        val panel = JPanel(gridLayout)
+
+        gridLayout.rows = 0
 
         setupToolbox(panel)
 
@@ -32,10 +35,7 @@ class Toolbox(private val data: IMainAppData) : JToolBar("Toolbox") {
                 val panelWidth = panel.width
                 val minCellWidth = 80
                 val cols = max(1, panelWidth / minCellWidth)
-
-                val gridOptions: GridLayout = panel.layout as GridLayout
-                gridOptions.columns = cols
-                gridOptions.rows = 0
+                gridLayout.columns = cols
             }
         })
 
@@ -52,6 +52,7 @@ class Toolbox(private val data: IMainAppData) : JToolBar("Toolbox") {
             }
         }
         add(panel)
+
     }
 
 
