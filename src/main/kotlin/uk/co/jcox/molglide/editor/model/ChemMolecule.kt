@@ -4,7 +4,7 @@ package uk.co.jcox.molglide.editor.model
 import io.github.dan2097.jnainchi.InchiStatus
 import org.joml.Vector2d
 import org.openscience.cdk.Atom
-import org.openscience.cdk.AtomContainer
+import org.openscience.cdk.DefaultChemObjectBuilder
 import org.openscience.cdk.atomtype.CDKAtomTypeMatcher
 import org.openscience.cdk.exception.CDKException
 import org.openscience.cdk.geometry.GeometryUtil
@@ -22,7 +22,7 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator
 import org.openscience.cdk.tools.manipulator.AtomTypeManipulator
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator
 import uk.co.jcox.molglide.editor.control.tool.AtomBondTool
-import java.util.UUID
+import java.util.*
 import javax.vecmath.Point2d
 
 /**
@@ -35,7 +35,7 @@ import javax.vecmath.Point2d
  * see ChemMolecule#initDefaultAtomProperties!
  */
 class ChemMolecule (
-    private val container: IAtomContainer = AtomContainer(),
+    private val container: IAtomContainer = DefaultChemObjectBuilder.getInstance().newAtomContainer(),
     initDefaults: Boolean = true
 ) : MolGLideChemData(container) {
 
@@ -83,6 +83,10 @@ class ChemMolecule (
         initDefaultBondProperties(cdkBond)
         calculateAtomProperties()
         return ChemBond(cdkBond, this)
+    }
+
+    fun getBond(atomA: ChemAtom, atomB: ChemAtom): ChemBond {
+        return ChemBond(container.getBond(atomA.atom, atomB.atom), this)
     }
 
     fun formBasicConnection(atomA: Int, atomB: Int): ChemBond {
@@ -194,7 +198,6 @@ class ChemMolecule (
         } catch (e: CDKException) {
 
         }
-
     }
 
     fun checkBondInRing(chemBond: ChemBond) : Boolean{
@@ -210,18 +213,26 @@ class ChemMolecule (
         return fragments
     }
 
-    fun atoms() : List<ChemAtom> {
+    fun atoms(discardInternal: Boolean = false) : List<ChemAtom> {
         val atoms = mutableListOf<ChemAtom>()
         container.atoms().forEach { iAtom ->
-            atoms.add(ChemAtom(iAtom, this))
+            val chemAtom = ChemAtom(iAtom, this)
+            if (discardInternal && chemAtom.skipUIBuild()) {
+                return@forEach
+            }
+            atoms.add(chemAtom)
         }
         return atoms
     }
 
-    fun bonds() : List<ChemBond> {
+    fun bonds(discardInternal: Boolean = false) : List<ChemBond> {
         val bonds = mutableListOf<ChemBond>()
         container.bonds().forEach { iBond ->
-            bonds.add(ChemBond(iBond, this))
+            val chemBond = ChemBond(iBond, this)
+            if (discardInternal && (chemBond.getStart().skipUIBuild() || chemBond.getEnd().skipUIBuild())) {
+                return@forEach
+            }
+            bonds.add(chemBond)
         }
         return bonds
     }
@@ -231,6 +242,14 @@ class ChemMolecule (
         items.addAll(bonds())
         items.addAll(atoms())
         return items
+    }
+
+    fun addChemData(data: ChemMolecule) {
+        this.container.add(data.container)
+    }
+
+    fun removeChemData(data: ChemMolecule) {
+        this.container.remove(data.container)
     }
 
     fun findBond(chemAtom1: ChemAtom, chemAtom2: ChemAtom): ChemBond? {
@@ -281,9 +300,15 @@ class ChemMolecule (
         atom.setProperty(TRAILING_POS, TrailingGroupPosition.RIGHT)
         atom.setProperty(IGNORE_ERRORS, false)
         atom.setProperty(TRANSIENT, false)
-        atom.setProperty(FORMAL_CHARGE, Vector2d(1.0,1.0).normalize())
-        atom.setProperty(LONE_PAIR, Vector2d(0.5, 1.0).normalize())
+        atom.setProperty(SYMBOL_OVERRIDE, "")
+        atom.setProperty(LOCK_HYDROGEN, false)
+        atom.setProperty(SKIP_UI_BUILD, false)
     }
+
+    fun skipUIBuild() {
+        atoms().forEach { chemAtom -> chemAtom.setSkipUIBuild(true) }
+    }
+
 
     private fun initDefaultBondProperties(cdkBond: IBond) {
         cdkBond.setProperty(FLIP_BOND, false)
@@ -314,6 +339,11 @@ class ChemMolecule (
         return newChemMolecule
     }
 
+    fun applyOverrideProperty(overrideID: String) {
+        atoms().forEach { chemAtom -> chemAtom.setOverrideID(overrideID) }
+        bonds().forEach { chemBond -> chemBond.setOverrideID(overrideID) }
+    }
+
 
     enum class TrailingGroupPosition (val vec: Vector2d) {
         ABOVE(Vector2d(0.0, 1.0)),
@@ -329,7 +359,9 @@ class ChemMolecule (
         const val IGNORE_ERRORS = "MOLGLIDE_IGNORE_ERRORS"
         const val TRANSIENT = "MOLGLIDE_TRANSIENT"
         const val UNKNOWN = "X"
-        const val FORMAL_CHARGE = "FORMAL_CHARGE"
-        const val LONE_PAIR = "LONE_PAIR"
+        const val SYMBOL_OVERRIDE = "MOLGLIDE_SYMBOL_OVERRIDE"
+        const val LOCK_HYDROGEN = "MOLGLIDE_LOCK_HYDROGEN"
+        const val SKIP_UI_BUILD = "MOLGLIDE_SKIP_UI_BUILD"
+        const val OVERRIDE_MARKER = "MOLGLIDE_OVERRIDE_ID_MARKER"
     }
 }

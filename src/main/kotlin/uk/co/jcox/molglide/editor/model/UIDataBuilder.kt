@@ -4,7 +4,6 @@ import org.joml.Vector2d
 import org.joml.minus
 import org.joml.plus
 import org.joml.times
-import org.openscience.cdk.interfaces.IAtom
 import org.openscience.cdk.interfaces.IAtomContainer
 import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.StereoChem
@@ -46,7 +45,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
 
     private fun buildAtomUI(fullBuild: Boolean) {
         data.getMolecules().forEach { chemMolecule ->
-            chemMolecule.atoms().forEach { chemAtom ->
+            chemMolecule.atoms(true).forEach { chemAtom ->
                 val isSelected = selectionManager.isSelected(chemAtom, ChemAtom.MAIN_ATOM)
                 uiComponents[chemAtom]?.selected = isSelected
                 if (!fullBuild && !(chemAtom.isTransient() || isSelected)) {
@@ -80,10 +79,10 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
 
 
         val ui: UIAtom = UIAtom(
-            chemAtom.atom.symbol,
+            chemAtom.getAppliedText(),
             pos.x,
             pos.y,
-            calculateTrailGroup(chemAtom.atom),
+            calculateTrailGroup(chemAtom),
             chemAtom.getTrailPos(),
             chemAtom.isVisible(),
             selectionManager.isSelected(chemAtom),
@@ -100,19 +99,22 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         return false
     }
 
-    private fun calculateTrailGroup(atom: IAtom): String {
-        if (atom.implicitHydrogenCount == 1) {
+    private fun calculateTrailGroup(chemAtom: ChemAtom): String {
+        if (! chemAtom.shouldShowTrailPos()) {
+            return ""
+        }
+        if (chemAtom.getImplicitHCount() == 1) {
             return "H"
         }
-        if (atom.implicitHydrogenCount > 1) {
-            return "H${atom.implicitHydrogenCount}"
+        if (chemAtom.getImplicitHCount() > 1) {
+            return "H${chemAtom.getImplicitHCount()}"
         }
         return ""
     }
 
     fun buildBondUI(fullBuild: Boolean) {
         data.getMolecules().forEach { chemMolecule ->
-            chemMolecule.bonds().forEach { chemBond ->
+            chemMolecule.bonds(true).forEach { chemBond ->
                 val isSelected = selectionManager.isSelected(chemBond)
                 uiComponents[chemBond]?.selected = isSelected
 

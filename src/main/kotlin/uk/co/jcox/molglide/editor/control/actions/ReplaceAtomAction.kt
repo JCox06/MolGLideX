@@ -1,26 +1,50 @@
 package uk.co.jcox.molglide.editor.control.actions
 
 import uk.co.jcox.molglide.editor.model.ChemAtom
+import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 
-class ReplaceAtomAction (private val chemAtom: ChemAtom, private val toReplace: String
+class ReplaceAtomAction (chemAtom: ChemAtom, private val toReplace: String
 ) : IDataAction {
 
-    private val chemMolecule = chemAtom.molecule
+    private val originalMolecule = chemAtom.molecule
+    private val atomIndex = originalMolecule.atoms().indexOf(chemAtom)
 
-    val oldAtom = chemAtom.atom.symbol
-    var wasVisible = chemAtom.isVisible()
+    private var workingMolecule: ChemMolecule? = null
 
     override fun execute(data: EditorStateData) {
-        chemMolecule.replaceAtom(chemAtom, toReplace)
-        hideIfCarbon(chemAtom)
-        showIfOther(chemAtom)
+//        chemAtom.removeSymbolOverride()
+//        chemMolecule.replaceAtom(chemAtom, toReplace)
+//        hideIfCarbon(chemAtom)
+//        showIfOther(chemAtom)
+
+        val moleculeCopy = originalMolecule.deepCopy()
+        val atomCopy = moleculeCopy.atoms()[atomIndex]
+
+        atomCopy.removeSymbolOverride()
+        moleculeCopy.replaceAtom(atomCopy, toReplace)
+        hideIfCarbonAndNotOverride(atomCopy)
+        showIfOther(atomCopy)
+
+        data.removeMolecule(originalMolecule)
+        data.addMolecule(moleculeCopy)
+
+        workingMolecule = moleculeCopy
     }
 
     override fun undo(data: EditorStateData) {
-        chemMolecule.replaceAtom(chemAtom, oldAtom)
-        chemAtom.setVisible(wasVisible)
+        val m = workingMolecule
+        if (m != null) {
+            data.removeMolecule(m)
+            data.addMolecule(originalMolecule)
+        }
     }
 
-
+    override fun redo(data: EditorStateData) {
+        val m = workingMolecule
+        if (m != null) {
+            data.removeMolecule(originalMolecule)
+            data.addMolecule(m)
+        }
+    }
 }

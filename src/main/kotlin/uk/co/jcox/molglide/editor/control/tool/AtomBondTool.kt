@@ -189,8 +189,7 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
 
         if (newAtom != null && newBond != null) {
             toolMode = Mode.AtomInsertionDragging(newAtom, currentMode.insertTo, true, newBond)
-            newAtom.setTransient(true)
-            newBond.setTransient(true)
+            newAtom.molecule.setTransient(true)
         }
     }
 
@@ -221,8 +220,7 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
     override fun onRelease(clickX: Int, clickY: Int, eventContext: EventContext) {
         val m = toolMode
         if (m is Mode.AtomInsertionDragging) {
-            m.draggingAtom.setTransient(false)
-            m.newBond.setTransient(false)
+            m.draggingAtom.molecule.setTransient(false)
         }
         toolMode = Mode.None
     }
@@ -271,7 +269,7 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
 
     companion object {
 
-        const val CONNECTION_DISTANCE = 50
+        const val CONNECTION_DISTANCE = 52
 
         private val COMMON_ANGLES = listOf<Float>(
             //Cardinal directions

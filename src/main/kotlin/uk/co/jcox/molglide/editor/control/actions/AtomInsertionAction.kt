@@ -22,13 +22,13 @@ class AtomInsertionAction (
 
 
     override fun execute(data: EditorStateData) {
-        hideIfCarbon(insertTo)
+        hideIfCarbonAndNotOverride(insertTo)
 
         val nAtom = chemMolecule.addAtom(atomInsert, clickX.toDouble(), clickY.toDouble())
         val nBond = chemMolecule.formBasicConnection(insertTo, nAtom)
         newAtom = nAtom
         newBond = nBond
-        hideIfCarbon(nAtom)
+        hideIfCarbonAndNotOverride(nAtom)
     }
 
     override fun undo(data: EditorStateData) {
@@ -40,7 +40,7 @@ class AtomInsertionAction (
     override fun redo(data: EditorStateData) {
         newAtom?.let { chemMolecule.directlyAddAtom(it.atom) }
         newBond?.let { chemMolecule.directlyAddBond(it.bond) }
-        hideIfCarbon(insertTo)
+        hideIfCarbonAndNotOverride(insertTo)
     }
 
 

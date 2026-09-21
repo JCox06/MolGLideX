@@ -28,8 +28,8 @@ class ChemBond (
     }
 
     fun midPoint(): Vector2d {
-        val atomA = bond.begin.point2d
-        val atomB = bond.end.point2d
+        val atomA = getStart().getPos()
+        val atomB = getEnd().getPos()
         return Vector2d((atomA.x + atomB.x) / 2, (atomA.y + atomB.y) /2)
     }
 

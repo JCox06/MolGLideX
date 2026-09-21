@@ -95,6 +95,7 @@ class UIAtom (
 
         val renderingCtx = g2d.fontRenderContext
         val attIterator = attStr.iterator
+
         return TextLayout(attIterator, renderingCtx)
     }
 

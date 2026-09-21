@@ -175,7 +175,7 @@ class EditorPanel(private val uiData: IDataModelUI) : JPanel() {
     companion object {
         const val MOUSE_SENSE = 2.0
         const val MOUSE_SENSE_ZOOM = 0.5f
-        const val UNMODDED_TEXT_SIZE = 32.0f
+        const val UNMODDED_TEXT_SIZE = 31.0f
         const val SIG_MOUSE_DELTA = 2.0f
         const val LINE_STROKE = 3.0f
         const val BOND_MARKER = UNMODDED_TEXT_SIZE * 0.5f

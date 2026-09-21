@@ -36,6 +36,9 @@ class EditorStateController (
     val actionManager: ActionManager = ActionManager(stateData) { dataHasChanged() }
     private var currentTool: Tool = AtomBondTool(globalContext, actionManager, stateData.selectionManager, stateData)
 
+
+    private val labelEditor = LabelEditor(actionManager)
+
     init {
         val panelMouseEvents = PanelMouseEvents()
         editorPanel.addMouseMotionListener(panelMouseEvents)
@@ -135,10 +138,9 @@ class EditorStateController (
         stateData.uiDataBuilder.rebuild(true)
     }
 
-    fun updateAtomLabel(newSymbol: String) {
-        val atom = stateData.selectionManager.getAtom() ?: return
-        val replaceAtomAction = ReplaceAtomAction(atom, newSymbol)
-        actionManager.executeAction(replaceAtomAction)
+    fun updateAtomLabel(newSymbol: String): Boolean {
+        val atom = stateData.selectionManager.getAtom() ?: return false
+        return labelEditor.editLabel(atom, newSymbol)
     }
 
     fun deleteSelectedAtom() {

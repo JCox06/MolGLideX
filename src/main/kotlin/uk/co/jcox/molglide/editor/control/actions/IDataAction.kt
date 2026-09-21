@@ -9,8 +9,8 @@ interface IDataAction {
     fun redo(data: EditorStateData) {
         execute(data)
     }
-    fun hideIfCarbon(chemAtom: ChemAtom) {
-        if (chemAtom.isCarbon()) {
+    fun hideIfCarbonAndNotOverride(chemAtom: ChemAtom) {
+        if (chemAtom.isCarbon() && !chemAtom.hasOverrideID()) {
             chemAtom.setVisible(false)
         }
     }

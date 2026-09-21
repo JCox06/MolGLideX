@@ -18,6 +18,15 @@ open class MolGLideChemData(
     override fun setTransient(value: Boolean) {
         cdkObject.setProperty(TRANSIENT, value)
     }
+    fun setOverrideID(id: String) {
+        cdkObject.setProperty(ChemMolecule.OVERRIDE_MARKER, id)
+    }
+    fun getOverrideID(): String {
+        return cdkObject.getProperty(ChemMolecule.OVERRIDE_MARKER)
+    }
+    fun hasOverrideID(): Boolean {
+        return cdkObject.properties.contains(ChemMolecule.OVERRIDE_MARKER)
+    }
 
     companion object {
         const val TEMP_MARKER_KEY: String = "MOLGLIDE_TEMP_MARKER"

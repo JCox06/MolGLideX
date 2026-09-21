@@ -62,7 +62,7 @@ open class UITextComponent (
         attStr.addAttribute(TextAttribute.FAMILY, g2d.font.family)
         attStr.addAttribute(TextAttribute.SIZE, g2d.font.size)
         attStr.addAttribute(TextAttribute.SUPERSCRIPT, TextAttribute.SUPERSCRIPT_SUPER)
-        g2d.drawString(attStr.iterator, x.toInt(), y.toInt())
+        g2d.drawString(attStr.iterator, x.toInt() - textWidth / 2, y.toInt() + textWidth / 2)
     }
 
     override fun drawComponent(g2d: Graphics2D, cameraZoom: Double) {
