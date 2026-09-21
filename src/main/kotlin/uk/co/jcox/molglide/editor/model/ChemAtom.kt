@@ -37,6 +37,9 @@ class ChemAtom (
     fun getImplicitHCount(): Int {
         return atom.implicitHydrogenCount
     }
+    fun setSymbol(symbol: String) {
+        atom.symbol = symbol
+    }
 
     fun symbolOverride(): String = atom.getProperty<String>(ChemMolecule.SYMBOL_OVERRIDE)
 

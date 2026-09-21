@@ -8,7 +8,8 @@ class ApplyAtomOverrideAction (
     private val chemAtom: ChemAtom,
     private val newSymbol: String,
     private val symbolOverride: String,
-    private val chemData: ChemMolecule?
+    private val chemData: ChemMolecule?,
+    private val joinFunc: ((anchor: ChemAtom, atoms: Collection<ChemAtom>) -> Unit)? = null
 ) : IDataAction {
 
     private val chemMolecule = chemAtom.molecule
@@ -32,7 +33,12 @@ class ApplyAtomOverrideAction (
         val atomCopy = moleculeCopy.atoms()[atomIndex]
 
         //Change properties
+
         atomCopy.setSymbolOverride(symbolOverride, chemData)
+
+        if (chemData != null && joinFunc != null) {
+            joinFunc(atomCopy, chemData.atoms())
+        }
         //Place new chem data
 
         //Apply to data
@@ -40,6 +46,8 @@ class ApplyAtomOverrideAction (
         data.addMolecule(moleculeCopy)
         workingMolecule = moleculeCopy
         workingChemAtom = atomCopy
+
+        moleculeCopy.calculateAtomProperties()
     }
 
     override fun undo(data: EditorStateData) {

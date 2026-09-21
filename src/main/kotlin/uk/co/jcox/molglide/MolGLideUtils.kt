@@ -3,7 +3,10 @@ package uk.co.jcox.molglide
 import com.formdev.flatlaf.util.SystemFileChooser
 import java.awt.Color
 import java.awt.Component
+import java.awt.Graphics2D
+import java.awt.font.TextAttribute
 import java.io.File
+import java.text.AttributedString
 import java.util.*
 import javax.swing.UIManager
 
@@ -74,5 +77,12 @@ object MolGLideUtils {
         val temp = File.createTempFile("MGX_${UUID.randomUUID().toString()}", ".svg")
         temp.deleteOnExit()
         return temp
+    }
+
+    fun createBaseString(g2d: Graphics2D, text: String): AttributedString {
+        val attStr = AttributedString(text)
+        attStr.addAttribute(TextAttribute.FAMILY, g2d.font.family)
+        attStr.addAttribute(TextAttribute.SIZE, g2d.font.size)
+        return attStr
     }
 }

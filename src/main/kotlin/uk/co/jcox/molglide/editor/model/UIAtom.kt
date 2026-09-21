@@ -42,7 +42,7 @@ class UIAtom (
     private fun paintMainAtomElementSymbol(g2d: Graphics2D) {
 
         if (trailGroup == "") {
-            g2d.drawString(element, centreTextWidth.toInt(), centreTextHeight.toInt())
+            drawMainElementText(g2d)
 
             if (trailGroupPos == ChemMolecule.TrailingGroupPosition.ABOVE || trailGroupPos == ChemMolecule.TrailingGroupPosition.BELOW) {
                 drawSeparateAboveBelowTrailingPos(g2d)
@@ -107,5 +107,20 @@ class UIAtom (
             }
         }
         return list
+    }
+
+    private fun drawMainElementText(g2d: Graphics2D) {
+        if (superScriptPrefix.contains(element)) {
+            val str = MolGLideUtils.createBaseString(g2d, element)
+            str.addAttribute(TextAttribute.SUPERSCRIPT, TextAttribute.SUPERSCRIPT_SUPER, 0, 1)
+            g2d.drawString(str.iterator, centreTextWidth.toInt(), centreTextHeight.toInt())
+            return
+        }
+
+        g2d.drawString(element, centreTextWidth.toInt(), centreTextHeight.toInt())
+    }
+
+    companion object {
+        private val superScriptPrefix = arrayOf("nPr", "iPr", "nBu", "sBu", "iBu", "tBu")
     }
 }

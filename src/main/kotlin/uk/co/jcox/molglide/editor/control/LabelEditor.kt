@@ -1,7 +1,10 @@
 package uk.co.jcox.molglide.editor.control
 
+import org.openscience.cdk.Atom
+import org.openscience.cdk.DefaultChemObjectBuilder
 import org.openscience.cdk.config.Isotopes
 import org.openscience.cdk.interfaces.IAtomContainer
+import org.openscience.cdk.interfaces.IBond
 import org.openscience.cdk.templates.MoleculeFactory
 import uk.co.jcox.molglide.editor.control.actions.ApplyAtomOverrideAction
 import uk.co.jcox.molglide.editor.control.actions.ReplaceAtomAction
@@ -50,8 +53,9 @@ class LabelEditor (
 
     private fun createCustomOverride(chemAtom: ChemAtom, label: String): Boolean {
         val chemDataFunc = overrideRegistry[label] ?: return false
+        val joinFunc = joinFunctions[label]
         val chemData = chemDataFunc()
-        val action = ApplyAtomOverrideAction(chemAtom, "C", label, chemData)
+        val action = ApplyAtomOverrideAction(chemAtom, "C", label, chemData, joinFunc)
         actionManager.executeAction(action)
         return true
     }
@@ -82,26 +86,106 @@ class LabelEditor (
             prepareGroup(atomContainer)
         }
 
+        private val makeIsoPr: () -> ChemMolecule = {
+            val mol = DefaultChemObjectBuilder.getInstance().newAtomContainer()
+            mol.addAtom(Atom("C"))
+            mol.addAtom(Atom("C"))
+            prepareGroup(mol)
+        }
+
+        private val makeSecBu: () -> ChemMolecule = {
+            val mol = DefaultChemObjectBuilder.getInstance().newAtomContainer()
+            mol.addAtom(Atom("C"))
+            mol.addAtom(Atom("C"))
+            mol.addBond(0, 1, IBond.Order.SINGLE)
+            mol.addAtom(Atom("C"))
+            prepareGroup(mol)
+        }
+
+        private val makeTertBu: () -> ChemMolecule = {
+            val mol = DefaultChemObjectBuilder.getInstance().newAtomContainer()
+            mol.addAtom(Atom("C"))
+            mol.addAtom(Atom("C"))
+            mol.addAtom(Atom("C"))
+            prepareGroup(mol)
+        }
+
         private val makeBu: () -> ChemMolecule = {
             val atomContainer = MoleculeFactory.makeAlkane(3)
             prepareGroup(atomContainer)
         }
 
+        private val makeIsoBu: () -> ChemMolecule = {
+            val mol = DefaultChemObjectBuilder.getInstance().newAtomContainer()
+            mol.addAtom(Atom("C"))
+            mol.addAtom(Atom("C"))
+            mol.addAtom(Atom("C"))
+
+            mol.addBond(0, 1, IBond.Order.SINGLE)
+            mol.addBond(0, 2, IBond.Order.SINGLE)
+            prepareGroup(mol)
+        }
+
         //todo FIX: Make the first atom in the new container the one to replace all other containers!
 
         private val makePh: () -> ChemMolecule = {
-            val atomContainer = MoleculeFactory.makeBenzene()
-            prepareGroup(atomContainer)
+            val mol = DefaultChemObjectBuilder.getInstance().newAtomContainer()
+            //Directly from the benzene function in the CDK:
+            mol.addAtom(Atom("C")) // 0
+            mol.addAtom(Atom("C")) // 1
+            mol.addAtom(Atom("C")) // 2
+            mol.addAtom(Atom("C")) // 3
+            mol.addAtom(Atom("C")) // 4
+
+            mol.addBond(0, 1, IBond.Order.DOUBLE) // 1
+            mol.addBond(1, 2, IBond.Order.SINGLE) // 2
+            mol.addBond(2, 3, IBond.Order.DOUBLE) // 3
+            mol.addBond(3, 4, IBond.Order.SINGLE) // 4
+
+            mol.bonds().forEach {b -> b.setIsAromatic(true)}
+
+            prepareGroup(mol)
         }
 
         private val overrideRegistry = mapOf(
             "Et" to makeEt,
             "Pr" to makePr,
+            "nPr" to makePr,
+            "iPr" to makeIsoPr,
             "Bu" to makeBu,
             "nBu" to makeBu,
-            "Ph" to makePh
+            "sBu" to makeSecBu,
+            "iBu" to makeIsoBu,
+            "tBu" to makeTertBu,
+            "Ph" to makePh,
         )
 
+
+        private val joinLast: (anchor: ChemAtom, atoms: Collection<ChemAtom>) -> Unit = { anchor, atoms ->
+            val molecule = anchor.molecule
+            molecule.formBasicConnection(ChemAtom(anchor.atom, anchor.molecule), ChemAtom(atoms.last().atom, anchor.molecule))
+        }
+
+        private val joinAromatic: (anchor: ChemAtom, atoms: Collection<ChemAtom>) -> Unit = { anchor, atoms ->
+            val molecule = anchor.molecule
+            val chemBond = molecule.formBasicConnection(ChemAtom(anchor.atom, anchor.molecule), ChemAtom(atoms.last().atom, anchor.molecule))
+            chemBond.bond.setIsAromatic(true)
+            chemBond.bond.order = IBond.Order.DOUBLE
+        }
+
+        private val joinAll: (anchor: ChemAtom, atoms: Collection<ChemAtom>) -> Unit = { anchor, atoms ->
+            val molecule = anchor.molecule
+            atoms.forEach { chemAtom ->
+                molecule.formBasicConnection(ChemAtom(anchor.atom, anchor.molecule), ChemAtom(chemAtom.atom, anchor.molecule))
+            }
+        }
+
+        private val joinFunctions = mapOf(
+            "Ph" to joinAromatic,
+            "iPr" to joinLast,
+            "sBu" to joinLast,
+            "tBu" to joinAll
+        )
 
         /**
          * There are two types of labels that can be applied to atoms in MolGLide:
