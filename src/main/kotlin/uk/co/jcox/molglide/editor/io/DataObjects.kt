@@ -33,6 +33,7 @@ data class AtomDataObject (
     val worldX: Double,
     val worldY: Double,
     val ignoreErrors: Boolean = false,
+    val override: String = ""
 )
 
 @Serializable

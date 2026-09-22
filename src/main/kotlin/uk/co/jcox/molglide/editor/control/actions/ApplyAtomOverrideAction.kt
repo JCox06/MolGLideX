@@ -33,6 +33,7 @@ class ApplyAtomOverrideAction (
 
         //Change properties
         atomCopy.setSymbolOverride(overrideString)
+        atomCopy.setVisible(true)
         val originalBondSize = moleculeCopy.bonds().size
         val originalAtomSize = moleculeCopy.atoms().size
         overrideAction(moleculeCopy, atomCopy)

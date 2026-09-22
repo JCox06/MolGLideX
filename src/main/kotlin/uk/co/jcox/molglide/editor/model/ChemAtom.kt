@@ -48,15 +48,13 @@ class ChemAtom (
             removeSymbolOverride()
         }
         atom.setProperty(ChemMolecule.SYMBOL_OVERRIDE, override)
-        this.setVisible(true)
     }
 
-    fun removeSymbolOverride(visibility: Boolean = true) {
+    fun removeSymbolOverride() {
         if (!atom.properties.contains(ChemMolecule.OVERRIDE_MARKER)) {
             return
         }
         atom.setProperty(ChemMolecule.SYMBOL_OVERRIDE, "")
-        this.setVisible(visibility)
 
         val removalID = atom.getProperty<String>(ChemMolecule.OVERRIDE_MARKER)
 

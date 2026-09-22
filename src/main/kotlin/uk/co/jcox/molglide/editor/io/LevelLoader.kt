@@ -3,6 +3,7 @@ package uk.co.jcox.molglide.editor.io
 import kotlinx.serialization.json.Json
 import org.joml.Vector2d
 import uk.co.jcox.molglide.editor.control.ActionManager
+import uk.co.jcox.molglide.editor.control.LabelEditor
 import uk.co.jcox.molglide.editor.control.actions.*
 import uk.co.jcox.molglide.editor.model.ChemAtom
 import uk.co.jcox.molglide.editor.model.ChemFormalCharge
@@ -37,13 +38,14 @@ class LevelLoader {
     private fun reconstructLevel(dataSaveFile: DataSaveFile) : EditorStateData {
         val levelData = EditorStateData()
         val levelActionBuilder = ActionManager(levelData)
+        val labelEditor = LabelEditor(levelActionBuilder)
 
-        runDirectDataActions(dataSaveFile, levelActionBuilder)
+        runDirectDataActions(dataSaveFile, levelActionBuilder, labelEditor)
 
         return levelData
     }
 
-    private fun runDirectDataActions(saveFile: DataSaveFile, actionManager: ActionManager) {
+    private fun runDirectDataActions(saveFile: DataSaveFile, actionManager: ActionManager, labelEditor: LabelEditor) {
         saveFile.dataMolecules.forEach { dataMolecule ->
            val directMoleculeCreationAction = DirectMoleculeCreationAction()
            actionManager.executeAction(directMoleculeCreationAction)
@@ -54,6 +56,7 @@ class LevelLoader {
                 val directlyAddAtomAction = DirectAtomCreationAction(chemMolecule, dataAtom)
                 actionManager.executeAction(directlyAddAtomAction)
                 idChemAtomMap[dataAtom.loaderID] = directlyAddAtomAction.newChemAtom
+                labelEditor.editLabel(directlyAddAtomAction.newChemAtom, dataAtom.override)
             }
 
             dataMolecule.bonds.forEach { bondID ->
@@ -65,6 +68,7 @@ class LevelLoader {
                 actionManager.executeAction(directBondConnectionAction)
             }
             chemMolecule.calculateAtomProperties()
+
         }
         saveFile.arrows.forEach { dataArrow ->
             val action = DirectAddArrowAction(dataArrow)

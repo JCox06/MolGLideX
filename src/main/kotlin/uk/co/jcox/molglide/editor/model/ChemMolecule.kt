@@ -64,10 +64,15 @@ class ChemMolecule (
     }
 
     fun addInternalAtom(element: String): ChemAtom {
-        val atom: IAtom = Atom(element)
-        initDefaultAtomProperties(atom)
-        directlyAddAtom(atom)
-        val chemAtom = ChemAtom(atom, this)
+//        val atom: IAtom = Atom(element)
+//        initDefaultAtomProperties(atom)
+//        directlyAddAtom(atom)
+//        val chemAtom = ChemAtom(atom, this)
+//        chemAtom.setInternalOnly(true)
+//        atom.point2d = Point2d(0.0, 0.0)
+//        return chemAtom
+
+        val chemAtom = addAtom(element, 0.0, 0.0)
         chemAtom.setInternalOnly(true)
         return chemAtom
     }
@@ -231,7 +236,7 @@ class ChemMolecule (
         val atoms = mutableListOf<ChemAtom>()
         container.atoms().forEach { iAtom ->
             val chemAtom = ChemAtom(iAtom, this)
-            if (discardInternal && chemAtom.skipUIBuild()) {
+            if (discardInternal && chemAtom.internalOnly()) {
                 return@forEach
             }
             atoms.add(chemAtom)

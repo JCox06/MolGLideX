@@ -84,7 +84,7 @@ class EditorStateData (
     fun getSpatials(): List<ISpatialInfo> {
         val spatials = mutableListOf<ISpatialInfo>()
         molecules.forEach { chemMolecule ->
-            spatials.addAll(chemMolecule.atoms())
+            spatials.addAll(chemMolecule.atoms(true))
         }
         spatials.addAll(arrows)
         spatials.addAll(charges)
