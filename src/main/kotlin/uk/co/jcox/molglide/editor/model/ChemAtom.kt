@@ -6,7 +6,6 @@ import uk.co.jcox.molglide.editor.model.ChemMolecule.Companion.IGNORE_ERRORS
 import uk.co.jcox.molglide.editor.model.ChemMolecule.Companion.TRAILING_POS
 import uk.co.jcox.molglide.editor.model.ChemMolecule.Companion.VISIBLE
 import uk.co.jcox.molglide.editor.model.ChemMolecule.TrailingGroupPosition
-import java.util.*
 
 class ChemAtom (
     val atom: IAtom,
@@ -43,32 +42,22 @@ class ChemAtom (
 
     fun symbolOverride(): String = atom.getProperty<String>(ChemMolecule.SYMBOL_OVERRIDE)
 
-    fun setSymbolOverride(override: String, chemData: ChemMolecule?) {
+    fun setSymbolOverride(override: String) {
         //First check to see if override group is present
         if (this.hasOverrideID()) {
             removeSymbolOverride()
         }
-
-        //Then, remove the anchor atom
         atom.setProperty(ChemMolecule.SYMBOL_OVERRIDE, override)
         this.setVisible(true)
-        if (chemData != null) {
-            //Mark the chem data
-            val markerID = UUID.randomUUID().toString()
-            chemData.applyOverrideProperty(markerID)
-            setOverrideID(markerID)
-
-            molecule.addChemData(chemData)
-            molecule.formBasicConnection(this, ChemAtom(chemData.atoms().first().atom, molecule))
-        }
     }
 
     fun removeSymbolOverride(visibility: Boolean = true) {
-        atom.setProperty(ChemMolecule.SYMBOL_OVERRIDE, "")
-        this.setVisible(visibility)
         if (!atom.properties.contains(ChemMolecule.OVERRIDE_MARKER)) {
             return
         }
+        atom.setProperty(ChemMolecule.SYMBOL_OVERRIDE, "")
+        this.setVisible(visibility)
+
         val removalID = atom.getProperty<String>(ChemMolecule.OVERRIDE_MARKER)
 
         val bondRemoval = molecule.bonds().filter { hasRequiredMarkerID(it, removalID) }

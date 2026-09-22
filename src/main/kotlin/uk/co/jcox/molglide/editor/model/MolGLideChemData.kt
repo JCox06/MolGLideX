@@ -28,6 +28,17 @@ open class MolGLideChemData(
         return cdkObject.properties.contains(ChemMolecule.OVERRIDE_MARKER)
     }
 
+    open fun internalOnly(): Boolean {
+        if (!cdkObject.properties.contains(ChemMolecule.SKIP_UI_BUILD)) {
+            return false
+        }
+        return cdkObject.getProperty<Boolean>(ChemMolecule.SKIP_UI_BUILD)
+    }
+
+    open fun setInternalOnly(internal: Boolean) {
+        cdkObject.setProperty(ChemMolecule.SKIP_UI_BUILD, internal)
+    }
+
     companion object {
         const val TEMP_MARKER_KEY: String = "MOLGLIDE_TEMP_MARKER"
     }

@@ -3,13 +3,12 @@ package uk.co.jcox.molglide.editor.control.actions
 import uk.co.jcox.molglide.editor.model.ChemAtom
 import uk.co.jcox.molglide.editor.model.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
+import java.util.*
 
 class ApplyAtomOverrideAction (
     private val chemAtom: ChemAtom,
-    private val newSymbol: String,
-    private val symbolOverride: String,
-    private val chemData: ChemMolecule?,
-    private val joinFunc: ((anchor: ChemAtom, atoms: Collection<ChemAtom>) -> Unit)? = null
+    private val overrideString: String,
+    private val overrideAction: (chemMolecule: ChemMolecule, chemAtom: ChemAtom) -> Unit
 ) : IDataAction {
 
     private val chemMolecule = chemAtom.molecule
@@ -33,13 +32,11 @@ class ApplyAtomOverrideAction (
         val atomCopy = moleculeCopy.atoms()[atomIndex]
 
         //Change properties
-
-        atomCopy.setSymbolOverride(symbolOverride, chemData)
-
-        if (chemData != null && joinFunc != null) {
-            joinFunc(atomCopy, chemData.atoms())
-        }
-        //Place new chem data
+        atomCopy.setSymbolOverride(overrideString)
+        val originalBondSize = moleculeCopy.bonds().size
+        val originalAtomSize = moleculeCopy.atoms().size
+        overrideAction(moleculeCopy, atomCopy)
+        tagNewComponents(moleculeCopy, originalBondSize, originalAtomSize, atomCopy)
 
         //Apply to data
         data.removeMolecule(chemMolecule)
@@ -49,6 +46,7 @@ class ApplyAtomOverrideAction (
 
         moleculeCopy.calculateAtomProperties()
     }
+
 
     override fun undo(data: EditorStateData) {
         //Remove copy, and place back original
@@ -66,5 +64,29 @@ class ApplyAtomOverrideAction (
             data.removeMolecule(chemMolecule)
             data.addMolecule(moleculeCopy)
         }
+    }
+
+    //The main atom (and hidden internal atoms) that are part of an override
+    //For instance in Et, the main atom, and the extra CH3 group need to be tagged.
+    //This is so if the group happens to be removed, removal is as simple as removing every atom with the same tag
+    private fun tagNewComponents(moleculeCopy: ChemMolecule, originalBondSize: Int, originalAtomSize: Int, atomCopy: ChemAtom) {
+        val newBondEndIndex = moleculeCopy.bonds().size - 1
+        val newAtomEndIndex = moleculeCopy.atoms().size - 1
+
+        val newID = UUID.randomUUID().toString()
+
+        for (i in originalBondSize..newBondEndIndex) {
+            val bond = moleculeCopy.bonds()[i]
+            bond.setOverrideID(newID)
+            bond.setInternalOnly(true)
+        }
+
+        for (i in originalAtomSize .. newAtomEndIndex) {
+            val atom = moleculeCopy.atoms()[i]
+            atom.setOverrideID(newID)
+            atom.setInternalOnly(true)
+        }
+
+        atomCopy.setOverrideID(newID)
     }
 }

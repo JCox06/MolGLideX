@@ -63,6 +63,15 @@ class ChemMolecule (
         return chemAtom
     }
 
+    fun addInternalAtom(element: String): ChemAtom {
+        val atom: IAtom = Atom(element)
+        initDefaultAtomProperties(atom)
+        directlyAddAtom(atom)
+        val chemAtom = ChemAtom(atom, this)
+        chemAtom.setInternalOnly(true)
+        return chemAtom
+    }
+
     fun directlyAddAtom(atom: IAtom): ChemAtom {
         container.addAtom(atom)
         calculateAtomProperties()
@@ -178,6 +187,11 @@ class ChemMolecule (
         calculateAtomProperties()
     }
 
+    fun updateAromaticity(chemBond: ChemBond, aromatic: Boolean) {
+        chemBond.bond.setIsAromatic(aromatic)
+        calculateAtomProperties()
+    }
+
     fun calculateAtomProperties() {
         try {
             val atomMatcher = CDKAtomTypeMatcher.getInstance(container.builder)
@@ -229,7 +243,7 @@ class ChemMolecule (
         val bonds = mutableListOf<ChemBond>()
         container.bonds().forEach { iBond ->
             val chemBond = ChemBond(iBond, this)
-            if (discardInternal && (chemBond.getStart().skipUIBuild() || chemBond.getEnd().skipUIBuild())) {
+            if (discardInternal && chemBond.internalOnly()) {
                 return@forEach
             }
             bonds.add(chemBond)
@@ -239,8 +253,8 @@ class ChemMolecule (
 
     fun selectables(): List<IEditorSelectable> {
         val items = mutableListOf<IEditorSelectable>()
-        items.addAll(bonds())
-        items.addAll(atoms())
+        items.addAll(bonds(true))
+        items.addAll(atoms(true))
         return items
     }
 
@@ -304,11 +318,6 @@ class ChemMolecule (
         atom.setProperty(LOCK_HYDROGEN, false)
         atom.setProperty(SKIP_UI_BUILD, false)
     }
-
-    fun skipUIBuild() {
-        atoms().forEach { chemAtom -> chemAtom.setSkipUIBuild(true) }
-    }
-
 
     private fun initDefaultBondProperties(cdkBond: IBond) {
         cdkBond.setProperty(FLIP_BOND, false)

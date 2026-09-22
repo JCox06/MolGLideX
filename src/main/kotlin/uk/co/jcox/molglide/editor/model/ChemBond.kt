@@ -56,6 +56,13 @@ class ChemBond (
         return super.isTransient() || molecule.isTransient()
     }
 
+    override fun internalOnly(): Boolean {
+        val checkObject = super.internalOnly()
+        val atomA = getStart().internalOnly()
+        val atomB = getStart().internalOnly()
+        return checkObject || atomA || atomB
+    }
+
     override fun getObjectSelectionPoints(): Map<Int, Vector2d> {
         return mutableMapOf(0 to midPoint())
     }
