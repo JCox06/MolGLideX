@@ -1,9 +1,10 @@
-package uk.co.jcox.molglide.editor.model
+package uk.co.jcox.molglide.editor.model.chemengine
 
 import org.joml.Vector2d
 import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.StereoChem
-import uk.co.jcox.molglide.editor.model.ChemMolecule.Companion.FLIP_BOND
+import uk.co.jcox.molglide.editor.model.IEditorSelectable
+import uk.co.jcox.molglide.editor.model.MolGLideChemData
 
 class ChemBond (
     val bond: IBond,
@@ -41,10 +42,10 @@ class ChemBond (
         bond.display = cdkType
     }
     fun shouldFlip(): Boolean {
-        return bond.getProperty<Boolean>(FLIP_BOND)
+        return bond.getProperty<Boolean>(ChemMolecule.FLIP_BOND)
     }
     fun setFlip(flip: Boolean) {
-        bond.setProperty(FLIP_BOND, flip)
+        bond.setProperty(ChemMolecule.FLIP_BOND, flip)
     }
     fun getStart(): ChemAtom {
         return ChemAtom(bond.begin, molecule)

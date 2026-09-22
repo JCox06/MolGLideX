@@ -1,7 +1,7 @@
 package uk.co.jcox.molglide
 
-import uk.co.jcox.molglide.editor.model.ChemAtom
-import uk.co.jcox.molglide.editor.model.ChemBond
+import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
+import uk.co.jcox.molglide.editor.model.chemengine.ChemBond
 import javax.swing.AbstractAction
 
 abstract class MolGLideSwingAction(name: String) : AbstractAction(name){

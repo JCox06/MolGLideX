@@ -1,6 +1,6 @@
 package uk.co.jcox.molglide.editor.control.actions
 
-import uk.co.jcox.molglide.editor.model.ChemArrow
+import uk.co.jcox.molglide.editor.model.chemengine.ChemArrow
 import uk.co.jcox.molglide.editor.model.EditorStateData
 
 class ArrowDeletionAction (

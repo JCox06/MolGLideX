@@ -9,6 +9,10 @@ import org.openscience.cdk.interfaces.IAtomContainer
 import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.editor.control.tool.AtomBondTool
+import uk.co.jcox.molglide.editor.model.chemengine.ChemArrow
+import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
+import uk.co.jcox.molglide.editor.model.chemengine.ChemBond
+import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
 import uk.co.jcox.molglide.editor.ui.EditorPanel
 import kotlin.math.roundToInt
 

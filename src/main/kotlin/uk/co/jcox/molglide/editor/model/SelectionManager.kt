@@ -3,6 +3,9 @@ package uk.co.jcox.molglide.editor.model
 import org.joml.Vector2d
 import org.joml.Vector2dc
 import uk.co.jcox.molglide.editor.control.tool.Tool
+import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
+import uk.co.jcox.molglide.editor.model.chemengine.ChemBond
+import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
 
 class SelectionManager (
 ) {

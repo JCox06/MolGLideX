@@ -8,9 +8,9 @@ import uk.co.jcox.molglide.IMainAppData
 import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.editor.control.actions.*
 import uk.co.jcox.molglide.editor.control.tool.*
-import uk.co.jcox.molglide.editor.model.ChemArrow
-import uk.co.jcox.molglide.editor.model.ChemFormalCharge
-import uk.co.jcox.molglide.editor.model.ChemMolecule
+import uk.co.jcox.molglide.editor.model.chemengine.ChemArrow
+import uk.co.jcox.molglide.editor.model.chemengine.ChemFormalCharge
+import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.model.util.EditorPositionSnapshot
 import uk.co.jcox.molglide.editor.ui.EditorPanel

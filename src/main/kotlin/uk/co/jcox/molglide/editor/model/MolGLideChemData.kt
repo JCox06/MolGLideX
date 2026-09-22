@@ -1,7 +1,7 @@
 package uk.co.jcox.molglide.editor.model
 
 import org.openscience.cdk.interfaces.IChemObject
-import uk.co.jcox.molglide.editor.model.ChemMolecule.Companion.TRANSIENT
+import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule.Companion.TRANSIENT
 
 open class MolGLideChemData(
     /**

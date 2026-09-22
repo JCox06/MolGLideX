@@ -2,10 +2,10 @@ package uk.co.jcox.molglide.editor.control.actions
 
 import org.openscience.cdk.Atom
 import org.openscience.cdk.interfaces.IAtom
-import uk.co.jcox.molglide.editor.model.ChemMolecule
+import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.io.AtomDataObject
-import uk.co.jcox.molglide.editor.model.ChemAtom
+import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
 import javax.vecmath.Point2d
 
 class DirectAtomCreationAction (

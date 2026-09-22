@@ -4,8 +4,8 @@ import kotlinx.serialization.json.Json
 import org.joml.Vector2d
 import uk.co.jcox.molglide.editor.control.ActionManager
 import uk.co.jcox.molglide.editor.control.actions.*
-import uk.co.jcox.molglide.editor.model.ChemAtom
-import uk.co.jcox.molglide.editor.model.ChemFormalCharge
+import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
+import uk.co.jcox.molglide.editor.model.chemengine.ChemFormalCharge
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import java.io.File
 import java.io.IOException

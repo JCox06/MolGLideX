@@ -5,7 +5,7 @@ import org.joml.minus
 import uk.co.jcox.molglide.editor.control.ActionManager
 import uk.co.jcox.molglide.editor.control.EventContext
 import uk.co.jcox.molglide.editor.control.actions.MoveSpatialAction
-import uk.co.jcox.molglide.editor.model.ChemAtom
+import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.model.ISpatialInfo
 import uk.co.jcox.molglide.editor.model.SelectionManager

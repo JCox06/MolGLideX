@@ -5,7 +5,7 @@ import org.openscience.cdk.interfaces.IAtomContainer
 import org.openscience.cdk.interfaces.IBond
 import org.openscience.cdk.layout.RingPlacer
 import uk.co.jcox.molglide.EditMode
-import uk.co.jcox.molglide.editor.model.ChemMolecule
+import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.control.tool.AtomBondTool
 import javax.vecmath.Point2d

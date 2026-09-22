@@ -8,6 +8,9 @@ import uk.co.jcox.molglide.editor.control.ActionManager
 import uk.co.jcox.molglide.editor.control.EventContext
 import uk.co.jcox.molglide.editor.control.actions.*
 import uk.co.jcox.molglide.editor.model.*
+import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
+import uk.co.jcox.molglide.editor.model.chemengine.ChemBond
+import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
@@ -233,7 +236,7 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
         //If the selection is active (as in the user is selecting an atom)
         //Any subsequent click should replace the atom selected with the active atom from the toolbox
         val selectable = selection?.selectable
-        if (selectable is ChemAtom ) {
+        if (selectable is ChemAtom) {
             return Mode.AtomReplacement(selectable)
         }
 

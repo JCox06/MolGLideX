@@ -2,6 +2,9 @@ package uk.co.jcox.molglide.editor.io
 
 import kotlinx.serialization.json.Json
 import uk.co.jcox.molglide.editor.model.*
+import uk.co.jcox.molglide.editor.model.chemengine.ChemArrow
+import uk.co.jcox.molglide.editor.model.chemengine.ChemFormalCharge
+import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
 import java.io.IOException
 
 class LevelSerializer {

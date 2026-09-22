@@ -1,6 +1,9 @@
-package uk.co.jcox.molglide.editor.model
+package uk.co.jcox.molglide.editor.model.chemengine
 
 import org.joml.Vector2d
+import uk.co.jcox.molglide.editor.model.IChemComponent
+import uk.co.jcox.molglide.editor.model.IEditorSelectable
+import uk.co.jcox.molglide.editor.model.ISpatialInfo
 import kotlin.collections.set
 
 class ChemArrow (

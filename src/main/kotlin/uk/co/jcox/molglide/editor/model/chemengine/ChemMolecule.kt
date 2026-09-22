@@ -1,4 +1,4 @@
-package uk.co.jcox.molglide.editor.model
+package uk.co.jcox.molglide.editor.model.chemengine
 
 
 import io.github.dan2097.jnainchi.InchiStatus
@@ -22,6 +22,10 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator
 import org.openscience.cdk.tools.manipulator.AtomTypeManipulator
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator
 import uk.co.jcox.molglide.editor.control.tool.AtomBondTool
+import uk.co.jcox.molglide.editor.model.IEditorSelectable
+import uk.co.jcox.molglide.editor.model.InchiReturn
+import uk.co.jcox.molglide.editor.model.InchiStats
+import uk.co.jcox.molglide.editor.model.MolGLideChemData
 import java.util.UUID
 import javax.vecmath.Point2d
 

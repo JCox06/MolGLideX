@@ -5,9 +5,8 @@ import uk.co.jcox.molglide.editor.control.ActionManager
 import uk.co.jcox.molglide.editor.control.EventContext
 import uk.co.jcox.molglide.editor.control.actions.RestoreChemArrowAction
 import uk.co.jcox.molglide.editor.control.actions.RestoreChemArrowPositionAction
-import uk.co.jcox.molglide.editor.model.ChemArrow
+import uk.co.jcox.molglide.editor.model.chemengine.ChemArrow
 import uk.co.jcox.molglide.editor.model.EditorStateData
-import uk.co.jcox.molglide.editor.model.IEditorSelectable
 import uk.co.jcox.molglide.editor.model.SelectionManager
 
 class ArrowTool(val data: EditorStateData, actionManager: ActionManager, selectionManager: SelectionManager) : Tool(actionManager,

@@ -1,6 +1,7 @@
 package uk.co.jcox.molglide.editor.model
 
 import uk.co.jcox.molglide.MolGLideUtils
+import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
 import java.awt.Color
 import java.awt.Graphics2D
 import java.awt.font.TextAttribute

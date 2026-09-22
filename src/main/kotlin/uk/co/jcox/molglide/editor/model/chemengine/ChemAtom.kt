@@ -1,36 +1,35 @@
-package uk.co.jcox.molglide.editor.model
+package uk.co.jcox.molglide.editor.model.chemengine
 
 import org.joml.Vector2d
 import org.openscience.cdk.interfaces.IAtom
-import uk.co.jcox.molglide.editor.model.ChemMolecule.Companion.IGNORE_ERRORS
-import uk.co.jcox.molglide.editor.model.ChemMolecule.Companion.TRAILING_POS
-import uk.co.jcox.molglide.editor.model.ChemMolecule.Companion.VISIBLE
-import uk.co.jcox.molglide.editor.model.ChemMolecule.TrailingGroupPosition
+import uk.co.jcox.molglide.editor.model.IEditorSelectable
+import uk.co.jcox.molglide.editor.model.ISpatialInfo
+import uk.co.jcox.molglide.editor.model.MolGLideChemData
 
 class ChemAtom (
     val atom: IAtom,
     val molecule: ChemMolecule,
 ) : IEditorSelectable, ISpatialInfo, MolGLideChemData(atom) {
     fun isVisible(): Boolean {
-        return atom.getProperty<Boolean>(VISIBLE)
+        return atom.getProperty<Boolean>(ChemMolecule.VISIBLE)
     }
     fun setVisible(visible: Boolean) {
-        atom.setProperty(VISIBLE, visible)
+        atom.setProperty(ChemMolecule.VISIBLE, visible)
     }
     fun shouldIgnoreErrors(): Boolean {
-        return atom.getProperty(IGNORE_ERRORS)
+        return atom.getProperty(ChemMolecule.IGNORE_ERRORS)
     }
     fun setIgnoreErrors(ignore: Boolean) {
-        atom.setProperty(IGNORE_ERRORS, ignore)
+        atom.setProperty(ChemMolecule.IGNORE_ERRORS, ignore)
     }
     fun isCarbon(): Boolean {
         return atom.symbol == "C"
     }
-    fun setTrailPos(trail: TrailingGroupPosition) {
-        atom.setProperty(TRAILING_POS, trail)
+    fun setTrailPos(trail: ChemMolecule.TrailingGroupPosition) {
+        atom.setProperty(ChemMolecule.TRAILING_POS, trail)
     }
-    fun getTrailPos() : TrailingGroupPosition {
-        return atom.getProperty<TrailingGroupPosition>(TRAILING_POS)
+    fun getTrailPos() : ChemMolecule.TrailingGroupPosition {
+        return atom.getProperty<ChemMolecule.TrailingGroupPosition>(ChemMolecule.TRAILING_POS)
     }
     fun getPos() : Vector2d {
         val p2d = atom.point2d

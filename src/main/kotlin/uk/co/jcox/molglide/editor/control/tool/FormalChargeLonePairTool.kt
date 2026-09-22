@@ -9,8 +9,8 @@ import uk.co.jcox.molglide.editor.control.actions.CreateFormalCharge
 import uk.co.jcox.molglide.editor.control.actions.DecrementFormalChargeAction
 import uk.co.jcox.molglide.editor.control.actions.IDataAction
 import uk.co.jcox.molglide.editor.control.actions.IncrementFormalChargeAction
-import uk.co.jcox.molglide.editor.model.ChemAtom
-import uk.co.jcox.molglide.editor.model.ChemFormalCharge
+import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
+import uk.co.jcox.molglide.editor.model.chemengine.ChemFormalCharge
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.model.SelectionManager
 

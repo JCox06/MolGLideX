@@ -2,7 +2,7 @@ package uk.co.jcox.molglide.editor.control.actions
 
 import org.joml.Vector2d
 import uk.co.jcox.molglide.editor.io.ArrowDataObject
-import uk.co.jcox.molglide.editor.model.ChemArrow
+import uk.co.jcox.molglide.editor.model.chemengine.ChemArrow
 import uk.co.jcox.molglide.editor.model.EditorStateData
 
 class DirectAddArrowAction (private val arrowDataObject: ArrowDataObject) : IDataAction {

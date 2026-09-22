@@ -1,6 +1,6 @@
 package uk.co.jcox.molglide.editor.control.actions
 
-import uk.co.jcox.molglide.editor.model.ChemMolecule
+import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 
 class DirectMoleculeCreationAction : IDataAction {

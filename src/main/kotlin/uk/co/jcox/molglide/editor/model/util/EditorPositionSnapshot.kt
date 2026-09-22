@@ -1,8 +1,7 @@
 package uk.co.jcox.molglide.editor.model.util
 
-import org.checkerframework.checker.units.qual.s
 import org.joml.Vector2d
-import uk.co.jcox.molglide.editor.model.ChemMolecule
+import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
 import uk.co.jcox.molglide.editor.model.ISpatialInfo
 
 class EditorPositionSnapshot (

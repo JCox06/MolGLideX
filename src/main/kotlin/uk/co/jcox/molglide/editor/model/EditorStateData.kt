@@ -1,5 +1,10 @@
 package uk.co.jcox.molglide.editor.model
 
+import uk.co.jcox.molglide.editor.model.chemengine.ChemArrow
+import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
+import uk.co.jcox.molglide.editor.model.chemengine.ChemBond
+import uk.co.jcox.molglide.editor.model.chemengine.ChemFormalCharge
+import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
 import kotlin.math.max
 
 

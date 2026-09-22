@@ -2,9 +2,9 @@ package uk.co.jcox.molglide
 
 import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.editor.control.EditorStateController
-import uk.co.jcox.molglide.editor.model.ChemArrow
-import uk.co.jcox.molglide.editor.model.ChemAtom
-import uk.co.jcox.molglide.editor.model.ChemBond
+import uk.co.jcox.molglide.editor.model.chemengine.ChemArrow
+import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
+import uk.co.jcox.molglide.editor.model.chemengine.ChemBond
 import java.awt.Desktop
 import java.awt.Toolkit
 import java.awt.event.ActionEvent

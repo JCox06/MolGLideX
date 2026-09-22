@@ -1,7 +1,7 @@
 package uk.co.jcox.molglide.editor.control.actions
 
-import uk.co.jcox.molglide.editor.model.ChemAtom
-import uk.co.jcox.molglide.editor.model.ChemBond
+import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
+import uk.co.jcox.molglide.editor.model.chemengine.ChemBond
 import uk.co.jcox.molglide.editor.model.EditorStateData
 
 class RingCyclisationAction (
