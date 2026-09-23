@@ -37,7 +37,7 @@ class EditorPanel(private val uiData: IDataModelUI) : JPanel() {
 
     fun buildContextMenus(actionRegistry: SwingActionRegistry, popupListener: PopupMenuListener) {
         fun buildCDKCommon(m: JPopupMenu) {
-            val cdkMenu = JMenu("CDK Tools")
+            val cdkMenu = JMenu("Chem Tools")
             cdkMenu.add(actionRegistry[MainController.CDK_COPY_CANONICAL_SMILES_ACTION])
             cdkMenu.add(actionRegistry[MainController.CDK_CLEANUP_STRUCTURE])
             cdkMenu.add(actionRegistry[MainController.CDK_INCHI])

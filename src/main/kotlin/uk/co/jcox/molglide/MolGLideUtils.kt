@@ -1,11 +1,13 @@
 package uk.co.jcox.molglide
 
 import com.formdev.flatlaf.util.SystemFileChooser
+import org.openscience.cdk.debug.DebugChemObjectBuilder
 import org.openscience.cdk.silent.SilentChemObjectBuilder
 import uk.co.jcox.molglide.editor.model.chemengine.CDKContainerWrapper
 import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule
 import java.awt.Color
 import java.awt.Component
+import java.awt.Toolkit
 import java.io.File
 import java.util.*
 import javax.swing.UIManager
@@ -26,11 +28,12 @@ object MolGLideUtils {
         return molglide
     }
 
-    fun getQuickCaptureDirectory() : File {
-        val molglide = getMolGLideHome()
-        val captures = File(molglide, "captures")
-        captures.mkdir()
-        return captures
+    fun getMolGLideSaveLocation(): File {
+        val userDocuments = File(System.getProperty("user.home") + "/Documents/MolGLideX")
+        if (!userDocuments.exists()) {
+            userDocuments.mkdir()
+        }
+        return userDocuments
     }
 
     fun getAccentColour() : Color {
@@ -49,6 +52,7 @@ object MolGLideUtils {
     fun showSaveDialogue(parent: Component): File? {
         val fileChooser = SystemFileChooser()
         fileChooser.addChoosableFileFilter(mgxFilter)
+        fileChooser.currentDirectory = getMolGLideSaveLocation()
         fileChooser.showSaveDialog(parent)
         val file = fileChooser.selectedFile
         if (file != null && file.extension.isEmpty()) {
@@ -61,6 +65,7 @@ object MolGLideUtils {
     fun showOpenDialogue() : File? {
         val fileChooser = SystemFileChooser()
         fileChooser.addChoosableFileFilter(mgxFilter)
+        fileChooser.currentDirectory = getMolGLideSaveLocation()
         fileChooser.showOpenDialog(null)
         val file = fileChooser.selectedFile
         return file
