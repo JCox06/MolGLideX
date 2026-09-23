@@ -1,7 +1,7 @@
 package uk.co.jcox.molglide.editor.control.actions
 
-import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
+import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule
 
 
 /**
@@ -21,12 +21,12 @@ import uk.co.jcox.molglide.editor.model.EditorStateData
  * any fragmentation in a molecule
  *
  * */
-class PartitionFragmentsAction (private val molecule: ChemMolecule) : IDataAction {
+class PartitionFragmentsAction (private val molecule: MgxMolecule) : IDataAction {
 
-    private var fragments = listOf<ChemMolecule>()
+    private var fragments: Collection<MgxMolecule> = listOf<MgxMolecule>()
 
     override fun execute(data: EditorStateData) {
-        val isFragmented = molecule.isFragmented()
+        val isFragmented = molecule.isDisconnected()
         if (isFragmented) {
             //First remove the original molecule
             data.removeMolecule(molecule)

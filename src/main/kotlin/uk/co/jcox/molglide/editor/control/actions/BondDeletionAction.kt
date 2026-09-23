@@ -1,19 +1,18 @@
 package uk.co.jcox.molglide.editor.control.actions
 
-import uk.co.jcox.molglide.editor.model.chemengine.ChemBond
-import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
+import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
 
-class BondDeletionAction (val toDelete: ChemBond) : IDataAction {
+class BondDeletionAction (val toDelete: MgxBond) : IDataAction {
 
-    private val molecule: ChemMolecule = toDelete.molecule
+    private val molecule = toDelete.getMolecule()
 
 
     override fun execute(data: EditorStateData) {
-        molecule.removeConnection(toDelete.bond)
+        molecule.removeBond(toDelete)
     }
 
     override fun undo(data: EditorStateData) {
-        molecule.directlyAddBond(toDelete.bond)
+        molecule.addBond(toDelete)
     }
 }

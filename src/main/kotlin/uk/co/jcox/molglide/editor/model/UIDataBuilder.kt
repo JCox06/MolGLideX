@@ -10,9 +10,9 @@ import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.editor.control.tool.AtomBondTool
 import uk.co.jcox.molglide.editor.model.chemengine.ChemArrow
-import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
-import uk.co.jcox.molglide.editor.model.chemengine.ChemBond
-import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
+import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
+import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
+import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule
 import uk.co.jcox.molglide.editor.ui.EditorPanel
 import kotlin.math.roundToInt
 
@@ -51,7 +51,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
     private fun buildAtomUI(fullBuild: Boolean) {
         data.getMolecules().forEach { chemMolecule ->
             chemMolecule.atoms().forEach { chemAtom ->
-                val isSelected = selectionManager.isSelected(chemAtom, ChemAtom.MAIN_ATOM)
+                val isSelected = selectionManager.isSelected(chemAtom, MgxAtom.MAIN_ATOM)
                 uiComponents[chemAtom]?.selected = isSelected
                 if (!fullBuild && !(chemAtom.isTransient() || isSelected)) {
                     return@forEach
@@ -79,37 +79,31 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
     }
 
 
-    private fun buildUIAtom(chemAtom: ChemAtom) : UIAtom {
+    private fun buildUIAtom(chemAtom: MgxAtom) : UIAtom {
         val pos = chemAtom.getPos()
 
 
         val ui: UIAtom = UIAtom(
-            chemAtom.atom.symbol,
+            chemAtom.getSymbol(),
             pos.x,
             pos.y,
-            calculateTrailGroup(chemAtom.atom),
+            calculateTrailGroup(chemAtom),
             chemAtom.getTrailPos(),
-            chemAtom.isVisible(),
+            chemAtom.isNotImplicit(),
             selectionManager.isSelected(chemAtom),
-            checkForAtomErrors(chemAtom),
-            chemAtom.shouldIgnoreErrors(),
+            chemAtom.isAtomTypeResolved(),
+            chemAtom.ignoreErrors(),
         )
         return ui
     }
 
-    private fun checkForAtomErrors(chemAtom: ChemAtom): Boolean {
-        if (chemAtom.atom.atomTypeName == ChemMolecule.UNKNOWN) {
-            return true
-        }
-        return false
-    }
-
-    private fun calculateTrailGroup(atom: IAtom): String {
-        if (atom.implicitHydrogenCount == 1) {
+    private fun calculateTrailGroup(atom: MgxAtom): String {
+        val hcount = atom.getImplicitHCount()
+        if (hcount == 1) {
             return "H"
         }
-        if (atom.implicitHydrogenCount > 1) {
-            return "H${atom.implicitHydrogenCount}"
+        if (hcount > 1) {
+            return "H${hcount}"
         }
         return ""
     }
@@ -127,10 +121,10 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
                 val absoluteBond = getAbsoluteBond(chemBond)
                 val bondComponents = mutableListOf<AbstractUIComponent>()
 
-                when (chemBond.bond.order) {
-                    IBond.Order.SINGLE -> handleSingleStereo(absoluteBond, chemBond, bondComponents)
-                    IBond.Order.DOUBLE -> bondComponents.addAll(calculatePositionForDoubleBond(absoluteBond, chemBond))
-                    IBond.Order.TRIPLE -> bondComponents.addAll(calculatePositionForTripleBond(absoluteBond, chemBond))
+                when (chemBond.getOrder()) {
+                    1 -> handleSingleStereo(absoluteBond, chemBond, bondComponents)
+                    2 -> bondComponents.addAll(calculatePositionForDoubleBond(absoluteBond, chemBond))
+                    3 -> bondComponents.addAll(calculatePositionForTripleBond(absoluteBond, chemBond))
                     else -> {}
                 }
                 val uiInfo = buildUIBond(chemBond, bondComponents)
@@ -139,25 +133,25 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
     }
 
 
-    private fun handleSingleStereo(absoluteBond: UILine, chemBond: ChemBond, bondComponents: MutableList<AbstractUIComponent>) {
+    private fun handleSingleStereo(absoluteBond: UILine, chemBond: MgxBond, bondComponents: MutableList<AbstractUIComponent>) {
         //If the stereochem is just normal, then just add the absolute bond
-        val s = chemBond.stereo()
-        if (s == StereoChem.NORMAL) {
+        val s = chemBond.getStereo()
+        if (s == MgxBond.Stereo.NORMAL) {
             bondComponents.add(absoluteBond)
             return
         }
-        if (s == StereoChem.DASHED) {
+        if (s == MgxBond.Stereo.HASHED) {
             addDashedWedgeLines(absoluteBond, chemBond, bondComponents)
             return
         }
 
-        if (s == StereoChem.WEDGED) {
+        if (s == MgxBond.Stereo.WEDGED) {
             addWedgedBonds(absoluteBond, chemBond, bondComponents)
             return
         }
     }
 
-    private fun addWedgedBonds(absoluteBond: UILine, chemBond: ChemBond, bondComponents: MutableList<AbstractUIComponent>) {
+    private fun addWedgedBonds(absoluteBond: UILine, chemBond: MgxBond, bondComponents: MutableList<AbstractUIComponent>) {
         val perp = calculatePerpendicularVector(absoluteBond)
 
         val startX = absoluteBond.startX
@@ -178,7 +172,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         bondComponents.add(UITriangle(v3, v2, v1))
     }
 
-    private fun addDashedWedgeLines(absoluteBond: UILine, chemBond: ChemBond, bondComponents: MutableList<AbstractUIComponent>) {
+    private fun addDashedWedgeLines(absoluteBond: UILine, chemBond: MgxBond, bondComponents: MutableList<AbstractUIComponent>) {
         val vec = calculateVector(absoluteBond)
         val perp = calculatePerpendicularVector(absoluteBond)
         val currentPos = Vector2d(absoluteBond.startX, absoluteBond.startY)
@@ -221,16 +215,15 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
      * @param chemBond the bond to calculate basic UI properties for
      * @return UI information to show where a bond really starts and really ends
      */
-    private fun getAbsoluteBond(chemBond: ChemBond) : UILine {
-        val atomA = ChemAtom(chemBond.bond.begin, chemBond.molecule)
-        val atomB = ChemAtom(chemBond.bond.end, chemBond.molecule)
+    private fun getAbsoluteBond(chemBond: MgxBond) : UILine {
+        val atomA = chemBond.getStart()
+        val atomB = chemBond.getEnd()
         val aPos = atomA.getPos()
         val bPos = atomB.getPos()
-        val aVis = atomA.isVisible()
-        val bVis = atomB.isVisible()
+        val aVis = atomA.isNotImplicit()
+        val bVis = atomB.isNotImplicit()
         val start = if (aVis) getCappedEnd(bPos, aPos, (EditorPanel.UNMODDED_TEXT_SIZE / AtomBondTool.CONNECTION_DISTANCE.toDouble())*1.0) else aPos
         val end = if (bVis) getCappedEnd(aPos, bPos, (EditorPanel.UNMODDED_TEXT_SIZE / AtomBondTool.CONNECTION_DISTANCE.toDouble())*1.0) else bPos
-        val id = chemBond.bond.id
         val uiLine: UILine = UILine(start.x, start.y, end.x, end.y)
         return uiLine
     }
@@ -250,7 +243,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
      *
      * @return The list of new UI bonds which can be added to the final UI
      */
-    private fun calculatePositionForTripleBond(uiLine: UILine, chemBond: ChemBond): List<UILine> {
+    private fun calculatePositionForTripleBond(uiLine: UILine, chemBond: MgxBond): List<UILine> {
         val bondList = mutableListOf<UILine>()
         val perp = calculatePerpendicularVector(uiLine)
         val bondA = applyBondTranslation(uiLine, perp * INTER_BOND_DISTANCE)
@@ -273,7 +266,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
      *  @param uiLine The main bond metrics after clipping where the element label is
      *  @return A list of bonds to add to the UIBonds list
      */
-    private fun calculatePositionForDoubleBond(uiLine: UILine, chemBond: ChemBond) : List<UILine> {
+    private fun calculatePositionForDoubleBond(uiLine: UILine, chemBond: MgxBond) : List<UILine> {
         val bondList = mutableListOf<UILine>()
 
         //Create the double bond, and correctly choose the side
@@ -304,19 +297,21 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
     }
 
 
-    private fun calculateDoubleBondSide(uiLine: UILine, chemBond: ChemBond): Pair<UILine, Vector2d> {
+    private fun calculateDoubleBondSide(uiLine: UILine, chemBond: MgxBond): Pair<UILine, Vector2d> {
         val perp = calculatePerpendicularVector(uiLine)
         val aVec = perp * INTER_BOND_DISTANCE
         val bVec = perp * -INTER_BOND_DISTANCE
         val testSideA = applyBondTranslation(uiLine, aVec)
         val testSideB = applyBondTranslation(uiLine, bVec)
 
+        val molecule = chemBond.getMolecule()
+
         //First check if the bond is part of a ring
-        if (chemBond.molecule.checkBondInRing(chemBond)) {
+        if (molecule.inRing(chemBond)) {
             //The bond is now part of the ring
             //Get the fragment it belongs to, and get the centre of that
-            val fragment = findFragment(chemBond, chemBond.molecule.getAllFragments()) ?: return Pair(uiLine, Vector2d(0.0, 0.0))
-            val centre = calculateAverageCentre(fragment)
+            val fragment = findFragment(chemBond, molecule.createRingFragments()) ?: return Pair(uiLine, Vector2d(0.0, 0.0))
+            val centre = fragment.getSpatialCentre()
 
             val distA = calculateDistance(testSideA, centre)
             val distB = calculateDistance(testSideB, centre)
@@ -340,25 +335,9 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         return Pair(testSideA, aVec)
     }
 
-    private fun findFragment(chemBond: ChemBond, containers: List<IAtomContainer>) : IAtomContainer? {
-        return containers.find { it.contains(chemBond.bond) }
+    private fun findFragment(chemBond: MgxBond, containers: Collection<MgxMolecule>) : MgxMolecule? {
+        return containers.find { it.bonds().contains(chemBond) }
     }
-
-    private fun calculateAverageCentre(container: IAtomContainer): Vector2d {
-        var atomCount = 0
-        var totalX = 0.0
-        var totalY = 0.0
-        container.atoms().forEach { atom ->
-            val point = atom.point2d
-            totalX += point.x
-            totalY += point.y
-            atomCount++
-        }
-        val avgX = totalX / atomCount
-        val avgY = totalY / atomCount
-        return Vector2d(avgX, avgY)
-    }
-
 
     private fun calculateDistance(uiLine: UILine, point: Vector2d): Double {
         val midpoint = Vector2d((uiLine.startX + uiLine.endX) / 2, (uiLine.startY + uiLine.endY) / 2)
@@ -372,15 +351,19 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
      *
      * For now, just check to see if one of the atoms is either C (carbonyl) or nitrogen (Immine)
      */
-    private fun shouldCentreDoubleBond(chemBond: ChemBond) : Boolean {
+    private fun shouldCentreDoubleBond(chemBond: MgxBond) : Boolean {
 
-        if (chemBond.molecule.checkBondInRing(chemBond)) {
+        if (chemBond.getMolecule().inRing(chemBond)) {
             return false
         }
         //Get both atoms
-        val heteroatom = chemBond.bond.atoms().find { it.symbol == "O" || it.symbol == "N" }
+        val start = chemBond.getStart()
+        val end = chemBond.getEnd()
 
-        return heteroatom != null
+        val s1 = start.getSymbol()
+        val s2 = end.getSymbol()
+
+        return (s1 == "O" || s1 == "N") || (s2 == "O" || s2 == "N")
     }
 
 
@@ -391,7 +374,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
      * This might not be what professional editors use, but it works for now, and also looks nice
      * which is the main thing
      */
-    private fun getBaselineShortening(doubleUILine: UILine, chemBond: ChemBond) : UILine {
+    private fun getBaselineShortening(doubleUILine: UILine, chemBond: MgxBond) : UILine {
         if (chemBond.isTerminal()) {
             return doubleUILine
         }
@@ -495,8 +478,8 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
             }
 
             val text = getFormalChargeText(formalCharge.getCharge())
-            val position = formalCharge.position
-            val ui = UITextComponent(text, position.x, position.y, formalCharge.chemAtom.isVisible())
+            val position = formalCharge.getPos()
+            val ui = UITextComponent(text, position.x, position.y, formalCharge.getAssociatedAtom().isNotImplicit())
             uiComponents[formalCharge] = ui
         }
     }
@@ -504,23 +487,22 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
     fun getSelectedFormula(): String {
         val s = selectionManager.getMolecule() ?: return ""
         return s.getFormulaString()
-
     }
 
 
-    private fun buildUIBond(chemBond: ChemBond, bondComponents: MutableList<AbstractUIComponent>): UIBond {
-        val ui = UIBond(chemBond.bond.order.numeric(), chemBond.midPoint(), chemBond.bond.isAromatic, chemBond.stereo(), bondComponents, selectionManager.isSelected(chemBond))
+    private fun buildUIBond(chemBond: MgxBond, bondComponents: MutableList<AbstractUIComponent>): UIBond {
+        val ui = UIBond(chemBond.getOrder(), chemBond.midpoint(), chemBond.getBondAromaticity(), chemBond.getStereo(), bondComponents, selectionManager.isSelected(chemBond))
         return ui
     }
 
     fun getSelectedWeight(): Double {
         val s = selectionManager.getMolecule() ?: return 0.0
-        return s.getMolecularWeight()
+        return s.getMolecularMass()
     }
 
     fun getSelectedHybridisation(): String {
-        val s = selectionManager.getAtom()
-        return s?.atom?.atomTypeName ?: ""
+        val s = selectionManager.getAtom() ?: return ""
+        return s.getAtomTypeString()
     }
 
 

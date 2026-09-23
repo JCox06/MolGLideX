@@ -1,7 +1,7 @@
 package uk.co.jcox.molglide
 
-import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
-import uk.co.jcox.molglide.editor.model.chemengine.ChemBond
+import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
+import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
 
 class SwingActionRegistry {
 
@@ -16,7 +16,7 @@ class SwingActionRegistry {
         return action
     }
 
-    fun stateHasChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+    fun stateHasChanged(activeSession: EditorSession, currentBond: MgxBond?, currentAtom: MgxAtom?) {
         registeredActions.values.forEach {
             it.chemDataChanged(activeSession, currentBond, currentAtom)
         }

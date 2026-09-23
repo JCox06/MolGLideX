@@ -3,9 +3,11 @@ package uk.co.jcox.molglide.editor.model
 import org.joml.Vector2d
 import org.joml.Vector2dc
 import uk.co.jcox.molglide.editor.control.tool.Tool
-import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
-import uk.co.jcox.molglide.editor.model.chemengine.ChemBond
-import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
+import uk.co.jcox.molglide.editor.model.chemengine.IEditorSelectable
+import uk.co.jcox.molglide.editor.model.chemengine.ISpatialInfo
+import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
+import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
+import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule
 
 class SelectionManager (
 ) {
@@ -98,9 +100,9 @@ class SelectionManager (
      * This method is for discrete selections only
      * @return the currently selected bond or null if no bond is selected
      */
-    fun getBond(): ChemBond? {
+    fun getBond(): MgxBond? {
         val selection = primarySelection?.selectable
-        if (selection is ChemBond) {
+        if (selection is MgxBond) {
             return selection
         }
         return null
@@ -110,9 +112,9 @@ class SelectionManager (
      * This method is for discrete selections only
      * @return the currently selected atom or null if no bond is selected
      */
-    fun getAtom(): ChemAtom? {
+    fun getAtom(): MgxAtom? {
         val selectable = primarySelection?.selectable
-        if (selectable is ChemAtom) {
+        if (selectable is MgxAtom) {
             return selectable
         }
         return null
@@ -122,13 +124,13 @@ class SelectionManager (
      * This method is for discrete selections only
      * @return the currently selected molecule from either the currently selected atom or bond or null if not selected
      */
-    fun getMolecule() : ChemMolecule? {
+    fun getMolecule() : MgxMolecule? {
         val selection = primarySelection?.selectable
-        if (selection is ChemAtom) {
-            return selection.molecule
+        if (selection is MgxAtom) {
+            return selection.getMolecule()
         }
-        if (selection is ChemBond) {
-            return selection.molecule
+        if (selection is MgxBond) {
+            return selection.getMolecule()
         }
         return null
     }
@@ -172,12 +174,12 @@ class SelectionManager (
         return false
     }
 
-    fun getBatchBonds(): List<ChemBond> {
-        return batchSelection.filterIsInstance<ChemBond>()
+    fun getBatchBonds(): List<MgxBond> {
+        return batchSelection.filterIsInstance<MgxBond>()
     }
 
-    fun getBatchAtoms(): List<ChemAtom> {
-        return batchSelection.filterIsInstance<ChemAtom>()
+    fun getBatchAtoms(): List<MgxAtom> {
+        return batchSelection.filterIsInstance<MgxAtom>()
     }
 
     fun getBatchSpatials(): Collection<ISpatialInfo> {

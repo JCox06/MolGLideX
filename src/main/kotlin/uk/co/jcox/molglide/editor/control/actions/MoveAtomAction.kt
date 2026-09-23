@@ -1,20 +1,21 @@
 package uk.co.jcox.molglide.editor.control.actions
 
-import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
+import org.joml.Vector2d
 import uk.co.jcox.molglide.editor.model.EditorStateData
+import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
 import javax.vecmath.Point2d
 
 class MoveAtomAction (
-    private val chemAtom: ChemAtom,
-    private val newPos: Point2d,
-    private val oldPos: Point2d,
+    private val chemAtom: MgxAtom,
+    private val newPos: Vector2d,
+    private val oldPos: Vector2d,
 ) : IDataAction {
 
     override fun execute(data: EditorStateData) {
-        chemAtom.atom.point2d = newPos
+        chemAtom.setPos(newPos.x, newPos.y)
     }
 
     override fun undo(data: EditorStateData) {
-        chemAtom.atom.point2d = oldPos
+        chemAtom.setPos(oldPos.x, oldPos.y)
     }
 }

@@ -1,12 +1,13 @@
 package uk.co.jcox.molglide
 
-import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
-import uk.co.jcox.molglide.editor.model.chemengine.ChemBond
+import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
+import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
+import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule
 import javax.swing.AbstractAction
 
 abstract class MolGLideSwingAction(name: String) : AbstractAction(name){
 
-    open fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+    open fun chemDataChanged(activeSession: EditorSession, currentBond: MgxBond?, currentAtom: MgxAtom?) {
 
     }
 }
@@ -14,14 +15,14 @@ abstract class MolGLideSwingAction(name: String) : AbstractAction(name){
 
 abstract class MolGLideSwingBondAction(name: String) : MolGLideSwingAction(name) {
 
-    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: MgxBond?, currentAtom: MgxAtom?) {
         isEnabled = currentBond != null
     }
 }
 
 abstract class MolGLideSwingAtomAction(name: String) : MolGLideSwingAction(name) {
 
-    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: MgxBond?, currentAtom: MgxAtom?) {
         isEnabled = currentAtom != null
     }
 }

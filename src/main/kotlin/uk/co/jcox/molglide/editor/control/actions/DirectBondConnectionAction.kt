@@ -1,35 +1,33 @@
 package uk.co.jcox.molglide.editor.control.actions
 
-import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.io.BondDataObject
-import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
-import uk.co.jcox.molglide.editor.model.chemengine.ChemBond
+import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
+import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
+import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule
 
 class DirectBondConnectionAction (
     private val dataBond: BondDataObject,
-    private val molecule: ChemMolecule,
-    private val atomA: ChemAtom,
-    private val atomB: ChemAtom,
+    private val molecule: MgxMolecule,
+    private val atomA: MgxAtom,
+    private val atomB: MgxAtom,
 ) : IDataAction {
 
-    private lateinit var bond: ChemBond
+    private lateinit var bond: MgxBond
 
     override fun execute(data: EditorStateData) {
-        bond = molecule.formBasicConnection(atomA, atomB)
+        bond = molecule.addBond(atomA, atomB, dataBond.order)
         bond.setFlip(dataBond.doubleFlip)
         bond.setStereo(dataBond.stereoDisplay)
-        molecule.updateBondOrder(bond, dataBond.order)
-        bond.bond.setIsAromatic(dataBond.aromatic)
+        bond.setBondAromaticity(dataBond.aromatic)
         bond.setTransient(false)
-
     }
 
     override fun undo(data: EditorStateData) {
-        molecule.removeConnection(bond)
+        molecule.removeBond(bond)
     }
 
     override fun redo(data: EditorStateData) {
-        molecule.directlyAddBond(bond.bond)
+        molecule.addBond(bond)
     }
 }

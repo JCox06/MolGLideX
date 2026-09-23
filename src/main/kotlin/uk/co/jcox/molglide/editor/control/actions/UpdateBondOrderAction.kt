@@ -1,20 +1,20 @@
 package uk.co.jcox.molglide.editor.control.actions
 
 import org.openscience.cdk.interfaces.IBond
-import uk.co.jcox.molglide.editor.model.chemengine.ChemBond
 import uk.co.jcox.molglide.editor.model.EditorStateData
+import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
 
-class UpdateBondOrderAction (private val chemBond: ChemBond, val newOrder: IBond.Order) : IDataAction {
+class UpdateBondOrderAction (private val chemBond: MgxBond, val newOrder: Int) : IDataAction {
 
-    private val molecule = chemBond.molecule
+    private val molecule = chemBond.getMolecule()
 
-    private val currentOrder = chemBond.bond.order
+    private val currentOrder = chemBond.getOrder()
 
     override fun execute(data: EditorStateData) {
-        molecule.updateBondOrder(chemBond, newOrder)
+        molecule.setBondOrder(chemBond, newOrder)
     }
 
     override fun undo(data: EditorStateData) {
-        molecule.updateBondOrder(chemBond, currentOrder)
+        molecule.setBondOrder(chemBond, currentOrder)
     }
 }

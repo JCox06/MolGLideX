@@ -6,10 +6,10 @@ import uk.co.jcox.molglide.IMainAppData
 import uk.co.jcox.molglide.editor.control.ActionManager
 import uk.co.jcox.molglide.editor.control.EventContext
 import uk.co.jcox.molglide.editor.control.actions.RingCreatorAction
-import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
-import uk.co.jcox.molglide.editor.model.chemengine.ChemBond
-import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
 import uk.co.jcox.molglide.editor.model.SelectionManager
+import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
+import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
+import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule
 import uk.co.jcox.molglide.editor.model.util.EditorPositionSnapshot
 import kotlin.math.round
 
@@ -22,23 +22,26 @@ class TemplateRingTool(val globalContext: IMainAppData, actionManager: ActionMan
 
         if (primary == null) {
             addIsolatedRing(clickX, clickY)
+            return
         }
+
+        TODO("NOT IMPLMENETED FUSING OF RINGS")
     }
 
     private fun addIsolatedRing(centreX: Int, centreY: Int) {
         //Add the ring as an isolated ring since the user is not selecting anything
         val action = RingCreatorAction(centreX, centreY, globalContext.getEditMode())
         actionManager.executeAction(action)
-        val c = action.getRingCentre()
-        toolMode = Mode.Rotate(action.placedRing, c.x, c.y, EditorPositionSnapshot.ofMolecule(action.placedRing))
-        action.placedRing.setTransient(true)
+        val c = action.mgxMolecule.getSpatialCentre()
+        toolMode = Mode.Rotate(action.mgxMolecule, c.x, c.y, EditorPositionSnapshot.ofMolecule(action.mgxMolecule))
+        action.mgxMolecule.bulkSetTransient(true)
     }
 
     override fun onRelease(clickX: Int, clickY: Int, eventContext: EventContext) {
         val m = toolMode
         if (m is Mode.Rotate) {
-            m.inserted.setTransient(false)
-            m.inserted.calculateAtomProperties()
+            m.inserted.bulkSetTransient(false)
+            m.inserted.calculateChemData()
         }
         toolMode = Mode.None
     }
@@ -68,7 +71,7 @@ class TemplateRingTool(val globalContext: IMainAppData, actionManager: ActionMan
 
     override fun isTypeValidPrimarySelection(selectionContext: SelectionManager.SelectionInfo): Boolean {
         val entity = selectionContext.selectable
-        return (entity is ChemAtom) || (entity is ChemBond)
+        return (entity is MgxAtom) || (entity is MgxBond)
     }
 
     override fun onSuddenMove() {
@@ -78,6 +81,6 @@ class TemplateRingTool(val globalContext: IMainAppData, actionManager: ActionMan
 
     private sealed class Mode {
         object None : Mode()
-        class Rotate(val inserted: ChemMolecule, val ringCentreX: Double, val ringCentreY: Double, val posMap: EditorPositionSnapshot): Mode()
+        class Rotate(val inserted: MgxMolecule, val ringCentreX: Double, val ringCentreY: Double, val posMap: EditorPositionSnapshot): Mode()
     }
 }

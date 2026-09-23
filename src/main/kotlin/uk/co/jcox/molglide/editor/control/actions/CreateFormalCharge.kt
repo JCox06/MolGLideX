@@ -1,10 +1,11 @@
 package uk.co.jcox.molglide.editor.control.actions
 
-import uk.co.jcox.molglide.editor.model.chemengine.ChemFormalCharge
+import uk.co.jcox.molglide.editor.model.chemengine.FormalChargeWrapper
 import uk.co.jcox.molglide.editor.model.EditorStateData
+import uk.co.jcox.molglide.editor.model.chemengine.MgxFormalCharge
 
 class CreateFormalCharge (
-    private val fc: ChemFormalCharge,
+    private val fc: MgxFormalCharge,
 ) : IDataAction {
 
     private val original = fc.getCharge()

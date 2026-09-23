@@ -1,15 +1,11 @@
 package uk.co.jcox.molglide.editor.control.actions
 
-import org.openscience.cdk.Ring
-import org.openscience.cdk.interfaces.IAtomContainer
-import org.openscience.cdk.interfaces.IBond
-import org.openscience.cdk.layout.RingPlacer
 import uk.co.jcox.molglide.EditMode
-import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
-import uk.co.jcox.molglide.editor.model.EditorStateData
+import uk.co.jcox.molglide.MolGLideUtils
 import uk.co.jcox.molglide.editor.control.tool.AtomBondTool
-import javax.vecmath.Point2d
-import javax.vecmath.Vector2d
+import uk.co.jcox.molglide.editor.model.EditorStateData
+import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule
+import uk.co.jcox.molglide.editor.model.chemengine.MgxTemplateBuilder
 
 class RingCreatorAction (
     private val clickX: Int,
@@ -17,57 +13,26 @@ class RingCreatorAction (
     private val insert: EditMode,
 ) : IDataAction {
 
-    private val ringBuilder = RingPlacer()
-    lateinit var placedRing: ChemMolecule
-
+    lateinit var mgxMolecule: MgxMolecule
+    private lateinit var mgxTemplateBuilder: MgxTemplateBuilder
 
     override fun execute(data: EditorStateData) {
-        val newRing = Ring(insert.ringSize, "C")
-        ringBuilder.placeRing(newRing, Point2d(clickX.toDouble(), clickY.toDouble()), AtomBondTool.CONNECTION_DISTANCE.toDouble())
-
-        val moleculeToAdd: IAtomContainer = newRing
-        val newChemMolecule = ChemMolecule(moleculeToAdd)
-        newChemMolecule.atoms().forEach { it.setVisible(false) }
+        mgxMolecule = MolGLideUtils.createMolecule()
+        mgxTemplateBuilder = mgxMolecule.getTemplateBuilder()
 
         if (insert == EditMode.RING_BENZENE) {
-            specialHandlingForBenzene(newChemMolecule)
+            mgxTemplateBuilder.buildIsolatedBenzene(clickX.toDouble(), clickY.toDouble(), AtomBondTool.CONNECTION_DISTANCE.toDouble())
+        } else {
+            mgxTemplateBuilder.buildIsolatedOrganicRing(insert.ringSize, clickX.toDouble(), clickY.toDouble(), AtomBondTool.CONNECTION_DISTANCE.toDouble())
         }
-
-        data.addMolecule(newChemMolecule)
-        placedRing = newChemMolecule
-    }
-
-
-    fun getRingCentre(): Vector2d {
-        var avgX = 0.0
-        var avgY = 0.0
-        placedRing.atoms().forEach { atom ->
-            val pos = atom.getPos()
-            avgX += pos.x
-            avgY += pos.y
-        }
-        avgX /= placedRing.atoms().size
-        avgY /= placedRing.atoms().size
-        return Vector2d(avgX, avgY)
+        data.addMolecule(mgxMolecule)
     }
 
     override fun undo(data: EditorStateData) {
-        placedRing?.let { data.removeMolecule(it) }
+        data.removeMolecule(mgxMolecule)
     }
 
     override fun redo(data: EditorStateData) {
-        placedRing?.let { data.addMolecule(it) }
-    }
-
-    private fun specialHandlingForBenzene(newRing: ChemMolecule) {
-        var makeDouble = false
-        newRing.bonds().forEach { bond ->
-            if (makeDouble) {
-                newRing.updateBondOrder(bond, IBond.Order.DOUBLE)
-            }
-            bond.bond.setIsAromatic(true)
-            makeDouble = !makeDouble
-
-        }
+        data.addMolecule(mgxMolecule)
     }
 }

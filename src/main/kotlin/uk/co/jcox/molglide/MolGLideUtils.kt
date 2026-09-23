@@ -1,6 +1,9 @@
 package uk.co.jcox.molglide
 
 import com.formdev.flatlaf.util.SystemFileChooser
+import org.openscience.cdk.silent.SilentChemObjectBuilder
+import uk.co.jcox.molglide.editor.model.chemengine.CDKContainerWrapper
+import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule
 import java.awt.Color
 import java.awt.Component
 import java.io.File
@@ -74,5 +77,12 @@ object MolGLideUtils {
         val temp = File.createTempFile("MGX_${UUID.randomUUID().toString()}", ".svg")
         temp.deleteOnExit()
         return temp
+    }
+
+    fun createMolecule(): MgxMolecule {
+        val chemBuilder = SilentChemObjectBuilder.getInstance()
+        val cdkContainer = chemBuilder.newAtomContainer()
+        val mgxMolecule = CDKContainerWrapper(cdkContainer)
+        return mgxMolecule
     }
 }

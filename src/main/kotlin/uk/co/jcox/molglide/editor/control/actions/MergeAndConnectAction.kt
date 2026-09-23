@@ -1,39 +1,37 @@
 package uk.co.jcox.molglide.editor.control.actions
 
-import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
-import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
+import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
+import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule
 
-class MergeAndConnectAction (private val chemAtomA: ChemAtom, private val chemAtomB: ChemAtom) : IDataAction {
+class MergeAndConnectAction (private val chemAtomA: MgxAtom, private val chemAtomB: MgxAtom) : IDataAction {
 
 
-    private val moleculeA = chemAtomA.molecule
-    private val moleculeB = chemAtomB.molecule
+    private val moleculeA = chemAtomA.getMolecule()
+    private val moleculeB = chemAtomB.getMolecule()
 
-    private val chemAtomAIndex = chemAtomA.atom.index
-    private val chemAtomBIndex = chemAtomB.atom.index
+    private val chemAtomAIndex = moleculeA.indexOf(chemAtomA)
+    private val chemAtomBIndex = moleculeB.indexOf(chemAtomB)
 
     private val newChemAtomAIndex = chemAtomAIndex
     private val newChemAtomBIndex = moleculeA.atoms().size + chemAtomBIndex
 
     init {
-        if (moleculeA == moleculeB) {
-            throw IllegalStateException("Cannot merge two atoms that are already in the same container")
-        }
+        require(moleculeA != moleculeB) {"Cannot merge two atoms that are already merged/in the same container"}
     }
 
-    private var newMergedMolecule: ChemMolecule? = null
+    private var newMergedMolecule: MgxMolecule? = null
 
 
     override fun execute(data: EditorStateData) {
-        val newMolecule = moleculeA.createNewMergedContainer(moleculeB)
+        val newMolecule = moleculeA.copyAndMerge(moleculeB)
         newMergedMolecule = newMolecule
         data.removeMolecule(moleculeA)
         data.removeMolecule(moleculeB)
         data.addMolecule(newMolecule)
 
         //Form bond between the new CLONED atoms
-        newMolecule.formBasicConnection(newChemAtomAIndex, newChemAtomBIndex)
+        newMolecule.addBond(newChemAtomAIndex, newChemAtomBIndex, 1)
     }
 
     override fun undo(data: EditorStateData) {

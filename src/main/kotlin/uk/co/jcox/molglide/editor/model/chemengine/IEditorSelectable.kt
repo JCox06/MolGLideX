@@ -1,4 +1,4 @@
-package uk.co.jcox.molglide.editor.model
+package uk.co.jcox.molglide.editor.model.chemengine
 
 import org.joml.Vector2dc
 
@@ -16,5 +16,4 @@ interface IEditorSelectable {
      * The params are not modified!
      */
     fun getObjectSelectionPoints(): Map<Int, Vector2dc>
-
 }

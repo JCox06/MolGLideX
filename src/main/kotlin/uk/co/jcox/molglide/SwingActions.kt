@@ -3,8 +3,8 @@ package uk.co.jcox.molglide
 import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.editor.control.EditorStateController
 import uk.co.jcox.molglide.editor.model.chemengine.ChemArrow
-import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
-import uk.co.jcox.molglide.editor.model.chemengine.ChemBond
+import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
+import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
 import java.awt.Desktop
 import java.awt.Toolkit
 import java.awt.event.ActionEvent
@@ -29,7 +29,7 @@ class UndoAction (val mainController: MainController) : MolGLideSwingAction("Und
         mainController.handleGlobalUndo()
     }
 
-    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: MgxBond?, currentAtom: MgxAtom?) {
         isEnabled = activeSession.editorController.actionManager.canUndo()
     }
 }
@@ -48,7 +48,7 @@ class RedoAction (val mainController: MainController) : MolGLideSwingAction("Red
         mainController.handleGlobalRedo()
     }
 
-    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: MgxBond?, currentAtom: MgxAtom?) {
         isEnabled = activeSession.editorController.actionManager.canRedo()
     }
 
@@ -122,11 +122,11 @@ class ToggleAtomVisibilityMenuAction (val getController: () -> EditorStateContro
 
     override fun chemDataChanged(
         activeSession: EditorSession,
-        currentBond: ChemBond?,
-        currentAtom: ChemAtom?
+        currentBond: MgxBond?,
+        currentAtom: MgxAtom?
     ) {
         super.chemDataChanged(activeSession, currentBond, currentAtom)
-        putValue(SELECTED_KEY, currentAtom?.isVisible())
+        putValue(SELECTED_KEY, currentAtom?.isNotImplicit())
     }
 }
 
@@ -150,16 +150,16 @@ class SetPlainBondMenuAction (val getController: () -> EditorStateController?)
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        getController()?.updateSingleSelectedBond(StereoChem.NORMAL)
+        getController()?.updateSingleSelectedBond(MgxBond.Stereo.NORMAL)
     }
 
     override fun chemDataChanged(
         activeSession: EditorSession,
-        currentBond: ChemBond?,
-        currentAtom: ChemAtom?
+        currentBond: MgxBond?,
+        currentAtom: MgxAtom?
     ) {
         super.chemDataChanged(activeSession, currentBond, currentAtom)
-        putValue(SELECTED_KEY, currentBond?.bond?.order == IBond.Order.SINGLE && currentBond.stereo() == StereoChem.NORMAL)
+        putValue(SELECTED_KEY, currentBond?.getOrder() == 1 && currentBond.getStereo() == MgxBond.Stereo.NORMAL)
     }
 }
 
@@ -169,13 +169,13 @@ class SetWedgedBondMenuAction (val getController: () -> EditorStateController?) 
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_W, 0))
     }
 
-    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: MgxBond?, currentAtom: MgxAtom?) {
         super.chemDataChanged(activeSession, currentBond, currentAtom)
-        putValue(SELECTED_KEY, currentBond?.bond?.order == IBond.Order.SINGLE && currentBond.stereo() == StereoChem.WEDGED)
+        putValue(SELECTED_KEY, currentBond?.getOrder() == 1 && currentBond.getStereo() == MgxBond.Stereo.WEDGED)
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        getController()?.updateSingleSelectedBond(StereoChem.WEDGED)
+        getController()?.updateSingleSelectedBond(MgxBond.Stereo.WEDGED)
     }
 }
 
@@ -189,11 +189,11 @@ class SetDashedBondMenuAction (val getController: () -> EditorStateController?)
     }
 
     override fun actionPerformed(e: ActionEvent?) {
-        getController()?.updateSingleSelectedBond(StereoChem.DASHED)
+        getController()?.updateSingleSelectedBond(MgxBond.Stereo.HASHED)
     }
-    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: MgxBond?, currentAtom: MgxAtom?) {
         super.chemDataChanged(activeSession, currentBond, currentAtom)
-        putValue(SELECTED_KEY, currentBond?.bond?.order == IBond.Order.SINGLE && currentBond.stereo() == StereoChem.DASHED)
+        putValue(SELECTED_KEY, currentBond?.getOrder() == 1 && currentBond.getStereo() == MgxBond.Stereo.HASHED)
     }
 
 }
@@ -221,9 +221,9 @@ class SetDoubleBondMenuAction (val getController: () -> EditorStateController?) 
         getController()?.updateDoubleSelectedBond()
     }
 
-    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: MgxBond?, currentAtom: MgxAtom?) {
         super.chemDataChanged(activeSession, currentBond, currentAtom)
-        putValue(SELECTED_KEY, currentBond?.bond?.order == IBond.Order.DOUBLE)
+        putValue(SELECTED_KEY, currentBond?.getOrder() == 2)
     }
 
 }
@@ -238,9 +238,9 @@ class SetAromaticDoubleBondMenuAction (val getController: () -> EditorStateContr
         getController()?.updateAromaticSelectedBond()
     }
 
-    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: MgxBond?, currentAtom: MgxAtom?) {
         super.chemDataChanged(activeSession, currentBond, currentAtom)
-        putValue(SELECTED_KEY, currentBond?.bond?.isAromatic)
+        putValue(SELECTED_KEY, currentBond?.getBondAromaticity())
     }
 }
 
@@ -256,9 +256,9 @@ class SetTripleBondMenuAction (val getController: () -> EditorStateController?) 
         getController()?.setTripleSelectedBond()
     }
 
-    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: MgxBond?, currentAtom: MgxAtom?) {
         super.chemDataChanged(activeSession, currentBond, currentAtom)
-        putValue(SELECTED_KEY, currentBond?.bond?.order == IBond.Order.TRIPLE)
+        putValue(SELECTED_KEY, currentBond?.getOrder() == 3)
     }
 }
 
@@ -336,7 +336,7 @@ class CopySelectionAction(val mainController: MainController) : MolGLideSwingAct
         mainController.copySelectedMolecules()
     }
 
-    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: MgxBond?, currentAtom: MgxAtom?) {
         isEnabled = activeSession.editorData.selectionManager.hasBatchSelection()
     }
 }
@@ -370,7 +370,7 @@ class CutSelectionAction(val mainController: MainController) : MolGLideSwingActi
         delete.actionPerformed(e)
     }
 
-    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: MgxBond?, currentAtom: MgxAtom?) {
         isEnabled = activeSession.editorData.selectionManager.hasBatchSelection()
     }
 }
@@ -387,7 +387,7 @@ class DeleteSelectionAction(val getController: () -> EditorStateController?) : M
         getController()?.deleteSelectedComponents()
     }
 
-    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: MgxBond?, currentAtom: MgxAtom?) {
         isEnabled = activeSession.editorData.selectionManager.hasBatchSelection()
     }
 }
@@ -460,7 +460,7 @@ class CDKCopyCanonicalSmilesAction (val mainController: MainController) : MolGLi
         putValue(SHORT_DESCRIPTION, "Copy the canonical SMILES of the selected molecule to the clipboard")
     }
 
-    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: MgxBond?, currentAtom: MgxAtom?
     ) {
         isEnabled = activeSession.editorData.selectionManager.getMolecule() != null
     }
@@ -476,7 +476,7 @@ class CDKCleanupStructure (val getController: () -> EditorStateController?) : Mo
         putValue(SHORT_DESCRIPTION, "Invoke CDK to clean the structure of the molecule")
     }
 
-    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: MgxBond?, currentAtom: MgxAtom?
     ) {
         isEnabled = activeSession.editorData.selectionManager.getMolecule() != null
     }
@@ -496,7 +496,7 @@ class CDKCopyInChi (val mainController: MainController): MolGLideSwingAction("Co
         mainController.copyInChi()
     }
 
-    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: MgxBond?, currentAtom: MgxAtom?
     ) {
         isEnabled = activeSession.editorData.selectionManager.getMolecule() != null
     }
@@ -510,7 +510,7 @@ class SetSingleElectronTransfer(val getController: () -> EditorStateController?)
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_1, 0))
     }
 
-    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: MgxBond?, currentAtom: MgxAtom?) {
         val selectionInfo = activeSession.editorData.selectionManager.primarySelection
         val arrow = selectionInfo?.selectable
         val objectID = selectionInfo?.objectAnchorID
@@ -535,7 +535,7 @@ class SetDoubleElectronTransfer(val getController: () -> EditorStateController?)
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_2, 0))
     }
 
-    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: MgxBond?, currentAtom: MgxAtom?) {
         val selectionInfo = activeSession.editorData.selectionManager.primarySelection
         val arrow = selectionInfo?.selectable
         val objectID = selectionInfo?.objectAnchorID
@@ -558,7 +558,7 @@ class SetNoElectronTransfer(val getController: () -> EditorStateController?) : M
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_3, 0))
     }
 
-    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: MgxBond?, currentAtom: MgxAtom?) {
         val selectionInfo = activeSession.editorData.selectionManager.primarySelection
         val arrow = selectionInfo?.selectable
         val objectID = selectionInfo?.objectAnchorID
@@ -581,7 +581,7 @@ class DeleteArrowAction(val getController: () -> EditorStateController?): MolGLi
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0))
     }
 
-    override fun chemDataChanged(activeSession: EditorSession, currentBond: ChemBond?, currentAtom: ChemAtom?) {
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: MgxBond?, currentAtom: MgxAtom?) {
         val selectionInfo = activeSession.editorData.selectionManager.primarySelection
         val arrow = selectionInfo?.selectable
         val objectID = selectionInfo?.objectAnchorID

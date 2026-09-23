@@ -3,8 +3,10 @@ package uk.co.jcox.molglide.editor.io
 import kotlinx.serialization.json.Json
 import uk.co.jcox.molglide.editor.model.*
 import uk.co.jcox.molglide.editor.model.chemengine.ChemArrow
-import uk.co.jcox.molglide.editor.model.chemengine.ChemFormalCharge
-import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
+import uk.co.jcox.molglide.editor.model.chemengine.FormalChargeWrapper
+import uk.co.jcox.molglide.editor.model.chemengine.IEditorSelectable
+import uk.co.jcox.molglide.editor.model.chemengine.MgxFormalCharge
+import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule
 import java.io.IOException
 
 class LevelSerializer {
@@ -46,7 +48,7 @@ class LevelSerializer {
     }
 
 
-    private fun serializeMolecule(saveFile: DataSaveFile, idMappings: DataObjectIDMap, molecule: ChemMolecule, selected: Collection<IEditorSelectable>? = null) {
+    private fun serializeMolecule(saveFile: DataSaveFile, idMappings: DataObjectIDMap, molecule: MgxMolecule, selected: Collection<IEditorSelectable>? = null) {
         val dataMolecule = MoleculeDataObject()
         var addMolecule = false
 
@@ -56,7 +58,7 @@ class LevelSerializer {
             }
             val id = idMappings.chemAtoms[chemAtom] ?: throw IOException("Level Data ID for atom is missing upon molecule serialization")
             val pos = chemAtom.getPos()
-            val dataAtom = AtomDataObject(id, chemAtom.atom.symbol, chemAtom.isVisible(), chemAtom.getTrailPos(), pos.x, pos.y, chemAtom.shouldIgnoreErrors())
+            val dataAtom = AtomDataObject(id, chemAtom.getSymbol(), chemAtom.isNotImplicit(), chemAtom.getTrailPos(), pos.x, pos.y, chemAtom.ignoreErrors())
             dataMolecule.atoms.add(id)
             saveFile.dataAtoms[id] = dataAtom
             addMolecule = true
@@ -70,7 +72,7 @@ class LevelSerializer {
             val atomAID = idMappings.chemAtoms[chemBond.getStart()] ?: throw IOException("Level Data ID for atom start of bond is missing upon molecule serialization")
             val atomBID = idMappings.chemAtoms[chemBond.getEnd()] ?: throw IOException("Level Data for ID for atom end of bond is missing upon molecule serialization")
 
-            val dataBond = BondDataObject(atomAID, atomBID, chemBond.shouldFlip(), chemBond.bond.order.numeric(), chemBond.stereo(), chemBond.bond.isAromatic)
+            val dataBond = BondDataObject(atomAID, atomBID, chemBond.shouldFlip(), chemBond.getOrder(), chemBond.getStereo(), chemBond.getBondAromaticity())
 
             dataMolecule.bonds.add(bondID)
             saveFile.dataBonds[bondID] = dataBond
@@ -114,9 +116,9 @@ class LevelSerializer {
     }
 
 
-    private fun serializeFormalCharge(dataSaveFile: DataSaveFile, idMappings: DataObjectIDMap, fc: ChemFormalCharge) {
-        val atomRef = idMappings.chemAtoms[fc.chemAtom] ?: return
-        val p = fc.position
+    private fun serializeFormalCharge(dataSaveFile: DataSaveFile, idMappings: DataObjectIDMap, fc: MgxFormalCharge) {
+        val atomRef = idMappings.chemAtoms[fc.getAssociatedAtom()] ?: return
+        val p = fc.getPos()
         val dataObject = FormalChargeObject(atomRef, fc.getCharge(), VectorDataObject(p.x, p.y))
 
         dataSaveFile.charges.add(dataObject)

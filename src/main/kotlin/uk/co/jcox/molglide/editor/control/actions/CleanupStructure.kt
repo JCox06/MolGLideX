@@ -1,16 +1,16 @@
 package uk.co.jcox.molglide.editor.control.actions
 
-import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
+import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule
 
-class CleanupStructure (private val originalMolecule: ChemMolecule) : IDataAction {
+class CleanupStructure (private val originalMolecule: MgxMolecule) : IDataAction {
 
 
-    private val moleculeToClean = originalMolecule.deepCopy()
-    private var cleanedMolecule: ChemMolecule? = null
+    private val moleculeToClean = originalMolecule
+    private var cleanedMolecule: MgxMolecule? = null
 
     override fun execute(data: EditorStateData) {
-        val returnedMolecule = moleculeToClean.cleanMolecule()
+        val returnedMolecule = moleculeToClean.clean2DStructure()
         data.removeMolecule(originalMolecule)
         data.addMolecule(returnedMolecule)
         cleanedMolecule = returnedMolecule

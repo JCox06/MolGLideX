@@ -1,4 +1,4 @@
-package uk.co.jcox.molglide.editor.model
+package uk.co.jcox.molglide.editor.model.chemengine
 
 
 enum class InchiStats {

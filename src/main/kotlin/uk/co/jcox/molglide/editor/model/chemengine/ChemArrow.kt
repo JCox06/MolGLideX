@@ -1,16 +1,13 @@
 package uk.co.jcox.molglide.editor.model.chemengine
 
 import org.joml.Vector2d
-import uk.co.jcox.molglide.editor.model.IChemComponent
-import uk.co.jcox.molglide.editor.model.IEditorSelectable
-import uk.co.jcox.molglide.editor.model.ISpatialInfo
 import kotlin.collections.set
 
 class ChemArrow (
     val arrowPoints: MutableMap<Int, Vector2d>,
     var startArrow: ArrowHead = ArrowHead.NONE,
     var endArrow: ArrowHead = ArrowHead.DOUBLE_BARBED
-) : IEditorSelectable, IChemComponent, ISpatialInfo {
+) : IEditorSelectable, ISpatialInfo {
 
     private var transient = false
 
