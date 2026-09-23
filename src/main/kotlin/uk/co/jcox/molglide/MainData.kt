@@ -1,5 +1,6 @@
 package uk.co.jcox.molglide
 
+import io.github.andrewauclair.moderndocking.app.Docking
 import kotlin.math.pow
 
 class MainData : IMainAppData{

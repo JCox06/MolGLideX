@@ -87,7 +87,7 @@ class MolGlideFrame (
         val result = JOptionPane.showConfirmDialog(this, panel, "Quit MolGLide ?", JOptionPane.YES_NO_OPTION,
             JOptionPane.WARNING_MESSAGE)
 
-        return true
+        return result == 0
     }
 
 
