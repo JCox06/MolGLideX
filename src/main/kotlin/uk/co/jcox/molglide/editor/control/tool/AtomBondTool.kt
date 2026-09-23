@@ -4,6 +4,7 @@ import org.joml.Vector2f
 import org.joml.minus
 import org.joml.plus
 import uk.co.jcox.molglide.IMainAppData
+import uk.co.jcox.molglide.editor.EditorConstants
 import uk.co.jcox.molglide.editor.control.ActionManager
 import uk.co.jcox.molglide.editor.control.EventContext
 import uk.co.jcox.molglide.editor.control.actions.*
@@ -34,7 +35,7 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
         //Find the position of the original (anchor) atom
         val anchorPos = mode.insertedTo.getPos()
 
-        val calculatedNewPos = closestPointToCircleCircumference(Vector2f(anchorPos.x.toFloat(), anchorPos.y.toFloat()), Vector2f(clickX.toFloat(), clickY.toFloat()), CONNECTION_DISTANCE.toFloat())
+        val calculatedNewPos = closestPointToCircleCircumference(Vector2f(anchorPos.x.toFloat(), anchorPos.y.toFloat()), Vector2f(clickX.toFloat(), clickY.toFloat()), EditorConstants.DEFAULT_BOND_DISTANCE.toFloat())
         mode.draggingAtom.setPos(calculatedNewPos.x.toDouble(), calculatedNewPos.y.toDouble())
 
         //Check to see if any trailing groups should be automatically moved
@@ -163,7 +164,7 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
         val directionVec = randomPoint - circleCentre
         val angle = org.joml.Vector2f(1.0f, 0.0f).angle(directionVec)
 
-        val refinedAngle: Float = COMMON_ANGLES.minBy { abs(Math.toRadians(it.toDouble()) - angle) }
+        val refinedAngle: Float = EditorConstants.COMMON_ANGLES.minBy { abs(Math.toRadians(it.toDouble()) - angle) }
 
         val refinedAngeRad = Math.toRadians(refinedAngle.toDouble())
 
@@ -271,23 +272,4 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
         class AtomInsertionDragging(val draggingAtom: MgxAtom, val insertedTo: MgxAtom, var allowBondChanges: Boolean, val newBond: MgxBond) : Mode()
     }
 
-    companion object {
-
-        const val CONNECTION_DISTANCE = 50
-
-        private val COMMON_ANGLES = listOf<Float>(
-            //Cardinal directions
-            0.0f, 90.0f, -90.0f, 180.0f, -180.0f,
-
-            //Semi Cardinal directions
-            45.0f, 135.0f, -45.0f, -135.0f,
-
-            //Odd angles - For triangles
-            30.0f, -30.0f, 60.0f, -60.0f, 120.0f, -120.0f, 150.0f, -150.0f,
-
-            //For Pentagons
-            108.0f, -108.0f, 72.0f, -72.0f, 36.0f, -36.0f, 126.0f, -126.0f, 144.0f, -144.0f,
-            18.0f, -18.0f, 162.0f, -162.0f, 126.0f, -126.0f, 36.0f, -36.0f, 54.0f, -54.0f,
-        )
-    }
 }

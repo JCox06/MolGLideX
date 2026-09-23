@@ -4,6 +4,8 @@ import com.github.jsonldjava.shaded.com.google.common.math.IntMath.pow
 import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.IEditorSessionOrganiser
 import uk.co.jcox.molglide.IMainAppData
+import uk.co.jcox.molglide.editor.EditorConstants
+import uk.co.jcox.molglide.editor.EditorConstants.MOUSE_SENSE_ZOOM
 import uk.co.jcox.molglide.editor.control.actions.*
 import uk.co.jcox.molglide.editor.control.tool.*
 import uk.co.jcox.molglide.editor.model.chemengine.ChemArrow
@@ -13,9 +15,6 @@ import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
 import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule
 import uk.co.jcox.molglide.editor.model.util.EditorPositionSnapshot
 import uk.co.jcox.molglide.editor.ui.EditorPanel
-import uk.co.jcox.molglide.editor.ui.EditorPanel.Companion.MOUSE_SENSE
-import uk.co.jcox.molglide.editor.ui.EditorPanel.Companion.MOUSE_SENSE_ZOOM
-import uk.co.jcox.molglide.editor.ui.EditorPanel.Companion.SIG_MOUSE_DELTA
 import java.awt.Point
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
@@ -392,8 +391,8 @@ class EditorStateController (
             updateMouse(e)
 
             val world = screenToWorld(e.point)
-            val moveX = offsetX * MOUSE_SENSE
-            val moveY = offsetY * MOUSE_SENSE
+            val moveX = offsetX * EditorConstants.MOUSE_SENSE_MOVE
+            val moveY = offsetY * EditorConstants.MOUSE_SENSE_MOVE
 
             if (SwingUtilities.isMiddleMouseButton(e)) {
                 translateCameraPos(moveX, moveY)
@@ -427,7 +426,7 @@ class EditorStateController (
             stateData.mouseX = currentPos.x
             stateData.mouseY = currentPos.y
 
-            if (sqrt((pow(offsetX, 2) + pow(offsetY, 2)).toDouble()) >= SIG_MOUSE_DELTA) {
+            if (sqrt((pow(offsetX, 2) + pow(offsetY, 2)).toDouble()) >= EditorConstants.SIG_MOUSE_DELTA) {
                 handleSuddenMouseMove()
             }
         }

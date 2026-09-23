@@ -4,7 +4,7 @@ import org.joml.Vector2d
 import org.joml.minus
 import org.joml.plus
 import org.joml.times
-import uk.co.jcox.molglide.editor.control.tool.AtomBondTool
+import uk.co.jcox.molglide.editor.EditorConstants
 import uk.co.jcox.molglide.editor.model.chemengine.ChemArrow
 import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
 import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
@@ -157,12 +157,12 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         val midPointEndX = absoluteBond.endX
         val midPointEndY = absoluteBond.endY
 
-        val v2x = (midPointEndX + perp.x * DASH_DISTANCE / 2)
-        val v2y = (midPointEndY + perp.y * DASH_DISTANCE / 2)
+        val v2x = (midPointEndX + perp.x * EditorConstants.HASH_DISTANCE / 2)
+        val v2y = (midPointEndY + perp.y * EditorConstants.HASH_DISTANCE / 2)
         val v2 = Vector2d(v2x, v2y)
 
-        val v3x = (midPointEndX - perp.x * DASH_DISTANCE / 2)
-        val v3y = (midPointEndY - perp.y * DASH_DISTANCE / 2)
+        val v3x = (midPointEndX - perp.x * EditorConstants.HASH_DISTANCE / 2)
+        val v3y = (midPointEndY - perp.y * EditorConstants.HASH_DISTANCE / 2)
         val v3 = Vector2d(v3x, v3y)
 
         bondComponents.add(UITriangle(v3, v2, v1))
@@ -176,7 +176,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
 
 
         val dist = currentPos.distance(lastPos)
-        val linesToDraw: Double = (dist / INTER_DASH_DISTANCE) //Problem: Need this to be integer
+        val linesToDraw: Double = (dist / EditorConstants.INTER_HASH_DISTANCE) //Problem: Need this to be integer
         val roundedLinesToDraw = linesToDraw.roundToInt()
         val relaxedInterDashDistance = (dist / linesToDraw).toInt()
 
@@ -186,7 +186,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
 
         repeat(roundedLinesToDraw + 1) {
             //As the loop progresses, the size of the dashes increases
-            val sideLength = (it / roundedLinesToDraw.toDouble()) * DASH_DISTANCE
+            val sideLength = (it / roundedLinesToDraw.toDouble()) * EditorConstants.HASH_DISTANCE
 
             val newStartX = (currentPos.x + perp.x * sideLength /2)
             val newStartY = (currentPos.y + perp.y * sideLength /2)
@@ -218,8 +218,8 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         val bPos = atomB.getPos()
         val aVis = atomA.isNotImplicit()
         val bVis = atomB.isNotImplicit()
-        val start = if (aVis) getCappedEnd(bPos, aPos, (EditorPanel.UNMODDED_TEXT_SIZE / AtomBondTool.CONNECTION_DISTANCE.toDouble())*1.0) else aPos
-        val end = if (bVis) getCappedEnd(aPos, bPos, (EditorPanel.UNMODDED_TEXT_SIZE / AtomBondTool.CONNECTION_DISTANCE.toDouble())*1.0) else bPos
+        val start = if (aVis) getCappedEnd(bPos, aPos, (EditorConstants.TEXT_SIZE / EditorConstants.DEFAULT_BOND_DISTANCE)*1.0) else aPos
+        val end = if (bVis) getCappedEnd(aPos, bPos, (EditorConstants.TEXT_SIZE / EditorConstants.DEFAULT_BOND_DISTANCE)*1.0) else bPos
         val uiLine: UILine = UILine(start.x, start.y, end.x, end.y)
         return uiLine
     }
@@ -242,8 +242,8 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
     private fun calculatePositionForTripleBond(uiLine: UILine, chemBond: MgxBond): List<UILine> {
         val bondList = mutableListOf<UILine>()
         val perp = calculatePerpendicularVector(uiLine)
-        val bondA = applyBondTranslation(uiLine, perp * INTER_BOND_DISTANCE)
-        val bondB = applyBondTranslation(uiLine, perp * -INTER_BOND_DISTANCE)
+        val bondA = applyBondTranslation(uiLine, perp * EditorConstants.INTER_BOND_DISTANCE)
+        val bondB = applyBondTranslation(uiLine, perp * -EditorConstants.INTER_BOND_DISTANCE)
 
         bondList.add(uiLine)
         bondList.add(bondA)
@@ -295,8 +295,8 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
 
     private fun calculateDoubleBondSide(uiLine: UILine, chemBond: MgxBond): Pair<UILine, Vector2d> {
         val perp = calculatePerpendicularVector(uiLine)
-        val aVec = perp * INTER_BOND_DISTANCE
-        val bVec = perp * -INTER_BOND_DISTANCE
+        val aVec = perp * EditorConstants.INTER_BOND_DISTANCE
+        val bVec = perp * -EditorConstants.INTER_BOND_DISTANCE
         val testSideA = applyBondTranslation(uiLine, aVec)
         val testSideB = applyBondTranslation(uiLine, bVec)
 
@@ -376,8 +376,8 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         }
         val startDouble = Vector2d(doubleUILine.startX, doubleUILine.startY)
         val endDouble = Vector2d(doubleUILine.endX, doubleUILine.endY)
-        val newStart = getCappedEnd(startDouble, endDouble, (EditorPanel.UNMODDED_TEXT_SIZE / AtomBondTool.CONNECTION_DISTANCE.toDouble()) * 1.3)
-        val newEnd = getCappedEnd(endDouble, startDouble, (EditorPanel.UNMODDED_TEXT_SIZE / AtomBondTool.CONNECTION_DISTANCE.toDouble()) * 1.3)
+        val newStart = getCappedEnd(startDouble, endDouble, (EditorConstants.TEXT_SIZE / EditorConstants.DEFAULT_BOND_DISTANCE) * 1.3)
+        val newEnd = getCappedEnd(endDouble, startDouble, (EditorConstants.TEXT_SIZE / EditorConstants.DEFAULT_BOND_DISTANCE) * 1.3)
         return UILine(newStart.x, newStart.y, newEnd.x, newEnd.y)
     }
 
@@ -454,12 +454,12 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         val perpVector = Vector2d(orientation.y, - orientation.x).normalize()
         val v1 = position + orientation * -2.15
 
-        val midForV2V3 = v1 + (orientation) * ARROW_LENGTH
+        val midForV2V3 = v1 + (orientation) * EditorConstants.ARROW_LENGTH
 
-        val v2 = midForV2V3 + (perpVector) * ARROW_LENGTH
+        val v2 = midForV2V3 + (perpVector) * EditorConstants.ARROW_LENGTH
         var v3 =  midForV2V3
         if (arrowHead == ChemArrow.ArrowHead.DOUBLE_BARBED) {
-            v3 = midForV2V3 - (perpVector) * ARROW_LENGTH
+            v3 = midForV2V3 - (perpVector) * EditorConstants.ARROW_LENGTH
         }
         return UITriangle(v1, v2, v3)
     }
@@ -503,11 +503,5 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
 
 
     companion object {
-        private const val INTER_BOND_DISTANCE = 6.0
-        private const val INTER_DASH_DISTANCE = AtomBondTool.CONNECTION_DISTANCE / 10.0
-        private const val DASH_DISTANCE = AtomBondTool.CONNECTION_DISTANCE / 3.0
-
-        private const val ARROW_WIDTH = INTER_DASH_DISTANCE /2
-        private const val ARROW_LENGTH = ARROW_WIDTH * 2
     }
 }

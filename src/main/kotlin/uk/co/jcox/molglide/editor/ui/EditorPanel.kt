@@ -8,6 +8,7 @@ import uk.co.jcox.molglide.MainController.Companion.ARROW_SINGLE
 import uk.co.jcox.molglide.MainController.Companion.TOGGLE_ATOM_VISIBILITY_ACTION
 import uk.co.jcox.molglide.MolGLideUtils
 import uk.co.jcox.molglide.SwingActionRegistry
+import uk.co.jcox.molglide.editor.EditorConstants
 import uk.co.jcox.molglide.editor.model.IDataModelUI
 import java.awt.*
 import javax.swing.JCheckBoxMenuItem
@@ -164,20 +165,11 @@ class EditorPanel(private val uiData: IDataModelUI) : JPanel() {
 
 
     private fun getFontSize() : Float {
-        return UNMODDED_TEXT_SIZE * uiData.cameraZoom().toFloat()
+        return EditorConstants.TEXT_SIZE * uiData.cameraZoom().toFloat()
     }
 
     private fun getLineStroke(): Float {
-        return LINE_STROKE * uiData.cameraZoom().toFloat()
+        return EditorConstants.LINE_STROKE * uiData.cameraZoom().toFloat()
     }
 
-
-    companion object {
-        const val MOUSE_SENSE = 2.0
-        const val MOUSE_SENSE_ZOOM = 0.5f
-        const val UNMODDED_TEXT_SIZE = 32.0f
-        const val SIG_MOUSE_DELTA = 2.0f
-        const val LINE_STROKE = 3.0f
-        const val BOND_MARKER = UNMODDED_TEXT_SIZE * 0.5f
-    }
 }

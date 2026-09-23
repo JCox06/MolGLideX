@@ -71,7 +71,6 @@ data class FormalChargeObject(
     val position: VectorDataObject
 )
 
-
 data class DataObjectIDMap (
     val chemMolecules: MutableMap<MgxMolecule, Int> = mutableMapOf(),
     val chemAtoms: MutableMap<MgxAtom, Int> = mutableMapOf(),
