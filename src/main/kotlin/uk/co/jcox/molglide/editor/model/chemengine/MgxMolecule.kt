@@ -38,8 +38,6 @@ interface MgxMolecule {
 
     /**
      * Recalculates the positions of all atoms to produce a clean 2D representation of the molecule
-     * The molecule is copied, and the cleaned version is returned as a copy
-     * @return the copy of the molecule
      */
     fun clean2DStructure(): MgxMolecule
 

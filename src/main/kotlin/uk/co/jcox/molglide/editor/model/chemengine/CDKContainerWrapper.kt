@@ -1,19 +1,24 @@
 package uk.co.jcox.molglide.editor.model.chemengine
 
+import io.github.dan2097.jnainchi.InchiStatus
 import org.joml.Vector2d
 import org.openscience.cdk.atomtype.CDKAtomTypeMatcher
 import org.openscience.cdk.exception.CDKException
 import org.openscience.cdk.geometry.GeometryUtil
 import org.openscience.cdk.graph.ConnectivityChecker
+import org.openscience.cdk.inchi.InChIGeneratorFactory
 import org.openscience.cdk.interfaces.IAtom
 import org.openscience.cdk.interfaces.IAtomContainer
+import org.openscience.cdk.layout.StructureDiagramGenerator
 import org.openscience.cdk.ringsearch.RingSearch
 import org.openscience.cdk.smiles.SmiFlavor
 import org.openscience.cdk.smiles.SmilesGenerator
 import org.openscience.cdk.tools.CDKHydrogenAdder
+import org.openscience.cdk.tools.StructureResonanceGenerator
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator
 import org.openscience.cdk.tools.manipulator.AtomTypeManipulator
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator
+import uk.co.jcox.molglide.editor.EditorConstants
 import javax.vecmath.Point2d
 
 class CDKContainerWrapper (
@@ -96,9 +101,18 @@ class CDKContainerWrapper (
     }
 
     override fun getInchi(): InchiReturn {
-        return InchiReturn("a", InchiStats.ERROR, "NOT IMPLEMENTED YET")
-    }
+        val inchiFactory = InChIGeneratorFactory.getInstance()
+        val generator = inchiFactory.getInChIGenerator(cdkContainer)
+        val returnStatus = generator.status
+        val status = when (returnStatus) {
+            InchiStatus.SUCCESS -> InchiStats.SUCCESS
+            InchiStatus.WARNING -> InchiStats.WARNING
+            InchiStatus.ERROR -> InchiStats.ERROR
+        }
+        val inchi = generator.inchi ?: "ERROR"
 
+        return InchiReturn(inchi, status, generator.message)
+    }
     override fun bonds(): Collection<MgxBond> {
         return cdkContainer.bonds().map { cdkBond -> CDKBondWrapper(cdkBond, this) }
     }
@@ -186,7 +200,17 @@ class CDKContainerWrapper (
     }
 
     override fun clean2DStructure(): MgxMolecule {
-        TODO("NOT YET IMPLEMENTED")
+        val middle = getSpatialCentre()
+        val gen = StructureDiagramGenerator()
+        gen.setMolecule(cdkContainer, false)
+        gen.generateCoordinates()
+
+        val targetBondLength = EditorConstants.DEFAULT_BOND_DISTANCE
+        val currentLength = GeometryUtil.getBondLengthMedian(cdkContainer)
+        val factor: Double = targetBondLength / currentLength
+        GeometryUtil.scaleMolecule(cdkContainer, factor)
+        GeometryUtil.translate2D(cdkContainer, middle.x, middle.y)
+        return this
     }
 
     override fun indexOf(mgxAtom: MgxAtom): Int {

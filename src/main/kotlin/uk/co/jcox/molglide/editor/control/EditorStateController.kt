@@ -298,7 +298,7 @@ class EditorStateController (
 
     fun cleanUpSelectedMolecule() {
         val molecule = stateData.selectionManager.getMolecule() ?: return
-        val action = CleanupStructure(molecule)
+        val action = CleanupStructureAction(molecule)
         actionManager.executeAction(action)
     }
 
