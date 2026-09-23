@@ -218,8 +218,8 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         val bPos = atomB.getPos()
         val aVis = atomA.isNotImplicit()
         val bVis = atomB.isNotImplicit()
-        val start = if (aVis) getCappedEnd(bPos, aPos, (EditorConstants.TEXT_SIZE / EditorConstants.DEFAULT_BOND_DISTANCE)*1.0) else aPos
-        val end = if (bVis) getCappedEnd(aPos, bPos, (EditorConstants.TEXT_SIZE / EditorConstants.DEFAULT_BOND_DISTANCE)*1.0) else bPos
+        val start = if (aVis) getCappedEnd(bPos, aPos, EditorConstants.BOND_ATOM_CLIPPING_PERCENTAGE) else aPos
+        val end = if (bVis) getCappedEnd(aPos, bPos, EditorConstants.BOND_ATOM_CLIPPING_PERCENTAGE) else bPos
         val uiLine: UILine = UILine(start.x, start.y, end.x, end.y)
         return uiLine
     }
@@ -376,8 +376,8 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
         }
         val startDouble = Vector2d(doubleUILine.startX, doubleUILine.startY)
         val endDouble = Vector2d(doubleUILine.endX, doubleUILine.endY)
-        val newStart = getCappedEnd(startDouble, endDouble, (EditorConstants.TEXT_SIZE / EditorConstants.DEFAULT_BOND_DISTANCE) * 1.3)
-        val newEnd = getCappedEnd(endDouble, startDouble, (EditorConstants.TEXT_SIZE / EditorConstants.DEFAULT_BOND_DISTANCE) * 1.3)
+        val newStart = getCappedEnd(startDouble, endDouble, EditorConstants.BOND_BOND_CLIPPING_PERCENTAGE)
+        val newEnd = getCappedEnd(endDouble, startDouble, EditorConstants.BOND_BOND_CLIPPING_PERCENTAGE)
         return UILine(newStart.x, newStart.y, newEnd.x, newEnd.y)
     }
 
