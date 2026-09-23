@@ -1,6 +1,5 @@
 package uk.co.jcox.molglide.editor.control
 
-import com.github.jsonldjava.shaded.com.google.common.math.IntMath.pow
 import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.IEditorSessionOrganiser
 import uk.co.jcox.molglide.IMainAppData
@@ -426,7 +425,7 @@ class EditorStateController (
             stateData.mouseX = currentPos.x
             stateData.mouseY = currentPos.y
 
-            if (sqrt((pow(offsetX, 2) + pow(offsetY, 2)).toDouble()) >= EditorConstants.SIG_MOUSE_DELTA) {
+            if (sqrt((offsetX * offsetX + offsetY * offsetY).toDouble()) >= EditorConstants.SIG_MOUSE_DELTA) {
                 handleSuddenMouseMove()
             }
         }

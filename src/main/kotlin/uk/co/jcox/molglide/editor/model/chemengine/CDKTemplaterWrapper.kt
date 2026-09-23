@@ -1,12 +1,10 @@
 package uk.co.jcox.molglide.editor.model.chemengine
 
 import org.openscience.cdk.Ring
-import org.openscience.cdk.interfaces.IAtomContainer
 import org.openscience.cdk.interfaces.IBond
 import org.openscience.cdk.interfaces.IRing
 import org.openscience.cdk.layout.RingPlacer
 import javax.vecmath.Point2d
-import kotlin.text.Typography.cent
 
 class CDKTemplaterWrapper (private val cdkWrapper: CDKContainerWrapper) : MgxTemplateBuilder {
 

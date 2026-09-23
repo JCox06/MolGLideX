@@ -9,7 +9,6 @@ import uk.co.jcox.molglide.editor.model.chemengine.ChemArrow
 import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
 import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
 import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule
-import uk.co.jcox.molglide.editor.ui.EditorPanel
 import kotlin.math.roundToInt
 
 class UIDataBuilder (private val data: EditorStateData, private val selectionManager: SelectionManager) {

@@ -1,9 +1,5 @@
 package uk.co.jcox.molglide.editor.control.actions
 
-import com.github.jsonldjava.shaded.com.google.common.net.InetAddresses.decrement
-import com.github.jsonldjava.shaded.com.google.common.net.InetAddresses.increment
-import org.checkerframework.checker.units.qual.mol
-import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
 

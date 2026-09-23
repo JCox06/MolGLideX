@@ -1,7 +1,6 @@
 package uk.co.jcox.molglide.editor.model.chemengine
 
 import org.joml.Vector2d
-import kotlin.collections.set
 
 class ChemArrow (
     val arrowPoints: MutableMap<Int, Vector2d>,

@@ -1,9 +1,8 @@
 package uk.co.jcox.molglide.editor.io
 
 import kotlinx.serialization.json.Json
-import uk.co.jcox.molglide.editor.model.*
+import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.model.chemengine.ChemArrow
-import uk.co.jcox.molglide.editor.model.chemengine.FormalChargeWrapper
 import uk.co.jcox.molglide.editor.model.chemengine.IEditorSelectable
 import uk.co.jcox.molglide.editor.model.chemengine.MgxFormalCharge
 import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule

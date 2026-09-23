@@ -2,10 +2,7 @@ package uk.co.jcox.molglide.editor.model.chemengine
 
 import org.joml.Vector2d
 import org.joml.Vector2dc
-import org.openscience.cdk.interfaces.IAtom
 import org.openscience.cdk.interfaces.IBond
-import org.openscience.cdk.isomorphism.AtomMappingTools
-import org.openscience.cdk.tools.manipulator.AtomContainerManipulator
 
 
 class CDKBondWrapper (private val cdkBond: IBond, private val mgxMolecule: CDKContainerWrapper) : MgxBond {

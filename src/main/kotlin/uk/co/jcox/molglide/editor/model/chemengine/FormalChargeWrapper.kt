@@ -1,7 +1,6 @@
 package uk.co.jcox.molglide.editor.model.chemengine
 
 import org.joml.Vector2d
-import org.xmlcml.euclid.Vector2
 
 class FormalChargeWrapper(
     private val mgxAtom: MgxAtom,

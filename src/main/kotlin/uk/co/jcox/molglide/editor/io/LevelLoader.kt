@@ -1,10 +1,8 @@
 package uk.co.jcox.molglide.editor.io
 
 import kotlinx.serialization.json.Json
-import org.joml.Vector2d
 import uk.co.jcox.molglide.editor.control.ActionManager
 import uk.co.jcox.molglide.editor.control.actions.*
-import uk.co.jcox.molglide.editor.model.chemengine.FormalChargeWrapper
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
 import java.io.File

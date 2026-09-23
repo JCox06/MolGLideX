@@ -1,7 +1,6 @@
 package uk.co.jcox.molglide
 
 import com.formdev.flatlaf.extras.FlatSVGIcon
-import io.github.andrewauclair.moderndocking.app.AppState
 import io.github.andrewauclair.moderndocking.app.Docking
 import io.github.andrewauclair.moderndocking.app.RootDockingPanel
 import io.github.andrewauclair.moderndocking.ext.ui.DockingUI

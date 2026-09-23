@@ -2,7 +2,6 @@ package uk.co.jcox.molglide
 
 import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
 import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
-import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule
 import javax.swing.AbstractAction
 
 abstract class MolGLideSwingAction(name: String) : AbstractAction(name){

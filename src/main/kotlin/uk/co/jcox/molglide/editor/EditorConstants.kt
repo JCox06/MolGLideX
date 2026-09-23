@@ -1,7 +1,5 @@
 package uk.co.jcox.molglide.editor
 
-import uk.co.jcox.molglide.editor.control.tool.AtomBondTool
-
 
 object EditorConstants {
 

@@ -14,7 +14,6 @@ import org.openscience.cdk.ringsearch.RingSearch
 import org.openscience.cdk.smiles.SmiFlavor
 import org.openscience.cdk.smiles.SmilesGenerator
 import org.openscience.cdk.tools.CDKHydrogenAdder
-import org.openscience.cdk.tools.StructureResonanceGenerator
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator
 import org.openscience.cdk.tools.manipulator.AtomTypeManipulator
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator

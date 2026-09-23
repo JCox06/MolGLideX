@@ -1,6 +1,5 @@
 package uk.co.jcox.molglide
 
-import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.editor.control.EditorStateController
 import uk.co.jcox.molglide.editor.model.chemengine.ChemArrow
 import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
