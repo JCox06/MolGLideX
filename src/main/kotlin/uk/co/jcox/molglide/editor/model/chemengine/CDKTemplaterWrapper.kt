@@ -1,6 +1,7 @@
 package uk.co.jcox.molglide.editor.model.chemengine
 
 import org.openscience.cdk.Ring
+import org.openscience.cdk.interfaces.IAtomContainer
 import org.openscience.cdk.interfaces.IBond
 import org.openscience.cdk.interfaces.IRing
 import org.openscience.cdk.layout.RingPlacer
@@ -14,7 +15,7 @@ class CDKTemplaterWrapper (private val cdkWrapper: CDKContainerWrapper) : MgxTem
 
 
     private fun buildCDKRing(vertexCount: Int, centreX: Double, centreY: Double, bondLength: Double): IRing {
-        val newRing = Ring()
+        val newRing = Ring(vertexCount, "C")
         ringBuilder.placeRing(newRing, Point2d(centreX, centreY), bondLength)
         return newRing
     }
@@ -22,7 +23,7 @@ class CDKTemplaterWrapper (private val cdkWrapper: CDKContainerWrapper) : MgxTem
 
     override fun buildIsolatedOrganicRing(vertexCount: Int, centreX: Double, centreY: Double, bondLength: Double) {
         val ring = buildCDKRing(vertexCount, centreX, centreY, bondLength)
-        cdkAtomContainer.add(ring)
+        cdkWrapper.addRawCDKData(ring)
     }
 
     override fun buildIsolatedBenzene(centreX: Double, centreY: Double, bondLength: Double) {
@@ -36,6 +37,6 @@ class CDKTemplaterWrapper (private val cdkWrapper: CDKContainerWrapper) : MgxTem
                 bond.order = IBond.Order.DOUBLE
             }
         }
-        cdkAtomContainer.add(ring)
+        cdkWrapper.addRawCDKData(ring)
     }
 }

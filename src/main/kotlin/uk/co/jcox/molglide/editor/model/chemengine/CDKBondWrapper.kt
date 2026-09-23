@@ -77,10 +77,14 @@ class CDKBondWrapper (private val cdkBond: IBond, private val mgxMolecule: CDKCo
     }
 
     override fun equals(other: Any?): Boolean {
-        return cdkBond === other
+        return other is CDKBondWrapper && this.cdkBond == other.cdkBond
     }
 
 
+    /**
+     * For the internal use only between CDK-like classes
+     * @return direct access to the underlying CDK object
+     */
     fun getHandle() : IBond {
         return cdkBond
     }

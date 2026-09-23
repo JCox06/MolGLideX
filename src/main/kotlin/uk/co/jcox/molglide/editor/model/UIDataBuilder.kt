@@ -4,10 +4,6 @@ import org.joml.Vector2d
 import org.joml.minus
 import org.joml.plus
 import org.joml.times
-import org.openscience.cdk.interfaces.IAtom
-import org.openscience.cdk.interfaces.IAtomContainer
-import org.openscience.cdk.interfaces.IBond
-import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.editor.control.tool.AtomBondTool
 import uk.co.jcox.molglide.editor.model.chemengine.ChemArrow
 import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom

@@ -10,7 +10,7 @@ class CDKAtomWrapper (private val cdkAtom: IAtom, private val mgxMolecule: CDKCo
         get() = cdkAtom.symbol == "C"
 
     override fun isNotImplicit(): Boolean {
-        return cdkAtom.getProperty(IS_NOT_IMPLICIT) ?: true
+        return cdkAtom.getProperty(IS_NOT_IMPLICIT) ?: false
     }
 
     override fun setNotImplicit(implicit: Boolean) {
@@ -71,9 +71,13 @@ class CDKAtomWrapper (private val cdkAtom: IAtom, private val mgxMolecule: CDKCo
     }
 
     override fun equals(other: Any?): Boolean {
-        return cdkAtom === other
+        return other is CDKAtomWrapper && this.cdkAtom == other.cdkAtom
     }
 
+    /**
+     * For the internal use only between CDK-like classes
+     * @return direct access to the underlying CDK object
+     */
     fun getHandle() : IAtom {
         return cdkAtom
     }

@@ -133,7 +133,7 @@ class CDKContainerWrapper (
     }
 
     override fun equals(other: Any?): Boolean {
-        return other === cdkContainer
+        return other is CDKContainerWrapper && this.cdkContainer == other.cdkContainer
     }
 
     override fun hashCode(): Int {
@@ -209,10 +209,6 @@ class CDKContainerWrapper (
         return newMolecule
     }
 
-    fun getHandle(): IAtomContainer {
-        return cdkContainer
-    }
-
     override fun isDisconnected(): Boolean {
         return !ConnectivityChecker.isConnected(cdkContainer)
     }
@@ -282,5 +278,22 @@ class CDKContainerWrapper (
     override fun getMolecularMass(): Double {
         val mass = AtomContainerManipulator.getMass(cdkContainer)
         return mass
+    }
+
+    /**
+     * For the internal use only between CDK-like classes
+     * @return direct access to the underlying CDK object
+     */
+    fun getHandle(): IAtomContainer {
+        return cdkContainer
+    }
+
+    /**
+     * For internal use only between CDK-like classes
+     * @param atomContainer Raw CDK data to be added to this container
+     */
+    fun addRawCDKData(atomContainer: IAtomContainer) {
+        cdkContainer.add(atomContainer)
+        calculateChemData()
     }
 }

@@ -1,6 +1,5 @@
 package uk.co.jcox.molglide.editor.control.actions
 
-import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
 

@@ -74,7 +74,7 @@ object MolGLideUtils {
     }
 
     fun getTempFile(): File {
-        val temp = File.createTempFile("MGX_${UUID.randomUUID().toString()}", ".svg")
+        val temp = File.createTempFile("MGX_${UUID.randomUUID()}", ".svg")
         temp.deleteOnExit()
         return temp
     }

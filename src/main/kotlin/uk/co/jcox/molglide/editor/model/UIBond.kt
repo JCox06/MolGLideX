@@ -1,7 +1,6 @@
 package uk.co.jcox.molglide.editor.model
 
 import org.joml.Vector2d
-import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
 import java.awt.Graphics2D
 

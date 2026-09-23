@@ -1,7 +1,6 @@
 package uk.co.jcox.molglide.editor.io
 
 import kotlinx.serialization.Serializable
-import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.editor.model.chemengine.ChemArrow
 import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
 import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
