@@ -1,22 +1,20 @@
 package uk.co.jcox.molglide.editor.control
 
 import com.github.jsonldjava.shaded.com.google.common.math.IntMath.pow
-import org.openscience.cdk.interfaces.IBond
 import uk.co.jcox.molglide.EditMode
 import uk.co.jcox.molglide.IEditorSessionOrganiser
 import uk.co.jcox.molglide.IMainAppData
-import uk.co.jcox.molglide.StereoChem
+import uk.co.jcox.molglide.editor.EditorConstants
+import uk.co.jcox.molglide.editor.EditorConstants.MOUSE_SENSE_ZOOM
 import uk.co.jcox.molglide.editor.control.actions.*
 import uk.co.jcox.molglide.editor.control.tool.*
 import uk.co.jcox.molglide.editor.model.chemengine.ChemArrow
-import uk.co.jcox.molglide.editor.model.chemengine.ChemFormalCharge
-import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
+import uk.co.jcox.molglide.editor.model.chemengine.FormalChargeWrapper
 import uk.co.jcox.molglide.editor.model.EditorStateData
+import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
+import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule
 import uk.co.jcox.molglide.editor.model.util.EditorPositionSnapshot
 import uk.co.jcox.molglide.editor.ui.EditorPanel
-import uk.co.jcox.molglide.editor.ui.EditorPanel.Companion.MOUSE_SENSE
-import uk.co.jcox.molglide.editor.ui.EditorPanel.Companion.MOUSE_SENSE_ZOOM
-import uk.co.jcox.molglide.editor.ui.EditorPanel.Companion.SIG_MOUSE_DELTA
 import java.awt.Point
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
@@ -36,6 +34,10 @@ class EditorStateController (
     val actionManager: ActionManager = ActionManager(stateData) { dataHasChanged() }
     private var currentTool: Tool = AtomBondTool(globalContext, actionManager, stateData.selectionManager, stateData)
 
+
+    var deltaTime = 0L; private set
+    var lastFrameTime = 0L; private set
+
     init {
         val panelMouseEvents = PanelMouseEvents()
         editorPanel.addMouseMotionListener(panelMouseEvents)
@@ -44,6 +46,10 @@ class EditorStateController (
 
 
         val timer = Timer(16) {
+            val currentTime = System.nanoTime()
+            deltaTime = currentTime - lastFrameTime
+            lastFrameTime = currentTime
+
             editorPanel.refreshEditor()
             val world = screenToWorld(stateData.mouseX.toDouble(), stateData.mouseY.toDouble())
             update(world.x, world.y)
@@ -144,7 +150,7 @@ class EditorStateController (
     fun deleteSelectedAtom() {
         val atom = stateData.selectionManager.getAtom() ?: return
         val deleteAtom = AtomDeletionAction(atom)
-        val frag = PartitionFragmentsAction(atom.molecule)
+        val frag = PartitionFragmentsAction(atom.getMolecule())
         actionManager.executeAction(CompoundAction(deleteAtom, frag))
     }
 
@@ -160,11 +166,11 @@ class EditorStateController (
         actionManager.executeAction(action)
     }
 
-    fun updateSingleSelectedBond(bondOptions: StereoChem) {
+    fun updateSingleSelectedBond(bondOptions: MgxBond.Stereo) {
         val bond = stateData.selectionManager.getBond() ?: return
 
         //Again as explained below, I am only allowing single bonds to have stereochem
-        val changeOrder = UpdateBondOrderAction(bond, IBond.Order.SINGLE)
+        val changeOrder = UpdateBondOrderAction(bond, 1)
         val changeStereo = ChangeStereoChemAction(bond, bondOptions)
         val compoundAction = CompoundAction(changeOrder, changeStereo)
         actionManager.executeAction(compoundAction)
@@ -180,8 +186,8 @@ class EditorStateController (
         //it is not really depicted in chemical sketchers
         //So I think for a simple molecular editor, its okay for the moment to assume
         //double bonds should NOT have stereochemistry information associated with them
-        val removeStereoAction = ChangeStereoChemAction(bond, StereoChem.NORMAL)
-        val updateBondOrderAction = UpdateBondOrderAction(bond, IBond.Order.DOUBLE)
+        val removeStereoAction = ChangeStereoChemAction(bond, MgxBond.Stereo.NORMAL)
+        val updateBondOrderAction = UpdateBondOrderAction(bond, 2)
         val compoundAction = CompoundAction(removeStereoAction, updateBondOrderAction)
         actionManager.executeAction(compoundAction)
     }
@@ -198,7 +204,7 @@ class EditorStateController (
 
     fun setTripleSelectedBond() {
         val bond = stateData.selectionManager.getBond() ?: return
-        val action = UpdateBondOrderAction(bond, IBond.Order.TRIPLE)
+        val action = UpdateBondOrderAction(bond, 3)
         actionManager.executeAction(action)
     }
 
@@ -206,14 +212,14 @@ class EditorStateController (
     fun deleteSelectedBond() {
         val bond = stateData.selectionManager.getBond() ?: return
         val bondDelete = BondDeletionAction(bond)
-        val fragment = PartitionFragmentsAction(bond.molecule)
+        val fragment = PartitionFragmentsAction(bond.getMolecule())
         actionManager.executeAction(CompoundAction(bondDelete, fragment))
 
     }
 
     fun ignoreErrors() {
         val chemAtom = stateData.selectionManager.getAtom() ?: return
-        val action = SetIgnoreErrorsOnAtom(chemAtom, !chemAtom.shouldIgnoreErrors())
+        val action = SetIgnoreErrorsOnAtom(chemAtom, !chemAtom.ignoreErrors())
         actionManager.executeAction(action)
     }
 
@@ -250,7 +256,7 @@ class EditorStateController (
 
     fun deleteSelectedComponents() {
 
-        val molsToCheck = mutableSetOf<ChemMolecule>()
+        val molsToCheck = mutableSetOf<MgxMolecule>()
 
         val actions: MutableList<IDataAction> = mutableListOf()
 
@@ -260,18 +266,18 @@ class EditorStateController (
         stateData.selectionManager.getBatchBonds().forEach { chemBond ->
             val deleteBondAction = BondDeletionAction(chemBond)
             actions.add(deleteBondAction)
-            molsToCheck.add(chemBond.molecule)
+            molsToCheck.add(chemBond.getMolecule())
         }
         stateData.selectionManager.getBatchAtoms().forEach { chemAtom ->
             val deleteAtomAction = AtomDeletionAction(chemAtom)
             actions.add(deleteAtomAction)
-            molsToCheck.add(chemAtom.molecule)
+            molsToCheck.add(chemAtom.getMolecule())
         }
         stateData.selectionManager.getBatchSpatials().filterIsInstance<ChemArrow>().forEach { chemArrow ->
             val arrowDeletion = ArrowDeletionAction(chemArrow)
             actions.add(arrowDeletion)
         }
-        stateData.selectionManager.getBatchSpatials().filterIsInstance<ChemFormalCharge>().forEach { chemFc ->
+        stateData.selectionManager.getBatchSpatials().filterIsInstance<FormalChargeWrapper>().forEach { chemFc ->
             val fcDeletion = RemoveFormalChargeAction(chemFc)
             actions.add(fcDeletion)
         }
@@ -292,7 +298,7 @@ class EditorStateController (
 
     fun cleanUpSelectedMolecule() {
         val molecule = stateData.selectionManager.getMolecule() ?: return
-        val action = CleanupStructure(molecule)
+        val action = CleanupStructureAction(molecule)
         actionManager.executeAction(action)
     }
 
@@ -385,8 +391,8 @@ class EditorStateController (
             updateMouse(e)
 
             val world = screenToWorld(e.point)
-            val moveX = offsetX * MOUSE_SENSE
-            val moveY = offsetY * MOUSE_SENSE
+            val moveX = offsetX * EditorConstants.MOUSE_SENSE_MOVE
+            val moveY = offsetY * EditorConstants.MOUSE_SENSE_MOVE
 
             if (SwingUtilities.isMiddleMouseButton(e)) {
                 translateCameraPos(moveX, moveY)
@@ -420,7 +426,7 @@ class EditorStateController (
             stateData.mouseX = currentPos.x
             stateData.mouseY = currentPos.y
 
-            if (sqrt((pow(offsetX, 2) + pow(offsetY, 2)).toDouble()) >= SIG_MOUSE_DELTA) {
+            if (sqrt((pow(offsetX, 2) + pow(offsetY, 2)).toDouble()) >= EditorConstants.SIG_MOUSE_DELTA) {
                 handleSuddenMouseMove()
             }
         }

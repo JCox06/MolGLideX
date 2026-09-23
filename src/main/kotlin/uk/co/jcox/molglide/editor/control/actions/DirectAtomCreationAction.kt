@@ -2,31 +2,27 @@ package uk.co.jcox.molglide.editor.control.actions
 
 import org.openscience.cdk.Atom
 import org.openscience.cdk.interfaces.IAtom
-import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
 import uk.co.jcox.molglide.editor.io.AtomDataObject
-import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
+import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
+import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule
 import javax.vecmath.Point2d
 
 class DirectAtomCreationAction (
-    private val molecule: ChemMolecule,
+    private val molecule: MgxMolecule,
     private val dataAtom: AtomDataObject,
 ) : IDataAction {
 
-    lateinit var newChemAtom: ChemAtom
+    lateinit var newChemAtom: MgxAtom
 
     override fun execute(data: EditorStateData) {
-        val atom: IAtom = Atom(dataAtom.symbol)
-        atom.point2d = Point2d(dataAtom.worldX, dataAtom.worldY)
 
-
-        newChemAtom = ChemAtom(atom, molecule)
-        newChemAtom.setVisible(dataAtom.isVisible)
+        newChemAtom = molecule.addAtom(dataAtom.symbol)
+        newChemAtom.setNotImplicit(dataAtom.isVisible)
         newChemAtom.setTrailPos(dataAtom.hydrogenPos)
         newChemAtom.setIgnoreErrors(dataAtom.ignoreErrors)
         newChemAtom.setTransient(false)
-
-        molecule.directlyAddAtom(atom)
+        newChemAtom.setPos(dataAtom.worldX, dataAtom.worldY)
     }
 
     override fun undo(data: EditorStateData) {
@@ -34,6 +30,6 @@ class DirectAtomCreationAction (
     }
 
     override fun redo(data: EditorStateData) {
-        molecule.directlyAddAtom(newChemAtom.atom)
+        molecule.addAtom(newChemAtom)
     }
 }

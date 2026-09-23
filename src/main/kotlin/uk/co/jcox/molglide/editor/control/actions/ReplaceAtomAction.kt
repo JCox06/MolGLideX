@@ -1,26 +1,24 @@
 package uk.co.jcox.molglide.editor.control.actions
 
-import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
 import uk.co.jcox.molglide.editor.model.EditorStateData
+import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
 
-class ReplaceAtomAction (private val chemAtom: ChemAtom, private val toReplace: String
+class ReplaceAtomAction (private val chemAtom: MgxAtom, private val toReplace: String
 ) : IDataAction {
 
-    private val chemMolecule = chemAtom.molecule
+    private val chemMolecule = chemAtom.getMolecule()
 
-    val oldAtom = chemAtom.atom.symbol
-    var wasVisible = chemAtom.isVisible()
+    val oldAtom = chemAtom.getSymbol()
+    var wasVisible = chemAtom.isNotImplicit()
 
     override fun execute(data: EditorStateData) {
-        chemMolecule.replaceAtom(chemAtom, toReplace)
+        chemMolecule.changeAtomSymbol(chemAtom, toReplace)
         hideIfCarbon(chemAtom)
         showIfOther(chemAtom)
     }
 
     override fun undo(data: EditorStateData) {
-        chemMolecule.replaceAtom(chemAtom, oldAtom)
-        chemAtom.setVisible(wasVisible)
+        chemMolecule.changeAtomSymbol(chemAtom, oldAtom)
+        chemAtom.setNotImplicit(wasVisible)
     }
-
-
 }

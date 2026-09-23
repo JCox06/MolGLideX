@@ -1,9 +1,9 @@
 package uk.co.jcox.molglide.editor.control.actions
 
-import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
 import uk.co.jcox.molglide.editor.model.EditorStateData
+import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
 
-class IncrementFormalChargeAction (private val chemAtom: ChemAtom) : IDataAction {
+class IncrementFormalChargeAction (private val chemAtom: MgxAtom) : IDataAction {
 
     override fun execute(data: EditorStateData) {
         chemAtom.setFormalCharge(chemAtom.getFormalCharge() + 1)
@@ -13,5 +13,4 @@ class IncrementFormalChargeAction (private val chemAtom: ChemAtom) : IDataAction
         chemAtom.setFormalCharge(chemAtom.getFormalCharge() - 1)
 
     }
-
 }

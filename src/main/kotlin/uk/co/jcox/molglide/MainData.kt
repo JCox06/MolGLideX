@@ -1,5 +1,8 @@
 package uk.co.jcox.molglide
 
+import io.github.andrewauclair.moderndocking.app.Docking
+import kotlin.math.pow
+
 class MainData : IMainAppData{
 
 
@@ -30,5 +33,15 @@ class MainData : IMainAppData{
 
     override fun getSelectedHybrid(): String {
         return activeSession?.editorData?.uiDataBuilder?.getSelectedHybridisation() ?: return ""
+    }
+
+    override fun getMoleculeCount(): Int {
+        return activeSession?.editorData?.getMolecules()?.size ?: 0
+    }
+
+    override fun getProcessingTime(): Double {
+        val delta = activeSession?.editorController?.deltaTime ?: 0
+        val divisor = 10.0.pow(6)
+        return delta / divisor
     }
 }

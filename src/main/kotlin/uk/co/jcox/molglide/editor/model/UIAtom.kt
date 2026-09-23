@@ -1,7 +1,7 @@
 package uk.co.jcox.molglide.editor.model
 
 import uk.co.jcox.molglide.MolGLideUtils
-import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
+import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
 import java.awt.Color
 import java.awt.Graphics2D
 import java.awt.font.TextAttribute
@@ -13,7 +13,7 @@ class UIAtom (
     posX: Double,
     posY: Double,
     val trailGroup: String,
-    val trailGroupPos: ChemMolecule.TrailingGroupPosition,
+    val trailGroupPos: MgxAtom.TrailingGroupPosition,
     val visible: Boolean,
     selected: Boolean,
     val hasErrors: Boolean,
@@ -45,18 +45,18 @@ class UIAtom (
         if (trailGroup == "") {
             g2d.drawString(element, centreTextWidth.toInt(), centreTextHeight.toInt())
 
-            if (trailGroupPos == ChemMolecule.TrailingGroupPosition.ABOVE || trailGroupPos == ChemMolecule.TrailingGroupPosition.BELOW) {
+            if (trailGroupPos == MgxAtom.TrailingGroupPosition.ABOVE || trailGroupPos == MgxAtom.TrailingGroupPosition.BELOW) {
                 drawSeparateAboveBelowTrailingPos(g2d)
             }
             return
         }
 
-        if (trailGroupPos == ChemMolecule.TrailingGroupPosition.LEFT) {
+        if (trailGroupPos == MgxAtom.TrailingGroupPosition.LEFT) {
             drawIntegratedLeftTrailingPos(g2d)
             return
         }
 
-        if (trailGroupPos == ChemMolecule.TrailingGroupPosition.RIGHT) {
+        if (trailGroupPos == MgxAtom.TrailingGroupPosition.RIGHT) {
             drawIntegratedRightTrailingPos(g2d)
             return
         }

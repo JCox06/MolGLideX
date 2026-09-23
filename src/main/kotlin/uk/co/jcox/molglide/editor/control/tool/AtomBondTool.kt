@@ -4,13 +4,13 @@ import org.joml.Vector2f
 import org.joml.minus
 import org.joml.plus
 import uk.co.jcox.molglide.IMainAppData
+import uk.co.jcox.molglide.editor.EditorConstants
 import uk.co.jcox.molglide.editor.control.ActionManager
 import uk.co.jcox.molglide.editor.control.EventContext
 import uk.co.jcox.molglide.editor.control.actions.*
 import uk.co.jcox.molglide.editor.model.*
-import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
-import uk.co.jcox.molglide.editor.model.chemengine.ChemBond
-import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
+import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
+import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
@@ -33,11 +33,10 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
         //at fixed, chemically sensical bond angles
 
         //Find the position of the original (anchor) atom
-        val anchorPos = mode.insertedTo.atom.point2d
+        val anchorPos = mode.insertedTo.getPos()
 
-        val calculatedNewPos = closestPointToCircleCircumference(Vector2f(anchorPos.x.toFloat(), anchorPos.y.toFloat()), Vector2f(clickX.toFloat(), clickY.toFloat()), CONNECTION_DISTANCE.toFloat())
-        mode.draggingAtom.atom.point2d.x = calculatedNewPos.x.toDouble()
-        mode.draggingAtom.atom.point2d.y = calculatedNewPos.y.toDouble()
+        val calculatedNewPos = closestPointToCircleCircumference(Vector2f(anchorPos.x.toFloat(), anchorPos.y.toFloat()), Vector2f(clickX.toFloat(), clickY.toFloat()), EditorConstants.DEFAULT_BOND_DISTANCE.toFloat())
+        mode.draggingAtom.setPos(calculatedNewPos.x.toDouble(), calculatedNewPos.y.toDouble())
 
         //Check to see if any trailing groups should be automatically moved
         autoMoveTrailingGroup(mode)
@@ -62,9 +61,9 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
      * either left or right of the master atom.
      * This method tests both positions to see which has the longest distance away
      */
-    private fun autoMoveGroup(checkAgainst: ChemAtom, applier: ChemAtom) {
-        val leftTest = ChemMolecule.TrailingGroupPosition.LEFT.vec + applier.getPos()
-        val rightTest = ChemMolecule.TrailingGroupPosition.RIGHT.vec + applier.getPos()
+    private fun autoMoveGroup(checkAgainst: MgxAtom, applier: MgxAtom) {
+        val leftTest = MgxAtom.TrailingGroupPosition.LEFT.vec + applier.getPos()
+        val rightTest = MgxAtom.TrailingGroupPosition.RIGHT.vec + applier.getPos()
 
         val leftDistance = checkAgainst.getPos().distance(leftTest)
         val rightDistance = checkAgainst.getPos().distance(rightTest)
@@ -74,9 +73,9 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
         }
 
         if (rightDistance > leftDistance) {
-            applier.setTrailPos(ChemMolecule.TrailingGroupPosition.RIGHT)
+            applier.setTrailPos(MgxAtom.TrailingGroupPosition.RIGHT)
         } else {
-            applier.setTrailPos(ChemMolecule.TrailingGroupPosition.LEFT)
+            applier.setTrailPos(MgxAtom.TrailingGroupPosition.LEFT)
 
         }
     }
@@ -96,11 +95,11 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
      */
     private fun checkBondOrderChange(draggingMode: Mode.AtomInsertionDragging) {
         val draggingPos = draggingMode.draggingAtom.getPos()
-        val molecule = draggingMode.insertedTo.molecule
+        val molecule = draggingMode.insertedTo.getMolecule()
 
         //Find an atom that is overlapping, that could also be from a different molecule now:
         var overlap = stateData.getAtoms().toList().find {
-            draggingPos.equals(it.getPos(), 0.25) && it.atom != draggingMode.draggingAtom.atom && it.atom != draggingMode.insertedTo.atom
+            draggingPos.equals(it.getPos(), 0.25) && it != draggingMode.draggingAtom && it != draggingMode.insertedTo
         }
 
         //If the overlap is null, but the mouse is now hovered over a different atom, allow that to become the overlap
@@ -118,9 +117,10 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
             //Then we have found an overlapping atom
             //And the tool allows bond changes
             //So undo the insert, and instead update the bond order of the common bond between the two atoms
-            val commonBond = molecule.findBond(overlap, draggingMode.insertedTo)
+            val hasCommonBond = molecule.hasBond(overlap, draggingMode.insertedTo)
             //If the bond exists, then update order
-            if (commonBond != null) {
+            if (hasCommonBond) {
+                val commonBond = molecule.getBond(overlap, draggingMode.insertedTo)
                 val action = IncrementBondOrderAction(commonBond)
                 actionManager.executeAction(action)
                 return
@@ -141,11 +141,11 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
         }
     }
 
-    private fun handleRingCyclisationAction(anchorAtom: ChemAtom, overlapAtom: ChemAtom) {
+    private fun handleRingCyclisationAction(anchorAtom: MgxAtom, overlapAtom: MgxAtom) {
         //As a precaution that the overlapping atom could be coming from a different container
         //it is best to call a merge action first
 
-        if (anchorAtom.molecule == overlapAtom.molecule) {
+        if (anchorAtom.getMolecule() == overlapAtom.getMolecule()) {
             //Cyclisation action
             val action = RingCyclisationAction(anchorAtom, overlapAtom)
             actionManager.executeAction(action)
@@ -164,7 +164,7 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
         val directionVec = randomPoint - circleCentre
         val angle = org.joml.Vector2f(1.0f, 0.0f).angle(directionVec)
 
-        val refinedAngle: Float = COMMON_ANGLES.minBy { abs(Math.toRadians(it.toDouble()) - angle) }
+        val refinedAngle: Float = EditorConstants.COMMON_ANGLES.minBy { abs(Math.toRadians(it.toDouble()) - angle) }
 
         val refinedAngeRad = Math.toRadians(refinedAngle.toDouble())
 
@@ -236,7 +236,7 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
         //If the selection is active (as in the user is selecting an atom)
         //Any subsequent click should replace the atom selected with the active atom from the toolbox
         val selectable = selection?.selectable
-        if (selectable is ChemAtom) {
+        if (selectable is MgxAtom) {
             return Mode.AtomReplacement(selectable)
         }
 
@@ -251,44 +251,25 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
 
     override fun isTypeValidPrimarySelection(selectionContext: SelectionManager.SelectionInfo): Boolean {
         val entity = selectionContext.selectable
-        return (entity is ChemAtom && selectionContext.objectAnchorID == ChemAtom.MAIN_ATOM) || (entity is ChemBond)
+        return (entity is MgxAtom && selectionContext.objectAnchorID == MgxAtom.MAIN_ATOM) || (entity is MgxBond)
     }
 
     sealed class Mode {
         object None: Mode()
         class MolCreation(val xPos: Int, val yPos: Int) : Mode()
-        class AtomReplacement(val replace: ChemAtom) : Mode()
+        class AtomReplacement(val replace: MgxAtom) : Mode()
 
         //This mode is strictly used only in the sudden move method
         //it is swithced on after a replacement action, to check if the user actually
         //intended to add a bond
-        class PostReplacement(val insertTo: ChemAtom) : Mode()
+        class PostReplacement(val insertTo: MgxAtom) : Mode()
 
 
         //This mode is strictly used only in the drag method after the
         //insertion has taken place. This allows the user to drag around and decide
         //on the new bond angle
         //The atom that was just added becomes dragging, and this was inserted into the already existing atom
-        class AtomInsertionDragging(val draggingAtom: ChemAtom, val insertedTo: ChemAtom, var allowBondChanges: Boolean, val newBond: ChemBond) : Mode()
+        class AtomInsertionDragging(val draggingAtom: MgxAtom, val insertedTo: MgxAtom, var allowBondChanges: Boolean, val newBond: MgxBond) : Mode()
     }
 
-    companion object {
-
-        const val CONNECTION_DISTANCE = 50
-
-        private val COMMON_ANGLES = listOf<Float>(
-            //Cardinal directions
-            0.0f, 90.0f, -90.0f, 180.0f, -180.0f,
-
-            //Semi Cardinal directions
-            45.0f, 135.0f, -45.0f, -135.0f,
-
-            //Odd angles - For triangles
-            30.0f, -30.0f, 60.0f, -60.0f, 120.0f, -120.0f, 150.0f, -150.0f,
-
-            //For Pentagons
-            108.0f, -108.0f, 72.0f, -72.0f, 36.0f, -36.0f, 126.0f, -126.0f, 144.0f, -144.0f,
-            18.0f, -18.0f, 162.0f, -162.0f, 126.0f, -126.0f, 36.0f, -36.0f, 54.0f, -54.0f,
-        )
-    }
 }

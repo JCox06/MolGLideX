@@ -4,15 +4,15 @@ import kotlinx.serialization.json.Json
 import org.joml.Vector2d
 import uk.co.jcox.molglide.editor.control.ActionManager
 import uk.co.jcox.molglide.editor.control.actions.*
-import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
-import uk.co.jcox.molglide.editor.model.chemengine.ChemFormalCharge
+import uk.co.jcox.molglide.editor.model.chemengine.FormalChargeWrapper
 import uk.co.jcox.molglide.editor.model.EditorStateData
+import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
 import java.io.File
 import java.io.IOException
 
 class LevelLoader {
 
-    private val idChemAtomMap: MutableMap<Int, ChemAtom> = mutableMapOf()
+    private val idChemAtomMap: MutableMap<Int, MgxAtom> = mutableMapOf()
     var metaData: MolGLideMetaData = MolGLideMetaData()
     private set
 
@@ -64,7 +64,7 @@ class LevelLoader {
                 val directBondConnectionAction = DirectBondConnectionAction(dataBond, chemMolecule, atomA, atomB)
                 actionManager.executeAction(directBondConnectionAction)
             }
-            chemMolecule.calculateAtomProperties()
+            chemMolecule.calculateChemData()
         }
         saveFile.arrows.forEach { dataArrow ->
             val action = DirectAddArrowAction(dataArrow)
@@ -73,7 +73,7 @@ class LevelLoader {
 
         saveFile.charges.forEach { dataCharge ->
             val chemAtom = idChemAtomMap[dataCharge.atomRef] ?: return@forEach
-            val chemFormalCharge = ChemFormalCharge(Vector2d(dataCharge.position.x, dataCharge.position.y), chemAtom)
+            val chemFormalCharge = chemAtom.createFormalChargeAt(dataCharge.position.x, dataCharge.position.y)
             chemFormalCharge.setCharge(dataCharge.charge)
             val action = CreateFormalCharge(chemFormalCharge)
             actionManager.executeAction(action)

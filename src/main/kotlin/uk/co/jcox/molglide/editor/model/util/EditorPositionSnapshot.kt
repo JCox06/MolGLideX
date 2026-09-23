@@ -1,8 +1,8 @@
 package uk.co.jcox.molglide.editor.model.util
 
 import org.joml.Vector2d
-import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
-import uk.co.jcox.molglide.editor.model.ISpatialInfo
+import uk.co.jcox.molglide.editor.model.chemengine.ISpatialInfo
+import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule
 
 class EditorPositionSnapshot (
     atomList: Collection<ISpatialInfo>
@@ -73,7 +73,7 @@ class EditorPositionSnapshot (
 
 
     companion object {
-        fun ofMolecule(chemMolecule: ChemMolecule): EditorPositionSnapshot {
+        fun ofMolecule(chemMolecule: MgxMolecule): EditorPositionSnapshot {
             return EditorPositionSnapshot(chemMolecule.atoms())
         }
     }

@@ -5,10 +5,10 @@ import org.joml.minus
 import uk.co.jcox.molglide.editor.control.ActionManager
 import uk.co.jcox.molglide.editor.control.EventContext
 import uk.co.jcox.molglide.editor.control.actions.MoveSpatialAction
-import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
 import uk.co.jcox.molglide.editor.model.EditorStateData
-import uk.co.jcox.molglide.editor.model.ISpatialInfo
+import uk.co.jcox.molglide.editor.model.chemengine.ISpatialInfo
 import uk.co.jcox.molglide.editor.model.SelectionManager
+import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
 import uk.co.jcox.molglide.editor.model.util.EditorPositionSnapshot
 
 /**
@@ -134,7 +134,7 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
         return ToolMode.None
     }
 
-    private fun calcMoleculeCentre(chemAtomList: List<ChemAtom>): Vector2d {
+    private fun calcMoleculeCentre(chemAtomList: List<MgxAtom>): Vector2d {
         var x = 0.0
         var y = 0.0
         val total = chemAtomList.size

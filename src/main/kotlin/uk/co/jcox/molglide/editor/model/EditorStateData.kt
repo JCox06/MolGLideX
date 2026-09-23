@@ -1,18 +1,22 @@
 package uk.co.jcox.molglide.editor.model
 
+import uk.co.jcox.molglide.MolGLideUtils
 import uk.co.jcox.molglide.editor.model.chemengine.ChemArrow
-import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
-import uk.co.jcox.molglide.editor.model.chemengine.ChemBond
-import uk.co.jcox.molglide.editor.model.chemengine.ChemFormalCharge
-import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
+import uk.co.jcox.molglide.editor.model.chemengine.FormalChargeWrapper
+import uk.co.jcox.molglide.editor.model.chemengine.IEditorSelectable
+import uk.co.jcox.molglide.editor.model.chemengine.ISpatialInfo
+import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
+import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
+import uk.co.jcox.molglide.editor.model.chemengine.MgxFormalCharge
+import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule
 import kotlin.math.max
 
 
 class EditorStateData (
 
-    private val molecules: MutableList<ChemMolecule> = mutableListOf(),
+    private val molecules: MutableList<MgxMolecule> = mutableListOf(),
     private val arrows: MutableList<ChemArrow> = mutableListOf(),
-    private val charges: MutableList<ChemFormalCharge> = mutableListOf(),
+    private val charges: MutableList<MgxFormalCharge> = mutableListOf(),
     ) : IDataModelUI {
 
     var cameraX: Double = 0.0
@@ -36,40 +40,40 @@ class EditorStateData (
     var sessionID: String = ""
 
 
-    fun createMolecule(initialAtom: String, positionX: Int, positionY: Int) : ChemMolecule {
+    fun createMolecule(initialAtom: String, positionX: Int, positionY: Int) : MgxMolecule {
         //Create the new atom container
-        val molecule: ChemMolecule = ChemMolecule()
+        val molecule = MolGLideUtils.createMolecule()
         molecules.add(molecule)
         molecule.addAtom( initialAtom, positionX.toDouble(), positionY.toDouble())
         return molecule
     }
 
-    fun addMolecule(mol: ChemMolecule) {
+    fun addMolecule(mol: MgxMolecule) {
         molecules.add(mol)
     }
 
-    fun addMolecules(extra: Collection<ChemMolecule>) {
+    fun addMolecules(extra: Collection<MgxMolecule>) {
         molecules.addAll(extra)
     }
 
-    fun removeMolecule(molecule: ChemMolecule) {
+    fun removeMolecule(molecule: MgxMolecule) {
         molecules.remove(molecule)
     }
 
-    fun removeMolecules(remove: Collection<ChemMolecule>) {
+    fun removeMolecules(remove: Collection<MgxMolecule>) {
         molecules.removeAll(remove)
     }
 
-    fun getAtoms() : List<ChemAtom> {
-        val atoms = mutableListOf<ChemAtom>()
+    fun getAtoms() : List<MgxAtom> {
+        val atoms = mutableListOf<MgxAtom>()
         molecules.forEach {mol ->
             atoms.addAll(mol.atoms())
         }
         return atoms
     }
 
-    fun getBonds() : List<ChemBond> {
-        val bonds = mutableListOf<ChemBond>()
+    fun getBonds() : List<MgxBond> {
+        val bonds = mutableListOf<MgxBond>()
         molecules.forEach {mol ->
             bonds.addAll(mol.bonds())
         }
@@ -97,15 +101,15 @@ class EditorStateData (
     }
 
 
-    fun addCharge(newCharge: ChemFormalCharge) {
+    fun addCharge(newCharge: MgxFormalCharge) {
         charges.add(newCharge)
     }
 
-    fun removeCharge(toRemove: ChemFormalCharge) {
+    fun removeCharge(toRemove: MgxFormalCharge) {
         charges.remove(toRemove)
     }
 
-    fun getCharges(): List<ChemFormalCharge> = charges
+    fun getCharges(): Collection<MgxFormalCharge> = charges
 
     fun getArrows(): List<ChemArrow> = arrows
 
@@ -117,7 +121,7 @@ class EditorStateData (
         arrows.removeAll(removeArrows)
     }
 
-    fun getMolecules() : List<ChemMolecule> = molecules
+    fun getMolecules() : Collection<MgxMolecule> = molecules
 
     fun addArrow(chemArrow: ChemArrow) {
         arrows.add(chemArrow)
@@ -127,11 +131,11 @@ class EditorStateData (
         arrows.remove(chemArrow)
     }
 
-    fun addCharges(extra: Collection<ChemFormalCharge>) {
+    fun addCharges(extra: Collection<MgxFormalCharge>) {
         charges.addAll(extra)
     }
 
-    fun removeCharges(remove: Collection<ChemFormalCharge>) {
+    fun removeCharges(remove: Collection<MgxFormalCharge>) {
         charges.removeAll(remove)
     }
 

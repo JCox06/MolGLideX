@@ -1,43 +1,24 @@
 package uk.co.jcox.molglide.editor.control.actions
 
+import com.github.jsonldjava.shaded.com.google.common.net.InetAddresses.decrement
+import com.github.jsonldjava.shaded.com.google.common.net.InetAddresses.increment
+import org.checkerframework.checker.units.qual.mol
 import org.openscience.cdk.interfaces.IBond
-import uk.co.jcox.molglide.editor.model.chemengine.ChemBond
 import uk.co.jcox.molglide.editor.model.EditorStateData
+import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
 
-class IncrementBondOrderAction (val chemBond: ChemBond) : IDataAction {
+class IncrementBondOrderAction (val chemBond: MgxBond) : IDataAction {
 
-    val molecule = chemBond.molecule
+    val molecule = chemBond.getMolecule()
 
     override fun execute(data: EditorStateData) {
-        val original = chemBond.bond.order
-        val new = increment(original)
-
-        molecule.updateBondOrder(chemBond, new)
+        val newOrder = chemBond.getOrder() + 1
+        molecule.setBondOrder(chemBond, newOrder)
     }
 
     override fun undo(data: EditorStateData) {
-        val currentOrder = chemBond.bond.order
-        val original = decrement(currentOrder)
-
-        molecule.updateBondOrder(chemBond, original)
+        val newOrder = chemBond.getOrder() - 1
+        molecule.setBondOrder(chemBond, newOrder)
     }
 
-
-    private fun increment(order: IBond.Order) : IBond.Order {
-        return when (order) {
-            IBond.Order.SINGLE -> IBond.Order.DOUBLE
-            IBond.Order.DOUBLE -> IBond.Order.TRIPLE
-            IBond.Order.TRIPLE -> IBond.Order.SINGLE
-            else -> IBond.Order.SINGLE
-        }
-    }
-
-    private fun decrement(order: IBond.Order) : IBond.Order {
-        return when (order) {
-            IBond.Order.SINGLE -> IBond.Order.TRIPLE
-            IBond.Order.DOUBLE -> IBond.Order.SINGLE
-            IBond.Order.TRIPLE -> IBond.Order.DOUBLE
-            else -> IBond.Order.SINGLE
-        }
-    }
 }

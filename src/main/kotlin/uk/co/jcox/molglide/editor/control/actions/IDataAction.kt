@@ -1,7 +1,7 @@
 package uk.co.jcox.molglide.editor.control.actions
 
-import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
 import uk.co.jcox.molglide.editor.model.EditorStateData
+import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
 
 interface IDataAction {
     fun execute(data: EditorStateData)
@@ -9,14 +9,14 @@ interface IDataAction {
     fun redo(data: EditorStateData) {
         execute(data)
     }
-    fun hideIfCarbon(chemAtom: ChemAtom) {
-        if (chemAtom.isCarbon()) {
-            chemAtom.setVisible(false)
+    fun hideIfCarbon(chemAtom: MgxAtom) {
+        if (chemAtom.isCarbon) {
+            chemAtom.setNotImplicit(false)
         }
     }
-    fun showIfOther(chemAtom: ChemAtom) {
-        if (!chemAtom.isCarbon()) {
-            chemAtom.setVisible(true)
+    fun showIfOther(chemAtom: MgxAtom) {
+        if (!chemAtom.isCarbon) {
+            chemAtom.setNotImplicit(true)
         }
     }
 }

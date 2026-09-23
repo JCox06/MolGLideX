@@ -1,7 +1,7 @@
 package uk.co.jcox.molglide.editor.control.actions
 
-import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
 import uk.co.jcox.molglide.editor.model.EditorStateData
+import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule
 
 class CreateMoleculeAction (
     private val locationX: Int,
@@ -10,7 +10,7 @@ class CreateMoleculeAction (
 
 ) : IDataAction{
 
-    private var createdMolecule: ChemMolecule? = null
+    private var createdMolecule: MgxMolecule? = null
 
     override fun execute(data: EditorStateData) {
         createdMolecule = data.createMolecule(element, locationX, locationY)

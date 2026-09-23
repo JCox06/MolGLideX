@@ -1,11 +1,10 @@
 package uk.co.jcox.molglide.editor.io
 
 import kotlinx.serialization.Serializable
-import uk.co.jcox.molglide.StereoChem
 import uk.co.jcox.molglide.editor.model.chemengine.ChemArrow
-import uk.co.jcox.molglide.editor.model.chemengine.ChemAtom
-import uk.co.jcox.molglide.editor.model.chemengine.ChemBond
-import uk.co.jcox.molglide.editor.model.chemengine.ChemMolecule
+import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
+import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
+import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule
 
 
 @Serializable
@@ -29,7 +28,7 @@ data class AtomDataObject (
     val loaderID: Int,
     val symbol: String,
     val isVisible: Boolean,
-    val hydrogenPos: ChemMolecule.TrailingGroupPosition,
+    val hydrogenPos: MgxAtom.TrailingGroupPosition,
     val worldX: Double,
     val worldY: Double,
     val ignoreErrors: Boolean = false,
@@ -41,7 +40,7 @@ data class BondDataObject (
     val atomB: Int,
     val doubleFlip: Boolean,
     val order: Int,
-    val stereoDisplay: StereoChem,
+    val stereoDisplay: MgxBond.Stereo,
     val aromatic: Boolean,
 )
 
@@ -72,10 +71,9 @@ data class FormalChargeObject(
     val position: VectorDataObject
 )
 
-
 data class DataObjectIDMap (
-    val chemMolecules: MutableMap<ChemMolecule, Int> = mutableMapOf(),
-    val chemAtoms: MutableMap<ChemAtom, Int> = mutableMapOf(),
-    val chemBonds: MutableMap<ChemBond, Int> = mutableMapOf(),
+    val chemMolecules: MutableMap<MgxMolecule, Int> = mutableMapOf(),
+    val chemAtoms: MutableMap<MgxAtom, Int> = mutableMapOf(),
+    val chemBonds: MutableMap<MgxBond, Int> = mutableMapOf(),
 )
 

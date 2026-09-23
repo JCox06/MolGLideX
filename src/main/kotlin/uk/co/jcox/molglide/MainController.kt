@@ -8,7 +8,7 @@ import uk.co.jcox.molglide.editor.io.LevelLoader
 import uk.co.jcox.molglide.editor.io.LevelSerializer
 import uk.co.jcox.molglide.editor.io.MolGLideMetaData
 import uk.co.jcox.molglide.editor.model.EditorStateData
-import uk.co.jcox.molglide.editor.model.InchiStats
+import uk.co.jcox.molglide.editor.model.chemengine.InchiStats
 import uk.co.jcox.molglide.editor.ui.EditorPanel
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
@@ -112,7 +112,7 @@ class MainController (
         val activeSession = mainData.activeSession ?: return
         val s = activeSession.editorData.selectionManager
         val molecule = s.getMolecule() ?: return
-        val smiles = molecule.getCanonicalString()
+        val smiles = molecule.getCanonicalSMILES()
         val clipboard = Toolkit.getDefaultToolkit().systemClipboard
         clipboard.setContents(StringSelection(smiles), null)
     }
@@ -121,7 +121,7 @@ class MainController (
         val activeSession = mainData.activeSession ?: return
         val s = activeSession.editorData.selectionManager
         val molecule = s.getMolecule() ?: return
-        val inChi = molecule.getInChi()
+        val inChi = molecule.getInchi()
         val clipboard = Toolkit.getDefaultToolkit().systemClipboard
         clipboard.setContents(StringSelection(inChi.inchiString), null)
         val errorMessage = inChi.log
