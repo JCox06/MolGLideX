@@ -72,6 +72,10 @@ interface MgxMolecule {
 
     fun inRing(mgxBond: MgxBond): Boolean
 
+    /**
+     * Searches for all the types of rings in the chemical structure and copies them and places them into
+     * separate molecules for further processing
+     */
     fun createRingFragments(): Collection<MgxMolecule>
 
     fun getFormulaString(): String

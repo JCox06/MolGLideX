@@ -1,6 +1,7 @@
 package uk.co.jcox.molglide
 
 import com.formdev.flatlaf.extras.FlatSVGIcon
+import io.github.andrewauclair.moderndocking.app.AppState
 import io.github.andrewauclair.moderndocking.app.Docking
 import io.github.andrewauclair.moderndocking.app.RootDockingPanel
 import io.github.andrewauclair.moderndocking.ext.ui.DockingUI
@@ -104,7 +105,11 @@ class MolGlideFrame (
             val weight = String.format("%.4f", appData.getSelectedWeight())
             val hybrid = appData.getSelectedHybrid()
             val formula = appData.getSelectedFormula()
-            statusLabel.text = "${formula} | ${weight} g/mol | ${hybrid}"
+            if (AppConfig.settings.debugMode) {
+                statusLabel.text = "${formula} | ${weight} g/mol | ${hybrid} | Processed ${appData.getMoleculeCount()} molecules in ${appData.getProcessingTime()} ms"
+            } else {
+                statusLabel.text = "${formula} | ${weight} g/mol | ${hybrid}"
+            }
         }
     }
 

@@ -35,6 +35,10 @@ class EditorStateController (
     val actionManager: ActionManager = ActionManager(stateData) { dataHasChanged() }
     private var currentTool: Tool = AtomBondTool(globalContext, actionManager, stateData.selectionManager, stateData)
 
+
+    var deltaTime = 0L; private set
+    var lastFrameTime = 0L; private set
+
     init {
         val panelMouseEvents = PanelMouseEvents()
         editorPanel.addMouseMotionListener(panelMouseEvents)
@@ -43,6 +47,10 @@ class EditorStateController (
 
 
         val timer = Timer(16) {
+            val currentTime = System.nanoTime()
+            deltaTime = currentTime - lastFrameTime
+            lastFrameTime = currentTime
+
             editorPanel.refreshEditor()
             val world = screenToWorld(stateData.mouseX.toDouble(), stateData.mouseY.toDouble())
             update(world.x, world.y)

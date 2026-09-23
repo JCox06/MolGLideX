@@ -16,6 +16,7 @@ class SettingsDialogue (mainFrame: JFrame) : JDialog (mainFrame, "Settings", Mod
 
         val tabbedLayout = JTabbedPane()
         tabbedLayout.addTab("Appearance", buildAppearanceMenu())
+        tabbedLayout.addTab("Development", buildDevelopmentMenu())
         mainPanel.add(tabbedLayout, BorderLayout.CENTER)
         mainPanel.add(buildCloseButtons(), BorderLayout.PAGE_END)
 
@@ -65,6 +66,16 @@ class SettingsDialogue (mainFrame: JFrame) : JDialog (mainFrame, "Settings", Mod
         panel.add(fontLabel)
         panel.add(fontSelection)
 
+        return panel
+    }
+
+    private fun buildDevelopmentMenu(): JPanel {
+        val panel = JPanel()
+
+        val checkbox = JCheckBox("Launch in Debug Mode", AppConfig.settings.debugMode)
+        checkbox.addActionListener { modify.debugMode = checkbox.isSelected }
+
+        panel.add(checkbox)
         return panel
     }
 

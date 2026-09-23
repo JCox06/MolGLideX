@@ -51,5 +51,7 @@ data class SettingsData (
     var lookAndFeel: String = AppConfig.themes.keys.first(),
     var componentAntialiasing: Boolean = true,
     var textAntialiasing: Boolean = true,
-    var editorFont: String = "Liberation Serif"
+    var editorFont: String = "Liberation Serif",
+
+    var debugMode: Boolean = false
 )

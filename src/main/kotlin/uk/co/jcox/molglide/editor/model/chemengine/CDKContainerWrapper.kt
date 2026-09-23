@@ -54,6 +54,7 @@ class CDKContainerWrapper (
 
         val mgxAtomA = CDKAtomWrapper(cdkAtomA, this)
         val mgxAtomB = CDKAtomWrapper(cdkAtomB, this)
+        calculateChemData()
         return addBond(mgxAtomA, mgxAtomB, order)
     }
 
@@ -61,12 +62,14 @@ class CDKContainerWrapper (
         require(mgxAtom.getMolecule() == this) {"Cannot re-add an atom that was never part of this molecule"}
         val cdkAtom = downcast(mgxAtom)
         cdkContainer.addAtom(cdkAtom.getHandle())
+        calculateChemData()
     }
 
     override fun addBond(mgxBond: MgxBond) {
         require(mgxBond.getMolecule() == this) {"Cannot re-add a bond that was never part of this molecule"}
         val cdkBond = downcast(mgxBond)
         cdkContainer.addBond(cdkBond.getHandle())
+        calculateChemData()
     }
 
     override fun removeAtom(mgxAtom: MgxAtom) {
@@ -172,6 +175,7 @@ class CDKContainerWrapper (
     override fun setBondOrder(mgxBond: MgxBond, order: Int) {
         val cdkBond = downcast(mgxBond)
         cdkBond.getHandle().order = CDKBondWrapper.getCDKOrder(order)
+        calculateChemData()
     }
 
     override fun selectables(): Collection<IEditorSelectable> {
@@ -206,6 +210,7 @@ class CDKContainerWrapper (
 
         cdkNewContainer.add(cdkNewMerger)
         val newMolecule = CDKContainerWrapper(cdkNewContainer)
+        calculateChemData()
         return newMolecule
     }
 

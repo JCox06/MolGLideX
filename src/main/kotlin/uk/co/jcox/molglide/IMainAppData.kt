@@ -9,4 +9,8 @@ interface IMainAppData {
     fun getSelectedWeight(): Double
 
     fun getSelectedHybrid(): String
+
+    fun getMoleculeCount(): Int
+
+    fun getProcessingTime(): Double
 }
