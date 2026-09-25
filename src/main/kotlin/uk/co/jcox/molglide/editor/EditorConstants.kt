@@ -13,7 +13,7 @@ object EditorConstants {
     const val INTER_HASH_DISTANCE = 5.0 //The distance between the dashes in a hashed (pointing away) stereochem bond
     const val HASH_DISTANCE = DEFAULT_BOND_DISTANCE / 3.0 //How big (wide) the biggest hash should be
     const val ARROW_LENGTH = 5.0 //The size of the arrow head for mechanism and reaction arrows
-    const val BOND_ATOM_CLIPPING_PERCENTAGE = 0.70 //The percentage of the bond to keep when an atom is placed at the end (to stop the bond from clipping into the atom)
+    const val BOND_ATOM_CLIPPING_PERCENTAGE = 0.65 //The percentage of the bond to keep when an atom is placed at the end (to stop the bond from clipping into the atom)
     const val BOND_BOND_CLIPPING_PERCENTAGE = 0.85 //The additional percentage of the bond to keep for the double/triple part of bonds. (To stop bonds from clipping into bonds)
 
 

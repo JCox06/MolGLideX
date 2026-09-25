@@ -9,4 +9,8 @@ interface MgxTemplateBuilder {
     fun buildIsolatedOrganicRing(vertexCount: Int, centreX: Double, centreY: Double, bondLength: Double)
 
     fun buildIsolatedBenzene(centreX: Double, centreY: Double, bondLength: Double)
+
+    fun buildCommonOrganicRing(vertexCount: Int, commonAtom: MgxAtom)
+
+    fun buildCommonOrganicRing(vertexCount: Int, commonBond: MgxBond)
 }

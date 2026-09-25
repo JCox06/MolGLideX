@@ -24,8 +24,15 @@ class TemplateRingTool(val globalContext: IMainAppData, actionManager: ActionMan
             addIsolatedRing(clickX, clickY)
             return
         }
-
-        TODO("NOT IMPLMENETED FUSING OF RINGS")
+        val bond = selectionManager.getBond()
+        val atom = selectionManager.getAtom()
+        if (atom != null) {
+            addCommonAtomRing(atom)
+            return
+        }
+        if (bond != null) {
+            addCommonBondRing(bond)
+        }
     }
 
     private fun addIsolatedRing(centreX: Int, centreY: Int) {
@@ -35,6 +42,16 @@ class TemplateRingTool(val globalContext: IMainAppData, actionManager: ActionMan
         val c = action.mgxMolecule.getSpatialCentre()
         toolMode = Mode.Rotate(action.mgxMolecule, c.x, c.y, EditorPositionSnapshot.ofMolecule(action.mgxMolecule))
         action.mgxMolecule.bulkSetTransient(true)
+    }
+
+    private fun addCommonBondRing(mgxBong: MgxBond) {
+        //todo the following two methods will need to each have a corresponding action
+        //The action will then use MgxMolecule#getTemplateBuilder() to build each of the rings
+        TODO("No implementation for fused rings")
+    }
+
+    private fun addCommonAtomRing(mgxAtom: MgxAtom) {
+        TODO("No implementation for spiro rings")
     }
 
     override fun onRelease(clickX: Int, clickY: Int, eventContext: EventContext) {

@@ -51,6 +51,9 @@ interface MgxMolecule {
 
     fun splitIntoFragments(): Collection<MgxMolecule>
 
+    /**
+     * @return a builder that can help create molecule fragments
+     */
     fun getTemplateBuilder(): MgxTemplateBuilder
 
     /**

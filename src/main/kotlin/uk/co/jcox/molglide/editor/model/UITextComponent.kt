@@ -58,6 +58,9 @@ open class UITextComponent (
 
     private fun paintText(g2d: Graphics2D) {
         //todo fix selection marker for this!
+        if (element.isEmpty()) {
+            return
+        }
         val attStr = AttributedString(element)
         attStr.addAttribute(TextAttribute.FAMILY, g2d.font.family)
         attStr.addAttribute(TextAttribute.SIZE, g2d.font.size)

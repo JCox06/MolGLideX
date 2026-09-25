@@ -38,6 +38,8 @@ class LevelLoader {
 
         runDirectDataActions(dataSaveFile, levelActionBuilder)
 
+        finaliseLevel(levelData)
+
         return levelData
     }
 
@@ -75,6 +77,12 @@ class LevelLoader {
             chemFormalCharge.setCharge(dataCharge.charge)
             val action = CreateFormalCharge(chemFormalCharge)
             actionManager.executeAction(action)
+        }
+    }
+
+    private fun finaliseLevel(level: EditorStateData) {
+        level.getMolecules().forEach { mgxMolecule ->
+            mgxMolecule.calculateChemData()
         }
     }
 }
