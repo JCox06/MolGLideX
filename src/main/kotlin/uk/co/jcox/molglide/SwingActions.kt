@@ -396,13 +396,16 @@ class IgnoreErrorAction(val getController: () -> EditorStateController?
 ) : MolGLideSwingAtomAction("Ignore Valency Errors") {
     init {
         putValue(SHORT_DESCRIPTION, "Enable/Disable valency checking for this atom")
-
     }
 
     override fun actionPerformed(e: ActionEvent?) {
         getController()?.ignoreErrors()
     }
 
+    override fun chemDataChanged(activeSession: EditorSession, currentBond: MgxBond?, currentAtom: MgxAtom?) {
+        super.chemDataChanged(activeSession, currentBond, currentAtom)
+        putValue(SELECTED_KEY, currentAtom?.ignoreErrors())
+    }
 }
 
 

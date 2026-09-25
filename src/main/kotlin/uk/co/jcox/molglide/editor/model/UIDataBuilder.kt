@@ -9,6 +9,7 @@ import uk.co.jcox.molglide.editor.model.chemengine.ChemArrow
 import uk.co.jcox.molglide.editor.model.chemengine.MgxAtom
 import uk.co.jcox.molglide.editor.model.chemengine.MgxBond
 import uk.co.jcox.molglide.editor.model.chemengine.MgxMolecule
+import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
 class UIDataBuilder (private val data: EditorStateData, private val selectionManager: SelectionManager) {
@@ -65,10 +66,10 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
             return "-"
         }
         if (formalCharge > 1) {
-            return "$formalCharge+"
+            return "${formalCharge.absoluteValue}+"
         }
         if (formalCharge < -1) {
-            return "$formalCharge-"
+            return "${formalCharge.absoluteValue}-"
         }
         return ""
     }
@@ -474,7 +475,7 @@ class UIDataBuilder (private val data: EditorStateData, private val selectionMan
 
             val text = getFormalChargeText(formalCharge.getCharge())
             val position = formalCharge.getPos()
-            val ui = UITextComponent(text, position.x, position.y, formalCharge.getAssociatedAtom().isNotImplicit())
+            val ui = UITextComponent(text, position.x, position.y, selectionManager.isSelected(formalCharge))
             uiComponents[formalCharge] = ui
         }
     }
