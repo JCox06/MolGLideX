@@ -103,7 +103,8 @@ class MainController (
         val svgPayload = svgGen.quickExport(activeSession.editorPanel)
         val mgxPayload = mgxExporter.getJSONEncoding(activeSession.editorData, MolGLideMetaData(), activeSession.editorData.selectionManager.batchSelection)
         val filePayload = listOf(MolGLideUtils.writeTempFile(svgPayload))
-        val payload = ClipboardMoleculePayload(mgxPayload, svgPayload, filePayload)
+        val htmlPayload = MolGLideUtils.getSvgAsBase64HTML(svgPayload)
+        val payload = ClipboardMoleculePayload(mgxPayload, svgPayload, filePayload, htmlPayload)
         val clipboard = Toolkit.getDefaultToolkit().systemClipboard
         clipboard.setContents(payload, null)
     }

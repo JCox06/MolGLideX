@@ -10,10 +10,11 @@ import java.io.File
 class ClipboardMoleculePayload (
     private val mgxJsonData: String,
     private val svgImageData: String,
-    private val files: List<File>
+    private val files: List<File>,
+    private val htmlData: String,
 ) : Transferable{
 
-    private val supportedFlavours = arrayOf(SVG_FLAVOUR, INK_SCAPE_FLAVOUR, FILE_FLAVOUR, JSON_FLAVOUR)
+    private val supportedFlavours = arrayOf(SVG_FLAVOUR, INK_SCAPE_FLAVOUR, FILE_FLAVOUR, HTML_FLAVOUR, JSON_FLAVOUR)
 
     init {
 //        val systemFlavourMap = SystemFlavorMap.getDefaultFlavorMap() as SystemFlavorMap
@@ -40,6 +41,9 @@ class ClipboardMoleculePayload (
         if (flavour == FILE_FLAVOUR) {
             return files
         }
+        if (flavour == HTML_FLAVOUR) {
+            return htmlData
+        }
         throw UnsupportedFlavorException(flavour)
     }
 
@@ -47,6 +51,7 @@ class ClipboardMoleculePayload (
         val JSON_FLAVOUR = DataFlavor("application/json; class=java.lang.String", "JSON MGX Data") //Note: This is only for JSON MGX data
         val SVG_FLAVOUR = DataFlavor("image/svg+xml; class=java.io.InputStream","Scalable Vector Graphic");
         val INK_SCAPE_FLAVOUR = DataFlavor("image/x-inkscape-svg; class=java.io.InputStream", "Scalable Vector Graphic")
+        val HTML_FLAVOUR = DataFlavor.allHtmlFlavor
         val FILE_FLAVOUR = DataFlavor.javaFileListFlavor
         //val SVG_TEXT_FLAVOUR = DataFlavor.stringFlavor
     }

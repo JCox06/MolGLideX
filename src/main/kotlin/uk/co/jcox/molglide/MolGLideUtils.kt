@@ -77,7 +77,7 @@ object MolGLideUtils {
     }
 
     fun getTempFile(): File {
-        val temp = File.createTempFile("MGX_${UUID.randomUUID()}", ".svg")
+        val temp = File.createTempFile("MGX", ".svg")
         temp.deleteOnExit()
         return temp
     }
@@ -87,5 +87,20 @@ object MolGLideUtils {
         val cdkContainer = chemBuilder.newAtomContainer()
         val mgxMolecule = CDKContainerWrapper(cdkContainer)
         return mgxMolecule
+    }
+
+    fun getSvgAsBase64HTML(svg: String): String {
+        val base64 = Base64.getEncoder().encodeToString(svg.toByteArray())
+
+        val htmlString = "<!DOCTYPE html>\n" +
+                "<html>\n" +
+                "<title>MolGLide Export</title>\n" +
+                "<body>\n" +
+                "\n" +
+                "<img alt=\"SVG generated image via MolGLide\" src=\"data:image/svg+xml;base64,${base64}\" />\n" +
+                "\n" +
+                "</body>" +
+                "</html>"
+        return htmlString
     }
 }
