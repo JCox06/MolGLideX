@@ -19,7 +19,7 @@ class SelectionManager (
 
     fun updatePrimarySelection(levelData: EditorStateData, worldX: Int, worldY: Int, currentTool: Tool) {
         val closestSelectable = getClosestSelectable(levelData, worldX, worldY)
-        if (closestSelectable == null || !currentTool.isTypeValidPrimarySelection(closestSelectable)) {
+        if (closestSelectable == null || !currentTool.canAccept(closestSelectable)) {
             primarySelection = null
             return
         }

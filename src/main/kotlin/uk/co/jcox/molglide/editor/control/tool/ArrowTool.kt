@@ -97,7 +97,7 @@ class ArrowTool(val data: EditorStateData, actionManager: ActionManager, selecti
         }
     }
 
-    override fun isTypeValidPrimarySelection(selectionContext: SelectionManager.SelectionInfo): Boolean {
+    override fun canAccept(selectionContext: SelectionManager.SelectionInfo): Boolean {
         return selectionContext.selectable is ChemArrow
     }
 

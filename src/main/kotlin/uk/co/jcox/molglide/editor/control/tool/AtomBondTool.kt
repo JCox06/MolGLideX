@@ -249,7 +249,7 @@ class AtomBondTool(val globalContext: IMainAppData, actionManager: ActionManager
         return Mode.MolCreation(clickX, clickY)
     }
 
-    override fun isTypeValidPrimarySelection(selectionContext: SelectionManager.SelectionInfo): Boolean {
+    override fun canAccept(selectionContext: SelectionManager.SelectionInfo): Boolean {
         val entity = selectionContext.selectable
         return (entity is MgxAtom && selectionContext.objectAnchorID == MgxAtom.MAIN_ATOM) || (entity is MgxBond)
     }

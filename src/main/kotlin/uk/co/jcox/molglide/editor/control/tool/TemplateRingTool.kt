@@ -86,7 +86,7 @@ class TemplateRingTool(val globalContext: IMainAppData, actionManager: ActionMan
     }
 
 
-    override fun isTypeValidPrimarySelection(selectionContext: SelectionManager.SelectionInfo): Boolean {
+    override fun canAccept(selectionContext: SelectionManager.SelectionInfo): Boolean {
         val entity = selectionContext.selectable
         return (entity is MgxAtom) || (entity is MgxBond)
     }

@@ -34,8 +34,9 @@ abstract class Tool (
 
     /**
      * Checks if a given object can be selected as the primary selection when this tool is active
+     * It can also be used to selectively choose what object anchors to allow to be selected
      */
-    open fun isTypeValidPrimarySelection(selectionContext: SelectionManager.SelectionInfo): Boolean {
+    open fun canAccept(selectionContext: SelectionManager.SelectionInfo): Boolean {
         return true
     }
 }

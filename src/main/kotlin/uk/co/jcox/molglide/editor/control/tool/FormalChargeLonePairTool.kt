@@ -75,7 +75,7 @@ class FormalChargeLonePairTool(val globalContext: IMainAppData, actionManager: A
 
     }
 
-    override fun isTypeValidPrimarySelection(selectionContext: SelectionManager.SelectionInfo): Boolean {
+    override fun canAccept(selectionContext: SelectionManager.SelectionInfo): Boolean {
         return (selectionContext.selectable is MgxAtom || selectionContext.selectable is FormalChargeWrapper)
     }
 }

@@ -152,7 +152,7 @@ class SelectTool(actionManager: ActionManager, selectionManager: SelectionManage
         return toolMode == ToolMode.None
     }
 
-    override fun isTypeValidPrimarySelection(selectionContext: SelectionManager.SelectionInfo): Boolean {
+    override fun canAccept(selectionContext: SelectionManager.SelectionInfo): Boolean {
         return true
     }
 
