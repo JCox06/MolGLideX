@@ -47,10 +47,7 @@ class MolGlideFrame (
         menuBar.add(helpMenu)
         jMenuBar = menuBar
 
-
         this.isVisible = true
-
-        JOptionPane.showMessageDialog(this, "MolGLideX is a continuation of MolGLide (legacy edition). MolGLideX is in development and unstable and crashes and bugs are expected to occur", "INDEV", JOptionPane.WARNING_MESSAGE)
     }
 
     private fun initDocking() {

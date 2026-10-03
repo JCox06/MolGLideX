@@ -1,0 +1,1275 @@
+{
+    "dataMolecules": [
+        {
+            "atoms": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5
+            ],
+            "bonds": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5
+            ]
+        },
+        {
+            "atoms": [
+                6,
+                7,
+                8,
+                9,
+                10
+            ],
+            "bonds": [
+                6,
+                7,
+                8,
+                9
+            ]
+        },
+        {
+            "atoms": [
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19,
+                20,
+                21
+            ],
+            "bonds": [
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19,
+                20,
+                21
+            ]
+        },
+        {
+            "atoms": [
+                22
+            ]
+        },
+        {
+            "atoms": [
+                23,
+                24,
+                25,
+                26,
+                27,
+                28,
+                29,
+                30
+            ],
+            "bonds": [
+                22,
+                23,
+                24,
+                25,
+                26,
+                27,
+                28,
+                29
+            ]
+        },
+        {
+            "atoms": [
+                31,
+                32,
+                33,
+                34,
+                35,
+                36
+            ],
+            "bonds": [
+                30,
+                31,
+                32,
+                33,
+                34,
+                35
+            ]
+        },
+        {
+            "atoms": [
+                37,
+                38
+            ],
+            "bonds": [
+                36
+            ]
+        },
+        {
+            "atoms": [
+                39,
+                40,
+                41,
+                42,
+                43,
+                44,
+                45
+            ],
+            "bonds": [
+                37,
+                38,
+                39,
+                40,
+                41,
+                42,
+                43,
+                44
+            ]
+        },
+        {
+            "atoms": [
+                46
+            ]
+        },
+        {
+            "atoms": [
+                47,
+                48,
+                49,
+                50,
+                51,
+                52,
+                53,
+                54
+            ],
+            "bonds": [
+                45,
+                46,
+                47,
+                48,
+                49,
+                50,
+                51,
+                52
+            ]
+        }
+    ],
+    "dataBonds": {
+        "0": {
+            "atomA": 0,
+            "atomB": 1,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "1": {
+            "atomA": 1,
+            "atomB": 2,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "2": {
+            "atomA": 2,
+            "atomB": 3,
+            "doubleFlip": false,
+            "order": 2,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "3": {
+            "atomA": 3,
+            "atomB": 4,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "4": {
+            "atomA": 4,
+            "atomB": 5,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "5": {
+            "atomA": 5,
+            "atomB": 0,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "6": {
+            "atomA": 6,
+            "atomB": 7,
+            "doubleFlip": false,
+            "order": 2,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "7": {
+            "atomA": 6,
+            "atomB": 8,
+            "doubleFlip": false,
+            "order": 2,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "8": {
+            "atomA": 6,
+            "atomB": 9,
+            "doubleFlip": false,
+            "order": 2,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "9": {
+            "atomA": 6,
+            "atomB": 10,
+            "doubleFlip": false,
+            "order": 2,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "10": {
+            "atomA": 11,
+            "atomB": 12,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "11": {
+            "atomA": 12,
+            "atomB": 13,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "12": {
+            "atomA": 13,
+            "atomB": 14,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "13": {
+            "atomA": 14,
+            "atomB": 15,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "14": {
+            "atomA": 15,
+            "atomB": 16,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "15": {
+            "atomA": 16,
+            "atomB": 11,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "16": {
+            "atomA": 17,
+            "atomB": 18,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "17": {
+            "atomA": 17,
+            "atomB": 19,
+            "doubleFlip": false,
+            "order": 2,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "18": {
+            "atomA": 17,
+            "atomB": 20,
+            "doubleFlip": false,
+            "order": 2,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "19": {
+            "atomA": 17,
+            "atomB": 21,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "20": {
+            "atomA": 14,
+            "atomB": 18,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "WEDGED",
+            "aromatic": false
+        },
+        "21": {
+            "atomA": 13,
+            "atomB": 21,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "WEDGED",
+            "aromatic": false
+        },
+        "22": {
+            "atomA": 23,
+            "atomB": 24,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "23": {
+            "atomA": 24,
+            "atomB": 25,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "24": {
+            "atomA": 25,
+            "atomB": 26,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "25": {
+            "atomA": 26,
+            "atomB": 27,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "26": {
+            "atomA": 27,
+            "atomB": 28,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "27": {
+            "atomA": 28,
+            "atomB": 23,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "28": {
+            "atomA": 26,
+            "atomB": 29,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "WEDGED",
+            "aromatic": false
+        },
+        "29": {
+            "atomA": 25,
+            "atomB": 30,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "WEDGED",
+            "aromatic": false
+        },
+        "30": {
+            "atomA": 31,
+            "atomB": 32,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "31": {
+            "atomA": 32,
+            "atomB": 33,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "32": {
+            "atomA": 33,
+            "atomB": 34,
+            "doubleFlip": false,
+            "order": 2,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "33": {
+            "atomA": 34,
+            "atomB": 35,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "34": {
+            "atomA": 35,
+            "atomB": 36,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "35": {
+            "atomA": 36,
+            "atomB": 31,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "36": {
+            "atomA": 37,
+            "atomB": 38,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "37": {
+            "atomA": 39,
+            "atomB": 40,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "38": {
+            "atomA": 40,
+            "atomB": 41,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "39": {
+            "atomA": 41,
+            "atomB": 42,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "40": {
+            "atomA": 42,
+            "atomB": 43,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "41": {
+            "atomA": 43,
+            "atomB": 44,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "42": {
+            "atomA": 44,
+            "atomB": 39,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "43": {
+            "atomA": 42,
+            "atomB": 45,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "WEDGED",
+            "aromatic": false
+        },
+        "44": {
+            "atomA": 41,
+            "atomB": 45,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "WEDGED",
+            "aromatic": false
+        },
+        "45": {
+            "atomA": 47,
+            "atomB": 48,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "46": {
+            "atomA": 48,
+            "atomB": 49,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "47": {
+            "atomA": 49,
+            "atomB": 50,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "48": {
+            "atomA": 50,
+            "atomB": 51,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "49": {
+            "atomA": 51,
+            "atomB": 52,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "50": {
+            "atomA": 52,
+            "atomB": 47,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "NORMAL",
+            "aromatic": false
+        },
+        "51": {
+            "atomA": 50,
+            "atomB": 53,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "WEDGED",
+            "aromatic": false
+        },
+        "52": {
+            "atomA": 49,
+            "atomB": 54,
+            "doubleFlip": false,
+            "order": 1,
+            "stereoDisplay": "HASHED",
+            "aromatic": false
+        }
+    },
+    "dataAtoms": {
+        "0": {
+            "loaderID": 0,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 170.0000000000001,
+            "worldY": 195.0
+        },
+        "1": {
+            "loaderID": 1,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 213.30127018922198,
+            "worldY": 169.99999999999994
+        },
+        "2": {
+            "loaderID": 2,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 213.3012701892219,
+            "worldY": 119.99999999999994
+        },
+        "3": {
+            "loaderID": 3,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 169.99999999999994,
+            "worldY": 95.0
+        },
+        "4": {
+            "loaderID": 4,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 126.69872981077805,
+            "worldY": 120.00000000000003
+        },
+        "5": {
+            "loaderID": 5,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 126.69872981077808,
+            "worldY": 170.00000000000003
+        },
+        "6": {
+            "loaderID": 6,
+            "symbol": "Os",
+            "isVisible": true,
+            "hydrogenPos": "RIGHT",
+            "worldX": 237.0,
+            "worldY": 44.0,
+            "ignoreErrors": true
+        },
+        "7": {
+            "loaderID": 7,
+            "symbol": "O",
+            "isVisible": true,
+            "hydrogenPos": "LEFT",
+            "worldX": 188.60015509170995,
+            "worldY": 56.54810793918632
+        },
+        "8": {
+            "loaderID": 8,
+            "symbol": "O",
+            "isVisible": true,
+            "hydrogenPos": "RIGHT",
+            "worldX": 224.4518920608137,
+            "worldY": -4.399844908290042
+        },
+        "9": {
+            "loaderID": 9,
+            "symbol": "O",
+            "isVisible": true,
+            "hydrogenPos": "LEFT",
+            "worldX": 285.39984490829005,
+            "worldY": 31.451892060813677
+        },
+        "10": {
+            "loaderID": 10,
+            "symbol": "O",
+            "isVisible": true,
+            "hydrogenPos": "LEFT",
+            "worldX": 249.5481079391863,
+            "worldY": 92.39984490829005
+        },
+        "11": {
+            "loaderID": 11,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 405.0778774376805,
+            "worldY": 199.73303135115117
+        },
+        "12": {
+            "loaderID": 12,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 448.30919665567194,
+            "worldY": 174.61226228107466
+        },
+        "13": {
+            "loaderID": 13,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "LEFT",
+            "worldX": 448.20167733564364,
+            "worldY": 124.61237788525003
+        },
+        "14": {
+            "loaderID": 14,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "LEFT",
+            "worldX": 404.8628387976237,
+            "worldY": 99.73326255950204
+        },
+        "15": {
+            "loaderID": 15,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 361.63151957963225,
+            "worldY": 124.85403162957867
+        },
+        "16": {
+            "loaderID": 16,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 361.7390388996606,
+            "worldY": 174.85391602540318
+        },
+        "17": {
+            "loaderID": 17,
+            "symbol": "Os",
+            "isVisible": true,
+            "hydrogenPos": "RIGHT",
+            "worldX": 464.8460956682856,
+            "worldY": 45.43100887382535,
+            "ignoreErrors": true
+        },
+        "18": {
+            "loaderID": 18,
+            "symbol": "O",
+            "isVisible": true,
+            "hydrogenPos": "LEFT",
+            "worldX": 415.2903515898441,
+            "worldY": 50.78730778669368
+        },
+        "19": {
+            "loaderID": 19,
+            "symbol": "O",
+            "isVisible": true,
+            "hydrogenPos": "RIGHT",
+            "worldX": 454.32775815079543,
+            "worldY": -3.421727805756788
+        },
+        "20": {
+            "loaderID": 20,
+            "symbol": "O",
+            "isVisible": true,
+            "hydrogenPos": "LEFT",
+            "worldX": 512.3367020974976,
+            "worldY": 29.878915567709697
+        },
+        "21": {
+            "loaderID": 21,
+            "symbol": "O",
+            "isVisible": true,
+            "hydrogenPos": "LEFT",
+            "worldX": 485.2103444311829,
+            "worldY": 90.92561384556706
+        },
+        "22": {
+            "loaderID": 22,
+            "symbol": "O",
+            "isVisible": true,
+            "hydrogenPos": "LEFT",
+            "worldX": 528.0,
+            "worldY": 124.0
+        },
+        "23": {
+            "loaderID": 23,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 619.0000000000001,
+            "worldY": 196.0
+        },
+        "24": {
+            "loaderID": 24,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 662.301270189222,
+            "worldY": 170.99999999999994
+        },
+        "25": {
+            "loaderID": 25,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "LEFT",
+            "worldX": 662.3012701892219,
+            "worldY": 120.99999999999994
+        },
+        "26": {
+            "loaderID": 26,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 619.0,
+            "worldY": 96.0
+        },
+        "27": {
+            "loaderID": 27,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 575.698729810778,
+            "worldY": 121.00000000000003
+        },
+        "28": {
+            "loaderID": 28,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 575.6987298107781,
+            "worldY": 171.00000000000003
+        },
+        "29": {
+            "loaderID": 29,
+            "symbol": "O",
+            "isVisible": true,
+            "hydrogenPos": "RIGHT",
+            "worldX": 619.0,
+            "worldY": 46.0
+        },
+        "30": {
+            "loaderID": 30,
+            "symbol": "O",
+            "isVisible": true,
+            "hydrogenPos": "RIGHT",
+            "worldX": 702.7521362304688,
+            "worldY": 91.6107406616211
+        },
+        "31": {
+            "loaderID": 31,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 170.0000000000001,
+            "worldY": 400.0
+        },
+        "32": {
+            "loaderID": 32,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 213.30127018922198,
+            "worldY": 374.99999999999994
+        },
+        "33": {
+            "loaderID": 33,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 213.3012701892219,
+            "worldY": 324.99999999999994
+        },
+        "34": {
+            "loaderID": 34,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 169.99999999999994,
+            "worldY": 300.0
+        },
+        "35": {
+            "loaderID": 35,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 126.69872981077805,
+            "worldY": 325.0
+        },
+        "36": {
+            "loaderID": 36,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 126.69872981077808,
+            "worldY": 375.0
+        },
+        "37": {
+            "loaderID": 37,
+            "symbol": "Br",
+            "isVisible": true,
+            "hydrogenPos": "LEFT",
+            "worldX": 264.0,
+            "worldY": 270.0
+        },
+        "38": {
+            "loaderID": 38,
+            "symbol": "Br",
+            "isVisible": true,
+            "hydrogenPos": "RIGHT",
+            "worldX": 314.0,
+            "worldY": 270.0
+        },
+        "39": {
+            "loaderID": 39,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 404.0000000000001,
+            "worldY": 404.0
+        },
+        "40": {
+            "loaderID": 40,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 447.301270189222,
+            "worldY": 378.99999999999994
+        },
+        "41": {
+            "loaderID": 41,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 447.3012701892219,
+            "worldY": 328.99999999999994
+        },
+        "42": {
+            "loaderID": 42,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "LEFT",
+            "worldX": 403.99999999999994,
+            "worldY": 304.0
+        },
+        "43": {
+            "loaderID": 43,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 360.69872981077805,
+            "worldY": 329.0
+        },
+        "44": {
+            "loaderID": 44,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 360.69872981077805,
+            "worldY": 379.0
+        },
+        "45": {
+            "loaderID": 45,
+            "symbol": "Br",
+            "isVisible": true,
+            "hydrogenPos": "LEFT",
+            "worldX": 447.30126953125,
+            "worldY": 279.0,
+            "ignoreErrors": true
+        },
+        "46": {
+            "loaderID": 46,
+            "symbol": "Br",
+            "isVisible": true,
+            "hydrogenPos": "RIGHT",
+            "worldX": 502.0,
+            "worldY": 367.0
+        },
+        "47": {
+            "loaderID": 47,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 620.0000000000001,
+            "worldY": 396.0
+        },
+        "48": {
+            "loaderID": 48,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 663.301270189222,
+            "worldY": 370.99999999999994
+        },
+        "49": {
+            "loaderID": 49,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "LEFT",
+            "worldX": 663.3012701892219,
+            "worldY": 320.99999999999994
+        },
+        "50": {
+            "loaderID": 50,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 620.0,
+            "worldY": 296.0
+        },
+        "51": {
+            "loaderID": 51,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 576.698729810778,
+            "worldY": 321.0
+        },
+        "52": {
+            "loaderID": 52,
+            "symbol": "C",
+            "isVisible": false,
+            "hydrogenPos": "RIGHT",
+            "worldX": 576.6987298107781,
+            "worldY": 371.0
+        },
+        "53": {
+            "loaderID": 53,
+            "symbol": "Br",
+            "isVisible": true,
+            "hydrogenPos": "LEFT",
+            "worldX": 620.0,
+            "worldY": 246.0
+        },
+        "54": {
+            "loaderID": 54,
+            "symbol": "Br",
+            "isVisible": true,
+            "hydrogenPos": "RIGHT",
+            "worldX": 707.7521362304688,
+            "worldY": 289.6107482910156
+        }
+    },
+    "arrows": [
+        {
+            "points": {
+                "0": {
+                    "x": 203.0,
+                    "y": 106.0
+                },
+                "1": {
+                    "x": 231.0,
+                    "y": 87.0
+                },
+                "2": {
+                    "x": 196.0,
+                    "y": 66.0
+                }
+            },
+            "arrowStart": "NONE",
+            "arrowEnd": "DOUBLE_BARBED"
+        },
+        {
+            "points": {
+                "0": {
+                    "x": 230.0,
+                    "y": 69.0
+                },
+                "1": {
+                    "x": 224.0,
+                    "y": 58.0
+                },
+                "2": {
+                    "x": 200.0,
+                    "y": 79.0
+                }
+            },
+            "arrowStart": "NONE",
+            "arrowEnd": "DOUBLE_BARBED"
+        },
+        {
+            "points": {
+                "0": {
+                    "x": 202.0,
+                    "y": 43.0
+                },
+                "1": {
+                    "x": 179.0,
+                    "y": 88.0
+                },
+                "2": {
+                    "x": 154.0,
+                    "y": 14.0
+                }
+            },
+            "arrowStart": "NONE",
+            "arrowEnd": "DOUBLE_BARBED"
+        },
+        {
+            "points": {
+                "0": {
+                    "x": 253.0,
+                    "y": 147.0
+                },
+                "1": {
+                    "x": 328.0,
+                    "y": 147.0
+                },
+                "2": {
+                    "x": 290.5,
+                    "y": 147.0
+                }
+            },
+            "arrowStart": "NONE",
+            "arrowEnd": "DOUBLE_BARBED"
+        },
+        {
+            "points": {
+                "0": {
+                    "x": 480.9999999999999,
+                    "y": 148.0
+                },
+                "1": {
+                    "x": 555.9999999999999,
+                    "y": 148.0
+                },
+                "2": {
+                    "x": 518.4999999999999,
+                    "y": 148.0
+                }
+            },
+            "arrowStart": "NONE",
+            "arrowEnd": "DOUBLE_BARBED"
+        },
+        {
+            "points": {
+                "0": {
+                    "x": 180.0,
+                    "y": 297.0
+                },
+                "1": {
+                    "x": 243.0,
+                    "y": 262.0
+                },
+                "2": {
+                    "x": 176.0,
+                    "y": 222.0
+                }
+            },
+            "arrowStart": "NONE",
+            "arrowEnd": "DOUBLE_BARBED"
+        },
+        {
+            "points": {
+                "0": {
+                    "x": 262.0,
+                    "y": 290.0
+                },
+                "1": {
+                    "x": 224.0,
+                    "y": 325.0
+                },
+                "2": {
+                    "x": 275.0,
+                    "y": 341.0
+                }
+            },
+            "arrowStart": "NONE",
+            "arrowEnd": "DOUBLE_BARBED"
+        },
+        {
+            "points": {
+                "0": {
+                    "x": 287.0,
+                    "y": 261.0
+                },
+                "1": {
+                    "x": 316.0,
+                    "y": 256.0
+                },
+                "2": {
+                    "x": 302.0,
+                    "y": 226.0
+                }
+            },
+            "arrowStart": "NONE",
+            "arrowEnd": "DOUBLE_BARBED"
+        },
+        {
+            "points": {
+                "0": {
+                    "x": 247.0,
+                    "y": 352.0
+                },
+                "1": {
+                    "x": 325.0,
+                    "y": 352.0
+                },
+                "2": {
+                    "x": 286.0,
+                    "y": 352.0
+                }
+            },
+            "arrowStart": "NONE",
+            "arrowEnd": "DOUBLE_BARBED"
+        },
+        {
+            "points": {
+                "0": {
+                    "x": 482.0,
+                    "y": 348.0
+                },
+                "1": {
+                    "x": 436.0,
+                    "y": 337.0
+                },
+                "2": {
+                    "x": 380.0,
+                    "y": 395.0
+                }
+            },
+            "arrowStart": "NONE",
+            "arrowEnd": "DOUBLE_BARBED"
+        },
+        {
+            "points": {
+                "0": {
+                    "x": 462.0,
+                    "y": 319.0
+                },
+                "1": {
+                    "x": 472.0,
+                    "y": 286.0
+                },
+                "2": {
+                    "x": 528.0,
+                    "y": 322.0
+                }
+            },
+            "arrowStart": "NONE",
+            "arrowEnd": "DOUBLE_BARBED"
+        },
+        {
+            "points": {
+                "0": {
+                    "x": 509.0,
+                    "y": 345.0
+                },
+                "1": {
+                    "x": 556.0,
+                    "y": 345.0
+                },
+                "2": {
+                    "x": 546.5,
+                    "y": 345.0
+                }
+            },
+            "arrowStart": "NONE",
+            "arrowEnd": "DOUBLE_BARBED"
+        }
+    ],
+    "charges": [
+        {
+            "atomRef": 45,
+            "charge": 1,
+            "position": {
+                "x": 452.0,
+                "y": 279.0
+            }
+        },
+        {
+            "atomRef": 46,
+            "charge": -1,
+            "position": {
+                "x": 488.0,
+                "y": 359.0
+            }
+        }
+    ]
+}

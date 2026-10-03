@@ -10,6 +10,7 @@ import java.io.IOException
 
 class LevelSerializer {
 
+    private val jsonEncoder = Json {prettyPrint = true}
 
     /**
      * Returns the JSON MGX file of the current editor state
@@ -18,7 +19,7 @@ class LevelSerializer {
      */
     fun getJSONEncoding(saveData: EditorStateData, metaData: MolGLideMetaData = MolGLideMetaData(), selected: Collection<IEditorSelectable>? = null) : String {
         val dataSaveFile = saveEditorState(saveData, metaData, selected)
-        val result = Json.encodeToString(dataSaveFile)
+        val result = jsonEncoder.encodeToString(dataSaveFile)
         return result
     }
 
